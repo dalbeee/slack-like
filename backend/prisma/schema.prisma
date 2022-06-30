@@ -13,22 +13,13 @@ datasource db {
 model User {
   id String @default(uuid()) @id
   email String
-  name String
   password String
-  profile Profile?
+  name String
+  timezone String?
+  status String?
+  pictureSrc String?
   workspaces Workspace[]
   channels Channel[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Profile {
-  id String @default(uuid()) @id
-  userId String @unique
-  user User @relation(fields: [userId], references: [id])
-  timezone String
-  status String
-  pictureSrc String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
