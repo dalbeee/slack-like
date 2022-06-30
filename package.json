@@ -1,0 +1,11 @@
+{
+  "name": "slack-like",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "dalbeee <acapelles@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "docker:dev:up": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d",
+    "docker:dev:down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml down -v"
+  }
+}
