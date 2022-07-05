@@ -50,10 +50,14 @@ model Message {
   content String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([id, createdAt])
 }
 
 model File {
   id String @default(uuid()) @id
-  fileSrc String
+  originalFileName String
   createdAt DateTime @default(now())
+
+  @@index([id, originalFileName, createdAt])
 }
