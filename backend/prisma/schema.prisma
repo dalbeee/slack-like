@@ -83,3 +83,13 @@ model MessageReaction {
   
   @@index([messageId, userId])
 }
+
+model Invitation {
+  id String @default(uuid()) @id
+  inviterUserId String
+  inviteeUserId String
+  workspaceId String
+  activationLink String
+  expiredDate DateTime
+  createdAt DateTime @default(now())
+}
