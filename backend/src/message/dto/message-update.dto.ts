@@ -1,11 +1,8 @@
 import { IsString } from 'class-validator';
 
-export class MessageCreateDto {
+export class MessageUpdateDto {
   @IsString()
-  workspaceId!: string;
-
-  @IsString()
-  channelId!: string;
+  id!: string;
 
   @IsString()
   userId!: string;

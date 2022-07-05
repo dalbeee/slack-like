@@ -1,9 +1,13 @@
 import { faker } from '@faker-js/faker';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { createChannel } from '@src/channel/__test__/createChannel';
 import { PrismaService } from '@src/prisma.service';
-import { MessageCreateDto } from './dto/message-create.dto';
+import { createUser } from '@src/user/__test__/createUser';
+import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
+import { MessageReactionCreateDto } from './dto/message-reaction-create.dto';
 import { MessageReactionService } from './message-reaction.service';
+import { createMessage } from './__test__/createMessage';
 
 let app: TestingModule;
 let messageReactionService: MessageReactionService;
@@ -27,30 +31,26 @@ afterAll(async () => {
   await app.close();
 });
 
-const createMessage = ({ content }: { content: string }) => {
-  return prisma.message.create({
-    data: { content },
-  });
-};
-
-const createUser = () => {
-  return prisma.user.create({
-    data: {
-      email: faker.internet.email(),
-      name: faker.datatype.string(20),
-      password: faker.datatype.string(20),
-    },
-  });
-};
-
 describe('createMessage', () => {
   it('return message', async () => {
-    const message = await createMessage({ content: 'hello' });
     const user = await createUser();
-    const messageDto: MessageCreateDto = {
-      content: '😊',
-      messageId: message.id,
+    const workspace = await createWorkspace({
+      name: faker.datatype.string(10),
+    });
+    const channel = await createChannel({
+      name: faker.datatype.string(10),
+      workspaceId: workspace.id,
+    });
+    const message = await createMessage({
+      content: 'hello',
       userId: user.id,
+      channelId: channel.id,
+      workspaceId: workspace.id,
+    });
+    const messageDto: MessageReactionCreateDto = {
+      content: '😊',
+      userId: user.id,
+      messageId: message.id,
     };
 
     const result = await messageReactionService.create(messageDto);
@@ -66,9 +66,21 @@ describe('createMessage', () => {
   });
 
   it('return array.length=2 if create two reactions', async () => {
-    const message = await createMessage({ content: 'hello' });
     const user = await createUser();
-    const messageDto: MessageCreateDto = {
+    const workspace = await createWorkspace({
+      name: faker.datatype.string(10),
+    });
+    const channel = await createChannel({
+      name: faker.datatype.string(10),
+      workspaceId: workspace.id,
+    });
+    const message = await createMessage({
+      content: 'hello',
+      userId: user.id,
+      channelId: channel.id,
+      workspaceId: workspace.id,
+    });
+    const messageDto: MessageReactionCreateDto = {
       content: '😊',
       messageId: message.id,
       userId: user.id,
@@ -90,9 +102,21 @@ describe('createMessage', () => {
 
 describe('delete', () => {
   it('return array.length=0 if delete reaction', async () => {
-    const message = await createMessage({ content: 'hello' });
     const user = await createUser();
-    const messageDto: MessageCreateDto = {
+    const workspace = await createWorkspace({
+      name: faker.datatype.string(10),
+    });
+    const channel = await createChannel({
+      name: faker.datatype.string(10),
+      workspaceId: workspace.id,
+    });
+    const message = await createMessage({
+      content: 'hello',
+      userId: user.id,
+      channelId: channel.id,
+      workspaceId: workspace.id,
+    });
+    const messageDto: MessageReactionCreateDto = {
       content: '😊',
       messageId: message.id,
       userId: user.id,

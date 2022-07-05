@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { PrismaService } from '@src/prisma.service';
 import { MessageReactionCreateDto } from './dto/message-reaction-create.dto';
@@ -26,13 +30,17 @@ export class MessageReactionService {
   async create({ content, messageId, userId }: MessageReactionCreateDto) {
     const existRow = await this._findByContent({ content, messageId, userId });
     if (existRow) return existRow;
-    return this.prisma.messageReaction.create({
-      data: {
-        content,
-        message: { connect: { id: messageId } },
-        user: { connect: { id: userId } },
-      },
-    });
+    try {
+      return await this.prisma.messageReaction.create({
+        data: {
+          content,
+          message: { connect: { id: messageId } },
+          user: { connect: { id: userId } },
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException();
+    }
   }
 
   async delete({ content, messageId, userId }: MessageReactionCreateDto) {
