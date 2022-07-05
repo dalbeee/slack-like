@@ -5,10 +5,10 @@ import {
 } from '@nestjs/common';
 
 import { PrismaService } from '@src/prisma.service';
-import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageDeleteDto } from './dto/message-delete.dto';
 import { MessageUpdateDto } from './dto/message-update.dto';
 import { MessagesFindDto } from './dto/messages-find.dto';
+import { MessageCreateProps } from './types';
 
 @Injectable()
 export class MessageService {
@@ -27,7 +27,7 @@ export class MessageService {
     userId,
     channelId,
     workspaceId,
-  }: MessageCreateDto) {
+  }: MessageCreateProps) {
     try {
       return await this.prisma.message.create({
         data: {
@@ -38,6 +38,7 @@ export class MessageService {
         },
       });
     } catch (error) {
+      console.log(error);
       throw new BadRequestException();
     }
   }
@@ -60,5 +61,9 @@ export class MessageService {
     return this.prisma.message.findMany({
       where: { channelId, workspaceId },
     });
+  }
+
+  findById(messageId: string) {
+    return this.prisma.message.findUnique({ where: { id: messageId } });
   }
 }

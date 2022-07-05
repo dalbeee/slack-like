@@ -8,6 +8,7 @@ import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
 import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageUpdateDto } from './dto/message-update.dto';
 import { MessageService } from './message.service';
+import { MessageCreateProps } from './types';
 import { createMessage } from './__test__/createMessage';
 
 let app: TestingModule;
@@ -81,7 +82,7 @@ describe('createMessage', () => {
       workspaceId: workspace.id,
     });
     const user = await createUser();
-    const messageDto: MessageCreateDto = {
+    const messageDto: MessageCreateProps = {
       content: '😊',
       channelId: channel.id,
       workspaceId: workspace.id,

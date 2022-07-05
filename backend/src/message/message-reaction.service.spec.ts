@@ -5,8 +5,9 @@ import { createChannel } from '@src/channel/__test__/createChannel';
 import { PrismaService } from '@src/prisma.service';
 import { createUser } from '@src/user/__test__/createUser';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
-import { MessageReactionCreateDto } from './dto/message-reaction-create.dto';
 import { MessageReactionService } from './message-reaction.service';
+import { MessageService } from './message.service';
+import { MessageReactionCreateProps } from './types';
 import { createMessage } from './__test__/createMessage';
 
 let app: TestingModule;
@@ -15,7 +16,7 @@ let prisma: PrismaService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
-    providers: [MessageReactionService, PrismaService],
+    providers: [PrismaService, MessageReactionService, MessageService],
   }).compile();
   app = await moduleRef.init();
   messageReactionService = app.get(MessageReactionService);
@@ -47,7 +48,7 @@ describe('createMessage', () => {
       channelId: channel.id,
       workspaceId: workspace.id,
     });
-    const messageDto: MessageReactionCreateDto = {
+    const messageDto: MessageReactionCreateProps = {
       content: '😊',
       userId: user.id,
       messageId: message.id,
@@ -80,7 +81,7 @@ describe('createMessage', () => {
       channelId: channel.id,
       workspaceId: workspace.id,
     });
-    const messageDto: MessageReactionCreateDto = {
+    const messageDto: MessageReactionCreateProps = {
       content: '😊',
       messageId: message.id,
       userId: user.id,
@@ -116,7 +117,7 @@ describe('delete', () => {
       channelId: channel.id,
       workspaceId: workspace.id,
     });
-    const messageDto: MessageReactionCreateDto = {
+    const messageDto: MessageReactionCreateProps = {
       content: '😊',
       messageId: message.id,
       userId: user.id,

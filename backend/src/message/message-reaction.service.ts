@@ -5,11 +5,15 @@ import {
 } from '@nestjs/common';
 
 import { PrismaService } from '@src/prisma.service';
-import { MessageReactionCreateDto } from './dto/message-reaction-create.dto';
+import { MessageService } from './message.service';
+import { MessageReactionCreateProps } from './types';
 
 @Injectable()
 export class MessageReactionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly messageService: MessageService,
+  ) {}
 
   _findByContent({
     messageId,
@@ -20,16 +24,21 @@ export class MessageReactionService {
     userId: string;
     content: string;
   }) {
-    const row = this.prisma.messageReaction.findFirst({
+    return this.prisma.messageReaction.findFirst({
       where: { messageId, userId, content },
     });
-    if (!row) throw new NotFoundException();
-    return row;
   }
 
-  async create({ content, messageId, userId }: MessageReactionCreateDto) {
-    const existRow = await this._findByContent({ content, messageId, userId });
-    if (existRow) return existRow;
+  async create({ content, messageId, userId }: MessageReactionCreateProps) {
+    const message = await this.messageService.findById(messageId);
+    if (!message) throw new NotFoundException('not found message');
+
+    const existReaction = await this._findByContent({
+      content,
+      messageId,
+      userId,
+    });
+    if (existReaction) return existReaction;
     try {
       return await this.prisma.messageReaction.create({
         data: {
@@ -39,11 +48,12 @@ export class MessageReactionService {
         },
       });
     } catch (error) {
+      console.log(error);
       throw new BadRequestException();
     }
   }
 
-  async delete({ content, messageId, userId }: MessageReactionCreateDto) {
+  async delete({ content, messageId, userId }: MessageReactionCreateProps) {
     const { id } = await this._findByContent({ content, messageId, userId });
     if (!id) throw new NotFoundException();
     return this.prisma.messageReaction.delete({ where: { id } });
@@ -52,7 +62,7 @@ export class MessageReactionService {
   findByUserAndMessage({
     messageId,
     userId,
-  }: Omit<MessageReactionCreateDto, 'content'>) {
+  }: Omit<MessageReactionCreateProps, 'content'>) {
     return this.prisma.messageReaction.findMany({
       where: { messageId, userId },
       select: { content: true },

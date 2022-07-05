@@ -19,6 +19,10 @@ export class WorkspaceService {
     return this.prisma.workspace.create({ data });
   }
 
+  findWorkspaceById(id: string) {
+    return this.prisma.workspace.findUnique({ where: { id } });
+  }
+
   findWorkspaces() {
     return this.prisma.workspace.findMany({});
   }
