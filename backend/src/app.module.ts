@@ -9,6 +9,7 @@ import { AppController } from '@src/app.controller';
 import { AppService } from '@src/app.service';
 import { UserModule } from '@src/user/user.module';
 import { ChannelModule } from './channel/channel.module';
+import { InvitationModule } from './invitation/invitation.module';
 import { MessageModule } from './message/message.module';
 import { UploadModule } from './upload/upload.module';
 import { WorkspaceModule } from './workspace/workspace.module';
@@ -20,6 +21,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
     WorkspaceModule,
     ChannelModule,
     MessageModule,
+    InvitationModule,
   ],
   controllers: [AppController],
   providers: [
