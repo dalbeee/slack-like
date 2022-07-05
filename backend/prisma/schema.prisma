@@ -23,6 +23,7 @@ model User {
   workspaces Workspace[]
   channels Channel[]
   reactions MessageReaction[]
+  messages Message[]
 }
 
 model Workspace {
@@ -31,6 +32,7 @@ model Workspace {
   description String?
   users User[]
   channels Channel[]
+  messages Message[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -42,6 +44,7 @@ model Channel {
   name String
   description String?
   Users User[]
+  Messages Message[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -52,7 +55,12 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   reactions MessageReaction[]
-
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  channel Channel @relation(fields: [channelId],references: [id])
+  channelId String
   @@index([id, createdAt])
 }
 
