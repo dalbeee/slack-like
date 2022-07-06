@@ -87,9 +87,9 @@ model MessageReaction {
 model Invitation {
   id String @default(uuid()) @id
   inviterUserId String
-  inviteeUserId String
+  inviteeEmail String
   workspaceId String
-  activationLink String
+  activateCode String
   expiredDate DateTime
   createdAt DateTime @default(now())
 }
