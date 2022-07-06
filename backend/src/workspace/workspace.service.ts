@@ -1,4 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 import { PrismaService } from '@src/prisma.service';
 import { WorkspaceCreateDto } from './dto/workspace-create.dto';
@@ -11,6 +16,20 @@ export class WorkspaceService {
     return this.prisma.workspace.findFirst({
       where: { name },
     });
+  }
+
+  async _hasWorkspaceJoinedUser({
+    userId,
+    workspaceId: worksapceId,
+  }: {
+    workspaceId: string;
+    userId: string;
+  }) {
+    const result = await this.prisma.workspace.findFirst({
+      include: { users: true },
+      where: { id: worksapceId, users: { some: { id: userId } } },
+    });
+    return result ? true : false;
   }
 
   async createWorkspace(data: WorkspaceCreateDto) {
@@ -32,5 +51,29 @@ export class WorkspaceService {
       where: { name },
       include: { channels: true },
     });
+  }
+
+  async joinMember({
+    userId,
+    workspaceId,
+  }: {
+    workspaceId: string;
+    userId: string;
+  }) {
+    const hasAlreadyJoinedUser = await this._hasWorkspaceJoinedUser({
+      userId,
+      workspaceId,
+    });
+    if (hasAlreadyJoinedUser) return true;
+
+    const result = await this.prisma.workspace.update({
+      where: { id: workspaceId },
+      data: { users: { connect: { id: userId } } },
+    });
+    if (!result)
+      throw new InternalServerErrorException(
+        'sorry, wrong action. admin will repair rapidly.',
+      );
+    return true;
   }
 }
