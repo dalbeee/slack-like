@@ -7,7 +7,7 @@ export type InvitationCreateProps = InvitationCreateDto & {
 
 export type ValidateInvivationProps = {
   invitations: Invitation;
-  inviteeUserId: string;
+  inviteeEmail: string;
 };
 
 export type ActivateInvitationsProps = {};

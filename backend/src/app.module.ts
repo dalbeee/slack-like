@@ -16,12 +16,12 @@ import { WorkspaceModule } from './workspace/workspace.module';
 
 @Module({
   imports: [
+    InvitationModule,
     UserModule,
     UploadModule,
     WorkspaceModule,
     ChannelModule,
     MessageModule,
-    InvitationModule,
   ],
   controllers: [AppController],
   providers: [

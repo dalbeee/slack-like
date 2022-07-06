@@ -3,46 +3,88 @@ import * as dayjs from 'dayjs';
 import { v4 as uuid } from 'uuid';
 
 import { PrismaService } from '@src/prisma.service';
-import { InvitationCreateProps, ValidateInvivationProps } from './types';
+import { InvitationCreateProps } from './types';
+import { UserService } from '@src/user/user.service';
+import { WorkspaceService } from '@src/workspace/workspace.service';
 
 @Injectable()
 export class InvitationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userService: UserService,
+    private readonly workspaceService: WorkspaceService,
+  ) {}
 
-  _findInvitationsByActivationLink(link: string) {
+  _findInvitationsByActivationCode(activateCode: string) {
     return this.prisma.invitation.findFirst({
-      where: { activationLink: link },
+      where: { activateCode },
     });
   }
-  _validateInvatations({
-    inviteeUserId,
-    invitations,
-  }: ValidateInvivationProps) {}
+
+  _isInviteeAlreadyJoinedUser(email: string) {
+    return this.userService.findUserByEmail(email);
+  }
 
   async createInvitations({
-    inviteeUserId,
+    inviteeEmail,
     inviterUserId,
     workspaceId,
   }: InvitationCreateProps) {
     const expiredDate = dayjs(Date.now()).add(7, 'days').toDate();
-
-    const activationLink = encodeURIComponent(dayjs().unix() + '__' + uuid());
-
+    const activateCode = encodeURIComponent(dayjs().unix() + '__' + uuid());
     return this.prisma.invitation.create({
       data: {
         expiredDate,
-        activationLink,
+        activateCode,
         inviterUserId,
-        inviteeUserId,
+        inviteeEmail,
         workspaceId,
       },
     });
   }
 
-  async activateInvitations(link: string) {
-    const invitations = await this._findInvitationsByActivationLink(link);
+  async isValidExpiredDate(activateCode: string) {
+    const invitations = await this._findInvitationsByActivationCode(
+      activateCode,
+    );
+    return invitations.expiredDate > new Date(Date.now()) ? true : false;
+  }
+
+  async hasWorkspaceJoinedUser(activateCode: string) {
+    const invitations = await this._findInvitationsByActivationCode(
+      activateCode,
+    );
+    const user = await this.userService.findUserByEmail(
+      invitations.inviteeEmail,
+    );
+    if (!user) return false;
+
+    return await this.workspaceService._hasWorkspaceJoinedUser({
+      userId: user.id,
+      workspaceId: invitations.workspaceId,
+    });
+  }
+
+  async activateInvitations({
+    activateCode,
+    userId,
+  }: {
+    userId: string;
+    activateCode: string;
+  }) {
+    const invitations = await this._findInvitationsByActivationCode(
+      activateCode,
+    );
     if (!invitations) throw new BadRequestException();
 
-    // await this._validateInvatations();
+    const isValidateExpiredDate = await this.isValidExpiredDate(activateCode);
+    if (!isValidateExpiredDate)
+      throw new BadRequestException('expired invitations');
+
+    const result = await this.workspaceService.joinMember({
+      userId,
+      workspaceId: invitations.workspaceId,
+    });
+    return result;
   }
 }

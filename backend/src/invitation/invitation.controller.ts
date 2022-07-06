@@ -1,17 +1,35 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
+import { InvitationActivateDto } from './dto/invitation-activate.dto';
 import { InvitationCreateDto } from './dto/invitation-create.dto';
 import { InvitationService } from './invitation.service';
 
-@Controller('/:workspace')
+@Controller('/invitations')
 export class InvitationController {
   constructor(private readonly invitationService: InvitationService) {}
 
   @Post()
-  createInvitation(
-    @Param('workspace') workspaceId: string,
-    @Body() data: InvitationCreateDto,
-  ) {
-    return this.invitationService.createInvitations({ ...data, workspaceId });
+  test() {
+    return true;
+  }
+  @Post('/create-invitations')
+  createInvitations(@Body() data: InvitationCreateDto) {
+    console.log(data);
+    return this.invitationService.createInvitations(data);
+  }
+
+  @Get('/expired-date-check')
+  isValidExpiredDate(@Query('code') activateCode: string) {
+    return this.invitationService.isValidExpiredDate(activateCode);
+  }
+
+  @Get('/user-join-validation')
+  hasWorkspaceJoinedUser(@Query('code') activateCode: string) {
+    return this.invitationService.hasWorkspaceJoinedUser(activateCode);
+  }
+
+  @Post('/activation')
+  async activateInvitations(@Body() data: InvitationActivateDto) {
+    return await this.invitationService.activateInvitations(data);
   }
 }
