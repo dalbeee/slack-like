@@ -1,4 +1,4 @@
-import MenuItem from "@components/common/MenuItem";
+import MenuItem from "@/components/common/MenuItem";
 
 const FavoriteMenu = () => {
   return (

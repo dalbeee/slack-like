@@ -1,7 +1,7 @@
-import ContentColumn from "@components/ContentColumn";
-import LeftColumn from "@components/leftColumn/LeftColumn";
-import RightColumn from "@components/RightColumn";
-import TopSearchBar from "@components/TopSearchBar";
+import ContentColumn from "@/components/ContentColumn";
+import LeftColumn from "@/components/leftColumn/LeftColumn";
+import RightColumn from "@/components/RightColumn";
+import TopSearchBar from "@/components/TopSearchBar";
 
 const AppLayout = () => {
   return (
