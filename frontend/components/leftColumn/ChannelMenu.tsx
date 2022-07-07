@@ -15,18 +15,19 @@ const ChannelMenu = () => {
     enabled(true);
   }, [enabled, router.isReady]);
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (e: React.MouseEvent) => {
     router.push(
-      `/client/${router.query?.workspace as string}/${e.currentTarget.value}`
+      `/client/${router.query?.workspace as string}/${e.currentTarget.id}`
     );
   };
 
   return (
     <>
+      <div className=""></div>
       <MenuItem isParent>
         채널
         {data?.map((item) => (
-          <MenuItem key={item.id} value={item.id} onClick={handleClick}>
+          <MenuItem id={item.id} key={item.id} onClick={handleClick}>
             {item.name}
           </MenuItem>
         ))}
