@@ -1,3 +1,4 @@
+import ChannelMenu from "./ChannelMenu";
 import FavoriteMenu from "./FavoriteMenu";
 import NewWorkspace from "./NewWorkspace";
 import UpperMenu from "./UpperMenu";
@@ -13,6 +14,7 @@ const LeftColumn = () => {
       <UpperMenu />
       <Hr />
       <FavoriteMenu />
+      <ChannelMenu />
     </div>
   );
 };
