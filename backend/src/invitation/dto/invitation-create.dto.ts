@@ -5,8 +5,5 @@ export class InvitationCreateDto {
   workspaceId!: string;
 
   @IsString()
-  inviterUserId!: string;
-
-  @IsString()
   inviteeEmail!: string;
 }

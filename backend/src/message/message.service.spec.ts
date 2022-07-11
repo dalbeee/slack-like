@@ -86,10 +86,9 @@ describe('createMessage', () => {
       content: '😊',
       channelId: channel.id,
       workspaceId: workspace.id,
-      userId: user.id,
     };
 
-    const result = await messageService.createMessage(messageDto);
+    const result = await messageService.createMessage(user, messageDto);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -121,10 +120,9 @@ describe('updateMessage', () => {
     const updateDto: MessageUpdateDto = {
       content: '2',
       id: message.id,
-      userId: user.id,
     };
 
-    const result = await messageService.updateMessage(updateDto);
+    const result = await messageService.updateMessage(user, updateDto);
 
     expect(result).toBeDefined();
   });
@@ -146,10 +144,9 @@ describe('updateMessage', () => {
     const updateDto: MessageUpdateDto = {
       content: '2',
       id: message.id,
-      userId: invalidUser.id,
     };
 
-    const result = () => messageService.updateMessage(updateDto);
+    const result = () => messageService.updateMessage(invalidUser, updateDto);
 
     await expect(result).rejects.toThrowError();
   });
@@ -170,9 +167,8 @@ describe('deleteMessage', () => {
       workspaceId: workspace.id,
     });
 
-    const result = await messageService.deleteMessage({
+    const result = await messageService.deleteMessage(user, {
       id: message.id,
-      userId: user.id,
     });
 
     expect(result).toEqual(true);
@@ -194,7 +190,7 @@ describe('deleteMessage', () => {
     const invalidUser = await createUser();
 
     const result = () =>
-      messageService.deleteMessage({ id: message.id, userId: invalidUser.id });
+      messageService.deleteMessage(invalidUser, { id: message.id });
 
     await expect(result).rejects.toThrowError();
   });

@@ -4,6 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 
+import { UserJwtPayload } from '@src/auth/types';
 import { PrismaService } from '@src/prisma.service';
 import { MessageDeleteDto } from './dto/message-delete.dto';
 import { MessageUpdateDto } from './dto/message-update.dto';
@@ -22,17 +23,15 @@ export class MessageService {
     return true;
   }
 
-  async createMessage({
-    content,
-    userId,
-    channelId,
-    workspaceId,
-  }: MessageCreateProps) {
+  async createMessage(
+    { id }: UserJwtPayload,
+    { content, channelId, workspaceId }: MessageCreateProps,
+  ) {
     try {
       return await this.prisma.message.create({
         data: {
           content,
-          user: { connect: { id: userId } },
+          user: { connect: { id } },
           workspace: { connect: { id: workspaceId } },
           channel: { connect: { id: channelId } },
         },
@@ -43,7 +42,10 @@ export class MessageService {
     }
   }
 
-  async updateMessage({ id, userId, ...data }: MessageUpdateDto) {
+  async updateMessage(
+    { id: userId }: UserJwtPayload,
+    { id, ...data }: MessageUpdateDto,
+  ) {
     await this._validateCollectUser({ id, userId });
     return this.prisma.message.update({
       where: { id },
@@ -51,7 +53,10 @@ export class MessageService {
     });
   }
 
-  async deleteMessage({ id, userId }: MessageDeleteDto) {
+  async deleteMessage(
+    { id: userId }: UserJwtPayload,
+    { id }: MessageDeleteDto,
+  ) {
     await this._validateCollectUser({ id, userId });
     await this.prisma.message.delete({ where: { id } });
     return true;

@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from '@prisma/client';
+import { UserJwtPayload } from '@src/auth/types';
 
 import { PrismaService } from '@src/prisma.service';
 import { InvitationService } from '../invitation.service';
@@ -15,7 +16,10 @@ type InvitationCreateProps = {
 };
 
 export const createInvitations = (data: InvitationCreateProps) =>
-  invitationService.createInvitations({
-    inviteeEmail: data?.inviteeEmail ?? faker.internet.email(),
-    ...data,
-  });
+  invitationService.createInvitations(
+    { id: data.inviterUserId } as UserJwtPayload,
+    {
+      inviteeEmail: data?.inviteeEmail ?? faker.internet.email(),
+      ...data,
+    },
+  );

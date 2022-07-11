@@ -6,6 +6,8 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { CurrentUser } from '@src/auth/decorator/current-user.decorator';
+import { UserJwtPayload } from '@src/auth/types';
 import { Server, Socket } from 'socket.io';
 
 import { MessageDto } from './dto/message.dto';
@@ -31,8 +33,11 @@ export class SocketIOController {
   }
 
   @SubscribeMessage('message')
-  async broadcastToWorkspace(@MessageBody() body: MessageDto) {
-    const message = await this.service.saveMessage(body);
+  async broadcastToWorkspace(
+    @MessageBody() body: MessageDto,
+    @CurrentUser() user: UserJwtPayload,
+  ) {
+    const message = await this.service.saveMessage(user, body);
     const data: SocketIOMessage = {
       socketInfo: {
         channelId: body.socketInfo.channelId,

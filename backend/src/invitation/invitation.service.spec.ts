@@ -43,9 +43,8 @@ describe('hasWorkspaceJoinedUser', () => {
       workspaceId: workspace.id,
       inviteeEmail: user.email,
     });
-    await invitationService.activateInvitations({
+    await invitationService.activateInvitations(user, {
       activateCode: invitations.activateCode,
-      userId: user.id,
     });
 
     const result = await invitationService.hasWorkspaceJoinedUser(
@@ -78,11 +77,11 @@ describe('createInvitations', () => {
     const inviter = await createUser();
     const data: InvitationCreateProps = {
       inviteeEmail: faker.internet.email(),
-      inviterUserId: inviter.id,
+
       workspaceId: workspace.id,
     };
 
-    const result = await invitationService.createInvitations(data);
+    const result = await invitationService.createInvitations(inviter, data);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -107,9 +106,8 @@ describe('activateInvitations', () => {
       workspaceId: workspace.id,
     });
 
-    const result = await invitationService.activateInvitations({
+    const result = await invitationService.activateInvitations(user, {
       activateCode: invitations.activateCode,
-      userId: user.id,
     });
 
     expect(result).toBeTruthy();
@@ -122,9 +120,8 @@ describe('activateInvitations', () => {
       inviterUserId: user.id,
       workspaceId: workspace.id,
     });
-    await invitationService.activateInvitations({
+    await invitationService.activateInvitations(user, {
       activateCode: invitations.activateCode,
-      userId: user.id,
     });
 
     const result = await workspaceService._hasWorkspaceJoinedUser({

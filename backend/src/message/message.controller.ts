@@ -1,5 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 
+import { CurrentUser } from '@src/auth/decorator/current-user.decorator';
+import { UserJwtPayload } from '@src/auth/types';
 import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageReactionCreateDto } from './dto/message-reaction-create.dto';
 import { MessageReactionService } from './message-reaction.service';
@@ -25,19 +27,20 @@ export class MessageController {
     @Param('workspace') workspaceId: string,
     @Param('channel') channelId: string,
     @Body() data: MessageCreateDto,
+    @CurrentUser() user: UserJwtPayload,
   ) {
-    return this.messageService.createMessage({
+    return this.messageService.createMessage(user, {
       ...data,
       workspaceId,
       channelId,
     });
   }
 
-  updateMessage() {}
+  // updateMessage() {}
 
-  deleteMessage() {}
+  // deleteMessage() {}
 
-  findMessageById() {}
+  // findMessageById() {}
 
   @Get()
   findMessages(

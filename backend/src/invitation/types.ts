@@ -9,5 +9,3 @@ export type ValidateInvivationProps = {
   invitations: Invitation;
   inviteeEmail: string;
 };
-
-export type ActivateInvitationsProps = {};

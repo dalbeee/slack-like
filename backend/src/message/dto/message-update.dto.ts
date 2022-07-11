@@ -5,8 +5,5 @@ export class MessageUpdateDto {
   id!: string;
 
   @IsString()
-  userId!: string;
-
-  @IsString()
   content!: string;
 }

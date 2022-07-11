@@ -6,6 +6,7 @@ import { PrismaService } from '@src/prisma.service';
 import { InvitationCreateProps } from './types';
 import { UserService } from '@src/user/user.service';
 import { WorkspaceService } from '@src/workspace/workspace.service';
+import { UserJwtPayload } from '@src/auth/types';
 
 @Injectable()
 export class InvitationService {
@@ -25,18 +26,17 @@ export class InvitationService {
     return this.userService.findUserByEmail(email);
   }
 
-  async createInvitations({
-    inviteeEmail,
-    inviterUserId,
-    workspaceId,
-  }: InvitationCreateProps) {
+  async createInvitations(
+    { id }: UserJwtPayload,
+    { inviteeEmail, workspaceId }: InvitationCreateProps,
+  ) {
     const expiredDate = dayjs(Date.now()).add(7, 'days').toDate();
     const activateCode = encodeURIComponent(dayjs().unix() + '__' + uuid());
     return this.prisma.invitation.create({
       data: {
         expiredDate,
         activateCode,
-        inviterUserId,
+        inviterUserId: id,
         inviteeEmail,
         workspaceId,
       },
@@ -65,13 +65,14 @@ export class InvitationService {
     });
   }
 
-  async activateInvitations({
-    activateCode,
-    userId,
-  }: {
-    userId: string;
-    activateCode: string;
-  }) {
+  async activateInvitations(
+    { id }: UserJwtPayload,
+    {
+      activateCode,
+    }: {
+      activateCode: string;
+    },
+  ) {
     const invitations = await this._findInvitationsByActivationCode(
       activateCode,
     );
@@ -82,7 +83,7 @@ export class InvitationService {
       throw new BadRequestException('expired invitations');
 
     const result = await this.workspaceService.joinMember({
-      userId,
+      userId: id,
       workspaceId: invitations.workspaceId,
     });
     return result;

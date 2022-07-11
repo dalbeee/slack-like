@@ -1,4 +1,6 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { CurrentUser } from '@src/auth/decorator/current-user.decorator';
+import { UserJwtPayload } from '@src/auth/types';
 
 import { InvitationActivateDto } from './dto/invitation-activate.dto';
 import { InvitationCreateDto } from './dto/invitation-create.dto';
@@ -13,9 +15,12 @@ export class InvitationController {
     return true;
   }
   @Post('/create-invitations')
-  createInvitations(@Body() data: InvitationCreateDto) {
+  createInvitations(
+    @Body() data: InvitationCreateDto,
+    @CurrentUser() user: UserJwtPayload,
+  ) {
     console.log(data);
-    return this.invitationService.createInvitations(data);
+    return this.invitationService.createInvitations(user, data);
   }
 
   @Get('/expired-date-check')
@@ -29,7 +34,10 @@ export class InvitationController {
   }
 
   @Post('/activation')
-  async activateInvitations(@Body() data: InvitationActivateDto) {
-    return await this.invitationService.activateInvitations(data);
+  async activateInvitations(
+    @Body() data: InvitationActivateDto,
+    @CurrentUser() user: UserJwtPayload,
+  ) {
+    return await this.invitationService.activateInvitations(user, data);
   }
 }
