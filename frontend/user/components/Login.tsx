@@ -3,6 +3,7 @@
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SubmitHandler, useForm } from "react-hook-form";
+
 import { useUser } from "../hooks/useUser";
 
 const schema = yup.object({
@@ -21,14 +22,14 @@ const Login = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<Schema>({ resolver: yupResolver(schema) });
-  const { user, login } = useUser();
-  console.log(user);
+  const { login } = useUser();
   const onSubmit: SubmitHandler<Schema> = (e) => {
     const loginDto = {
       email: e.email,
       password: e.password,
     };
     login(loginDto);
+
     return;
   };
 

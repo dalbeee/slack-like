@@ -1,10 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/router";
 
-import { httpClient } from "@/common/httpClient";
+import { httpClient, tokenVault } from "@/common/httpClient";
 import { UserJwtToken, UserLoginDto } from "@/common/types";
 import { RootState } from "@/store/store";
 import { setAccessToken } from "@/store/userSlice";
-import { useRouter } from "next/router";
 
 export const useUser = () => {
   const router = useRouter();
@@ -12,8 +12,10 @@ export const useUser = () => {
   const dispatch = useDispatch();
   const login = (body: UserLoginDto) => {
     httpClient.post<any, UserJwtToken>("/auth/login", body).then((r) => {
-      dispatch(setAccessToken(r.access_token as string));
+      dispatch(setAccessToken(r?.access_token as string));
       router.push("/auth/connect");
+      tokenVault.setAccessToken(r?.access_token as string);
+      tokenVault.vaultFlush();
       return;
     });
   };
