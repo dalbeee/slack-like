@@ -1,13 +1,14 @@
 import { io } from "socket.io-client";
 
-import { SocketIOInfo } from "./types";
+import { SocketIOInfo, SocketIOMessage } from "./types";
 
 const url = process.env.NEXT_PUBLIC_WS_URL;
 
 export const wsClient = io(url as string);
 
-export const connect = (props: SocketIOInfo) => {
+export const connect = (props: SocketIOInfo, fetcher: (arg: any) => any) => {
   wsClient.emit("connection", { socketInfo: props });
+  init(fetcher);
 };
 
 export const send = ({
@@ -32,6 +33,7 @@ export const send = ({
   wsClient.emit("message", data);
 };
 
-wsClient.on("message", (res) => {
-  console.log(res);
-});
+const init = (callback: (arg: any) => any) =>
+  wsClient.on("message", (res: SocketIOMessage) => {
+    callback(res.message);
+  });

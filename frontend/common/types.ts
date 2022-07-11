@@ -10,3 +10,21 @@ export interface SocketIOMessage {
   channelTo?: string;
   message: string;
 }
+
+export type Message = {
+  id: string;
+  content: string;
+  createdAt: Date;
+  userId: string;
+};
+
+export interface FetchData {
+  Messages: Message[];
+  Users: [];
+  createdAt: Date;
+  updatedAt: Date;
+  description: null;
+  id: string;
+  name: string;
+  workspaceId: string;
+}
