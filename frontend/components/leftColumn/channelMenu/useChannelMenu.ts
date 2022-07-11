@@ -1,19 +1,21 @@
-import { useQuery } from "react-query";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 import { httpClient } from "@/common/httpClient";
+import { Channel } from "@/common/types";
 
-export const useChannelMenu = ({ workspace }: { workspace: string }) => {
-  const [enabled, setEnabled] = useState(false);
+export const useChannelMenu = () => {
+  const [data, setData] = useState<Channel[]>([] as Channel[]);
+  const router = useRouter();
 
-  const { data } = useQuery(
-    "/channels",
-    () => {
-      return httpClient.get<any, { id: string; name: string }[]>(
-        `/${workspace}`
-      );
-    },
-    { enabled }
-  );
-  return { data, enabled: setEnabled };
+  useEffect(() => {
+    if (!router.isReady) return;
+    const workspace = router.query.workspace as string;
+    httpClient.get<any, Channel[]>(`/${workspace}`).then((r) => {
+      setData(r);
+      return;
+    });
+  }, [router.isReady, router.query.workspace]);
+
+  return { data };
 };

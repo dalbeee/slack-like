@@ -1,19 +1,12 @@
-import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import React from "react";
 
 import MenuItem from "@/components/common/MenuItem";
 import { useChannelMenu } from "./channelMenu/useChannelMenu";
+import { useRouter } from "next/router";
 
 const ChannelMenu = () => {
   const router = useRouter();
-  const { data, enabled } = useChannelMenu({
-    workspace: router.query?.workspace as string,
-  });
-
-  useEffect(() => {
-    if (!router.isReady) return;
-    enabled(true);
-  }, [enabled, router.isReady]);
+  const { data } = useChannelMenu();
 
   const handleClick = (e: React.MouseEvent) => {
     router.push(

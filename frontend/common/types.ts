@@ -28,3 +28,12 @@ export interface FetchData {
   name: string;
   workspaceId: string;
 }
+
+export type Channel = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
