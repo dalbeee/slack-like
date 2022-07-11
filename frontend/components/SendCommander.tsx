@@ -1,11 +1,11 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { Socket } from "socket.io-client";
 
 import { send } from "@/common/wsClient";
 
-const SendCommander = () => {
+const SendCommander = ({ ws }: { ws: Socket }) => {
   const router = useRouter();
-
   const [value, setValue] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,11 +16,10 @@ const SendCommander = () => {
     e.preventDefault();
     const data = {
       workspaceId: router.query?.workspace as string,
-      channelId: undefined,
-      userId: undefined,
+      channelId: router.query?.channel as string,
       message: value,
     };
-    send(data);
+    send(ws, data);
     setValue("");
   };
 

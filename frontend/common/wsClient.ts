@@ -1,39 +1,57 @@
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
+import { tokenVault } from "./httpClient";
 
 import { SocketIOInfo, SocketIOMessage } from "./types";
 
 const url = process.env.NEXT_PUBLIC_WS_URL;
 
-export const wsClient = io(url as string);
+const socketOptions = () => ({
+  transportOptions: {
+    polling: {
+      extraHeaders: {
+        Authorization: `Bearer ${tokenVault.getAccessToken()}`,
+      },
+    },
+  },
+});
 
-export const connect = (props: SocketIOInfo, fetcher: (arg: any) => any) => {
-  wsClient.emit("connection", { socketInfo: props });
-  init(fetcher);
+const init = (ws: Socket, callback: (arg: any) => any) => {
+  ws.off("message");
+  ws.on("message", (res: SocketIOMessage) => {
+    callback(res.message);
+  });
 };
 
-export const send = ({
-  channelId,
-  workspaceId,
-  userId,
-  message,
-}: {
-  workspaceId: string;
-  channelId?: string;
-  userId?: string;
-  message: string;
-}) => {
+export const wsClientFactory = () => io(url as string, socketOptions());
+
+export const connect = (
+  ws: Socket,
+  props: SocketIOInfo,
+  fetcher: (arg: any) => any
+) => {
+  if (!ws) return;
+  ws.emit("connection", { socketInfo: props });
+  init(ws, fetcher);
+};
+
+export const send = (
+  ws: Socket,
+  {
+    channelId,
+    workspaceId,
+    message,
+  }: {
+    workspaceId: string;
+    channelId?: string;
+    message: string;
+  }
+) => {
   const data = {
     socketInfo: {
       channelId,
       workspaceId,
-      userId,
     },
     message,
   };
-  wsClient.emit("message", data);
+  ws.emit("message", data);
 };
-
-const init = (callback: (arg: any) => any) =>
-  wsClient.on("message", (res: SocketIOMessage) => {
-    callback(res.message);
-  });
