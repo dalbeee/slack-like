@@ -6,8 +6,8 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-
 import { Server, Socket } from 'socket.io';
+
 import { MessageDto } from './dto/message.dto';
 import { SocketIOService } from './socketio.service';
 import { SocketIOMessage } from './types';
@@ -28,11 +28,11 @@ export class SocketIOController {
     @MessageBody() data: Omit<MessageDto, 'data'>,
   ) {
     socket.join(data.socketInfo.workspaceId);
-    // socket.join(`${data.socketInfo.workspaceId}/${data.socketInfo.channelId}`);
   }
 
   @SubscribeMessage('message')
-  broadcastToWorkspace(@MessageBody() body: MessageDto) {
+  async broadcastToWorkspace(@MessageBody() body: MessageDto) {
+    const message = await this.service.saveMessage(body);
     const data: SocketIOMessage = {
       socketInfo: {
         channelId: body.socketInfo.channelId,
@@ -41,7 +41,7 @@ export class SocketIOController {
       },
       channelTo: body.socketInfo.channelId,
       type: 'message',
-      message: body.message,
+      message,
     };
     this.server.to(body.socketInfo.workspaceId).emit('message', data);
   }
