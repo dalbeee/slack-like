@@ -1,4 +1,4 @@
-import { UsePipes, ValidationPipe } from '@nestjs/common';
+import { UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -6,10 +6,11 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { CurrentUser } from '@src/auth/decorator/current-user.decorator';
-import { UserJwtPayload } from '@src/auth/types';
 import { Server, Socket } from 'socket.io';
 
+import { WebsocketCurrentUser } from '@src/auth/decorator/current-user-websocket.decorator';
+import { WsGuard } from '@src/auth/guard/websocket.guard';
+import { UserJwtPayload } from '@src/auth/types';
 import { MessageDto } from './dto/message.dto';
 import { SocketIOService } from './socketio.service';
 import { SocketIOMessage } from './types';
@@ -32,17 +33,17 @@ export class SocketIOController {
     socket.join(data.socketInfo.workspaceId);
   }
 
+  @UseGuards(WsGuard)
   @SubscribeMessage('message')
   async broadcastToWorkspace(
     @MessageBody() body: MessageDto,
-    @CurrentUser() user: UserJwtPayload,
+    @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
     const message = await this.service.saveMessage(user, body);
     const data: SocketIOMessage = {
       socketInfo: {
         channelId: body.socketInfo.channelId,
         workspaceId: body.socketInfo.workspaceId,
-        userId: undefined,
       },
       channelTo: body.socketInfo.channelId,
       type: 'message',

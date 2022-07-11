@@ -16,4 +16,9 @@ export class WorkspaceController {
   findWorkspaceChannelByName(@Param('name') name: string) {
     return this.workspaceService.findWorkspaceByName(name);
   }
+
+  @Get()
+  findWorkspaces() {
+    return this.workspaceService.findWorkspaces();
+  }
 }
