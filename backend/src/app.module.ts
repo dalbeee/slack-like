@@ -3,11 +3,13 @@ import {
   Module,
   ValidationPipe,
 } from '@nestjs/common';
-import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 
 import { AppController } from '@src/app.controller';
 import { AppService } from '@src/app.service';
 import { UserModule } from '@src/user/user.module';
+import { AuthModule } from './auth/auth.module';
+import { AccessTokenAuthGuard } from './auth/guard/access-token.guard';
 import { ChannelModule } from './channel/channel.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { MessageModule } from './message/message.module';
@@ -19,6 +21,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
   imports: [
     InvitationModule,
     UserModule,
+    AuthModule,
     UploadModule,
     WorkspaceModule,
     ChannelModule,
@@ -35,6 +38,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
         forbidNonWhitelisted: true,
       }),
     },
+    { provide: APP_GUARD, useClass: AccessTokenAuthGuard },
     AppService,
   ],
 })
