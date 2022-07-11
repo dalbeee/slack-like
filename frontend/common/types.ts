@@ -37,3 +37,32 @@ export type Channel = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type UserJwtToken = {
+  access_token?: string;
+  refresh_token?: string;
+};
+
+export type User = {
+  id: string;
+  email: string;
+  name: string;
+  timezone: string | null;
+  status: string | null;
+  pictureSrc: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+export type UserLoginDto = {
+  email: string;
+  password: string;
+};
+
+export type Workspace = {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
