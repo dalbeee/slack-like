@@ -36,7 +36,7 @@ const Content = () => {
   }, [router.isReady]);
 
   return (
-    <div className="">
+    <div className="h-full">
       {data?.Messages.map((m) => (
         <div className="text-neutral-300" key={m.id}>
           {m.content}
@@ -48,7 +48,7 @@ const Content = () => {
 
 const ContentColumn = () => {
   return (
-    <div className=" w-full">
+    <div className="w-full flex flex-col p-4">
       <Content />
       <SendCommander />
     </div>
