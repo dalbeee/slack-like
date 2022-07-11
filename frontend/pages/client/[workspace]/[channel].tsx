@@ -8,4 +8,5 @@ const Page = () => {
   );
 };
 
+Page.Auth = true;
 export default Page;
