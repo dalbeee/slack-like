@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 
 import { send } from "@/common/wsClient";
@@ -7,6 +7,14 @@ import { send } from "@/common/wsClient";
 const SendCommander = ({ ws }: { ws: Socket }) => {
   const router = useRouter();
   const [value, setValue] = useState("");
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    ref.current?.focus();
+    return () => {
+      setValue("");
+    };
+  }, [router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.currentTarget.value);
@@ -30,6 +38,7 @@ const SendCommander = ({ ws }: { ws: Socket }) => {
           <div className="group-focus-within:text-neutral-400">엘레먼트들</div>
           <form action="" onSubmit={handleSubmit}>
             <input
+              ref={ref}
               className="block w-full text-xl bg-transparent py-2 text-neutral-300 focus:outline-none"
               type="text"
               placeholder={`# 에 메세지 보내기.`}

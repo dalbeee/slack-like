@@ -31,16 +31,13 @@ const ContentColumn = () => {
   useEffect(() => {
     if (!router.isReady) return;
     const fetchData = () => {
-      httpClient
-        .get<any, FetchData>(
-          `${router.query?.workspace as string}/${
-            router.query?.channel as string
-          }`
-        )
-        .then((r) => {
-          setData(r);
-          return;
-        });
+      const workspace = router.query?.workspace as string;
+      const channel = router.query?.channel as string;
+      if (!channel) return;
+      httpClient.get<any, FetchData>(`${workspace}/${channel}`).then((r) => {
+        setData(r);
+        return;
+      });
     };
     fetchData();
 
