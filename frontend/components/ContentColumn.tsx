@@ -5,20 +5,7 @@ import { httpClient } from "@/common/httpClient";
 import SendCommander from "./SendCommander";
 import { FetchData, Message } from "@/common/types";
 import { connect, wsClientFactory } from "@/common/wsClient";
-
-const Content = ({ data }: { data: FetchData }) => {
-  if (!data) return null;
-  return (
-    <div className="h-full">
-      {!!data?.Messages?.length &&
-        data?.Messages.map((m) => (
-          <div className="text-neutral-300" key={m.id}>
-            {m.content}
-          </div>
-        ))}
-    </div>
-  );
-};
+import Content from "./content/Content";
 
 const ContentColumn = () => {
   const [wsClient] = useState(() => wsClientFactory());
