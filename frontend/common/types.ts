@@ -1,7 +1,6 @@
 export interface SocketIOInfo {
   workspaceId: string;
   channelId: string;
-  userId?: string;
 }
 
 export interface SocketIOMessage {

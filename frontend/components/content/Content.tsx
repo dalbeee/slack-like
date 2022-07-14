@@ -3,8 +3,9 @@ import dayjs from "dayjs";
 
 import { FetchData } from "@/common/types";
 import ToolTip from "./ToolTip";
+import { Socket } from "socket.io-client";
 
-const Content = ({ data }: { data: FetchData }) => {
+const Content = ({ ws, data }: { ws: Socket; data: FetchData }) => {
   const [isHighliterLocked, setIsHighliterLocked] = useState(false);
   const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
   const [isOnExpand, setIsOnExpand] = useState(false);
@@ -49,11 +50,12 @@ const Content = ({ data }: { data: FetchData }) => {
               </span>
               <span className="text-neutral-400 text-lg">{m.content}</span>
             </div>
-            <div className={`inline-block  absolute -right-0 -top-4  `}>
+            <div className={`z-50 inline-block  absolute -right-0 -top-4  `}>
               <ToolTip
                 className={`${
                   highlightedRowId === m.id ? "visible" : "invisible"
                 }`}
+                ws={ws}
                 messageData={m}
                 hightlightedRowId={highlightedRowId}
                 setHighlightedRowId={setHighlightedRowId}

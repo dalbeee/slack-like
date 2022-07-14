@@ -1,14 +1,32 @@
+import { Message } from "@/common/types";
+import { deleteMessage } from "@/common/wsClient";
+import { useRouter } from "next/router";
 import React, {
   forwardRef,
   ForwardRefExoticComponent,
   RefAttributes,
 } from "react";
+import { Socket } from "socket.io-client";
 
 import MenuItem from "../common/MenuItem";
 
-const ToolTipExpand: ForwardRefExoticComponent<RefAttributes<HTMLDivElement>> =
+type ToolTipExpandProps = { ws: Socket; messageData: Message };
+
+const ToolTipExpand: ForwardRefExoticComponent<
+  RefAttributes<HTMLDivElement> & ToolTipExpandProps
+> =
   // eslint-disable-next-line react/display-name
-  forwardRef((_, ref) => {
+  forwardRef(({ messageData, ws }: ToolTipExpandProps, ref) => {
+    const router = useRouter();
+    const handleDelete = () => {
+      deleteMessage(ws, {
+        socketInfo: {
+          workspaceId: router.query?.workspace as string,
+          channelId: router.query?.channel as string,
+        },
+        messageId: messageData.id,
+      });
+    };
     return (
       <div
         ref={ref}
@@ -20,7 +38,7 @@ const ToolTipExpand: ForwardRefExoticComponent<RefAttributes<HTMLDivElement>> =
         <MenuItem>링크 복사</MenuItem>
         <MenuItem>채널에 고정</MenuItem>
         <MenuItem>메세지 편집</MenuItem>
-        <MenuItem>
+        <MenuItem onClick={handleDelete}>
           <span className="text-red-700">메세지 삭제</span>
         </MenuItem>
         <MenuItem>메세지 바로 가기 추가...</MenuItem>

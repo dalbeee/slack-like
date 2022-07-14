@@ -53,10 +53,7 @@ export class MessageService {
     });
   }
 
-  async deleteMessage(
-    { id: userId }: UserJwtPayload,
-    { id }: MessageDeleteDto,
-  ) {
+  async deleteMessage({ id: userId }: UserJwtPayload, id: string) {
     await this._validateCollectUser({ id, userId });
     await this.prisma.message.delete({ where: { id } });
     return true;

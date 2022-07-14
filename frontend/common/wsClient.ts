@@ -15,43 +15,48 @@ const socketOptions = () => ({
   },
 });
 
-const init = (ws: Socket, callback: (arg: any) => any) => {
-  ws.off("message");
-  ws.on("message", (res: SocketIOMessage) => {
-    callback(res.message);
+type CallbackProps = {
+  messageKey: string;
+  callbackFn: (arg: any) => any;
+};
+
+const init = (ws: Socket, setupCallbacks: CallbackProps[]) => {
+  setupCallbacks.forEach((callback) => {
+    ws.off(callback.messageKey);
+    ws.on(callback.messageKey, (res: SocketIOMessage) => {
+      callback.callbackFn(res.message);
+    });
   });
 };
 
 export const wsClientFactory = () => io(url as string, socketOptions());
 
-export const connect = (
+export const socketConnect = (
   ws: Socket,
-  props: SocketIOInfo,
-  fetcher: (arg: any) => any
+  socketInfo: SocketIOInfo,
+  callbacks: CallbackProps[]
 ) => {
   if (!ws) return;
-  ws.emit("connection", { socketInfo: props });
-  init(ws, fetcher);
+  ws.emit("connection", socketInfo);
+  init(ws, callbacks);
 };
 
-export const send = (
+export const createMessage = (
   ws: Socket,
-  {
-    channelId,
-    workspaceId,
-    message,
-  }: {
-    workspaceId: string;
-    channelId?: string;
+  data: {
+    socketInfo: { workspaceId: string; channelId: string };
     message: string;
   }
 ) => {
-  const data = {
-    socketInfo: {
-      channelId,
-      workspaceId,
-    },
-    message,
-  };
-  ws.emit("message", data);
+  ws.emit("message.create", data);
+};
+
+export const deleteMessage = (
+  ws: Socket,
+  data: {
+    socketInfo: { channelId: string; workspaceId: string };
+    messageId: string;
+  }
+) => {
+  ws.emit("message.delete", data);
 };

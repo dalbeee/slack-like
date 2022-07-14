@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 
 import { CurrentUser } from '@src/auth/decorator/current-user.decorator';
 import { UserJwtPayload } from '@src/auth/types';
@@ -38,7 +38,13 @@ export class MessageController {
 
   // updateMessage() {}
 
-  // deleteMessage() {}
+  @Delete('/:messageId')
+  deleteMessage(
+    @Param('messageId') id: string,
+    @CurrentUser() user: UserJwtPayload,
+  ) {
+    return this.messageService.deleteMessage(user, id);
+  }
 
   // findMessageById() {}
 

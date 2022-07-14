@@ -5,7 +5,6 @@ import { createChannel } from '@src/channel/__test__/createChannel';
 import { PrismaService } from '@src/prisma.service';
 import { createUser } from '@src/user/__test__/createUser';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
-import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageUpdateDto } from './dto/message-update.dto';
 import { MessageService } from './message.service';
 import { MessageCreateProps } from './types';
@@ -167,9 +166,7 @@ describe('deleteMessage', () => {
       workspaceId: workspace.id,
     });
 
-    const result = await messageService.deleteMessage(user, {
-      id: message.id,
-    });
+    const result = await messageService.deleteMessage(user, message.id);
 
     expect(result).toEqual(true);
   });
@@ -189,8 +186,7 @@ describe('deleteMessage', () => {
     });
     const invalidUser = await createUser();
 
-    const result = () =>
-      messageService.deleteMessage(invalidUser, { id: message.id });
+    const result = () => messageService.deleteMessage(invalidUser, message.id);
 
     await expect(result).rejects.toThrowError();
   });

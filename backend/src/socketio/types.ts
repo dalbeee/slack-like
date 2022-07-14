@@ -9,5 +9,5 @@ export interface SocketIOMessage {
   socketInfo: SocketIOInfo;
   type: 'message' | 'reaction';
   channelTo?: string;
-  message: Message;
+  message: Message | string;
 }

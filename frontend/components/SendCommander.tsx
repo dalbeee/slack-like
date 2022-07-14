@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 
-import { send } from "@/common/wsClient";
+import { createMessage } from "@/common/wsClient";
 
 const SendCommander = ({ ws }: { ws: Socket }) => {
   const router = useRouter();
@@ -23,11 +23,13 @@ const SendCommander = ({ ws }: { ws: Socket }) => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = {
-      workspaceId: router.query?.workspace as string,
-      channelId: router.query?.channel as string,
+      socketInfo: {
+        workspaceId: router.query?.workspace as string,
+        channelId: router.query?.channel as string,
+      },
       message: value,
     };
-    send(ws, data);
+    createMessage(ws, data);
     setValue("");
   };
 

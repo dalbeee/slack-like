@@ -4,15 +4,22 @@ import { useEffect, useState } from "react";
 import { httpClient } from "@/common/httpClient";
 import SendCommander from "./SendCommander";
 import { FetchData, Message } from "@/common/types";
-import { connect, wsClientFactory } from "@/common/wsClient";
+import { socketConnect, wsClientFactory } from "@/common/wsClient";
 import Content from "./content/Content";
 
 const ContentColumn = () => {
   const [wsClient] = useState(() => wsClientFactory());
   const router = useRouter();
   const [data, setData] = useState<FetchData>({} as FetchData);
-  const addData = (data: Message) => {
+
+  const addRow = (data: Message) => {
     setData((prev) => ({ ...prev, Messages: [...prev.Messages, data] }));
+  };
+  const deleteRow = (data: string) => {
+    setData((prev) => ({
+      ...prev,
+      Messages: prev.Messages.filter((row) => row.id !== data),
+    }));
   };
 
   useEffect(() => {
@@ -34,19 +41,22 @@ const ContentColumn = () => {
   }, [router.isReady, router.query?.channel, router.query?.workspace]);
 
   useEffect(() => {
-    connect(
+    socketConnect(
       wsClient,
       {
         workspaceId: router.query?.workspace as string,
         channelId: router.query?.channel as string,
       },
-      addData
+      [
+        { messageKey: "message.create", callbackFn: addRow },
+        { messageKey: "message.delete", callbackFn: deleteRow },
+      ]
     );
   }, [router.query?.channel, router.query?.workspace, wsClient]);
 
   return (
     <div className="w-full flex flex-col p-4">
-      <Content data={data} />
+      <Content ws={wsClient} data={data} />
       {router.query?.channel && <SendCommander ws={wsClient} />}
     </div>
   );
