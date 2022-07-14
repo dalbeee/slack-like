@@ -33,7 +33,7 @@ const Content = ({ ws, data }: { ws: Socket; data: FetchData }) => {
       {!!data?.Messages?.length &&
         data?.Messages.map((m) => (
           <div
-            className={`relative group bg-opacity-50 py-2 justify-between flex ${
+            className={`relative group bg-opacity-50 justify-between py-2 flex ${
               highlightedRowId === m.id ? "bg-neutral-700" : ""
             }`}
             key={m.id}
@@ -50,11 +50,12 @@ const Content = ({ ws, data }: { ws: Socket; data: FetchData }) => {
               </span>
               <span className="text-neutral-400 text-lg">{m.content}</span>
             </div>
-            <div className={`z-50 inline-block  absolute -right-0 -top-4  `}>
+            <div
+              className={`z-10 inline-block absolute -right-0 -top-4  ${
+                highlightedRowId === m.id ? "visible" : "invisible"
+              }`}
+            >
               <ToolTip
-                className={`${
-                  highlightedRowId === m.id ? "visible" : "invisible"
-                }`}
                 ws={ws}
                 messageData={m}
                 hightlightedRowId={highlightedRowId}

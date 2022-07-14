@@ -30,7 +30,7 @@ const ToolTipExpand: ForwardRefExoticComponent<
     return (
       <div
         ref={ref}
-        className="flex flex-col bg-neutral-800 bg-opacity-60 border rounded-xl border-neutral-700"
+        className="z-20 flex flex-col bg-neutral-800 bg-opacity-60 border rounded-xl border-neutral-700"
       >
         <MenuItem>댓글에 대한 알림 끄기</MenuItem>
         <MenuItem>읽지 않음으로 표시</MenuItem>
