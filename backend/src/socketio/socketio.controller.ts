@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  UseGuards,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { BadRequestException, UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -31,12 +26,13 @@ export class SocketIOController {
 
   constructor(private readonly service: SocketIOService) {}
 
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  // @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @SubscribeMessage('connection')
   joinClient(
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: SocketConnectionDto,
   ) {
+    if (Object.keys(data).length === 0) return;
     socket.join(data.workspaceId);
   }
 
