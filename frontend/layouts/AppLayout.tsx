@@ -1,16 +1,18 @@
-import ContentColumn from "@/components/ContentColumn";
-import LeftColumn from "@/components/leftColumn/LeftColumn";
-import RightColumn from "@/components/RightColumn";
-import TopSearchBar from "@/components/TopSearchBar";
+import SocketInitializer from "@/module/app/components/SocketInitializer";
+import ContentColumnLayout from "./ContentColumnLayout";
+import LeftColumnLayout from "./LeftColumnLayout";
+import RightColumnLayout from "./RightColumnLayout";
+import TopSearchBarLayout from "./TopSearchBarLayout";
 
 const AppLayout = () => {
   return (
     <>
-      <TopSearchBar />
+      <SocketInitializer />
+      <TopSearchBarLayout />
       <div className="flex bg-neutral-900 min-h-content">
-        <LeftColumn />
-        <ContentColumn />
-        <RightColumn />
+        <LeftColumnLayout />
+        <ContentColumnLayout />
+        <RightColumnLayout />
       </div>
     </>
   );

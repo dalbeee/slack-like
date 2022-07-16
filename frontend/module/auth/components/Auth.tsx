@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { FC, useEffect } from "react";
 import jwtDecode from "jwt-decode";
 
-import { useUser } from "@/user/hooks/useUser";
+import { useUser } from "@/module/user/hooks/useUser";
 
 const Auth: FC<any> = ({ children }) => {
   const router = useRouter();

@@ -1,25 +1,24 @@
 import { Message } from "@/common";
-import { deleteMessage } from "@/common/wsClient";
+import { deleteMessage, socketFactory } from "@/common/wsClient";
 import { useRouter } from "next/router";
 import React, {
   forwardRef,
   ForwardRefExoticComponent,
   RefAttributes,
 } from "react";
-import { Socket } from "socket.io-client";
 
-import MenuItem from "../common/MenuItem";
+import MenuItem from "../../../../common/components/MenuItem";
 
-type ToolTipExpandProps = { ws: Socket; messageData: Message };
+type ToolTipExpandProps = { messageData: Message };
 
 const ToolTipExpand: ForwardRefExoticComponent<
   RefAttributes<HTMLDivElement> & ToolTipExpandProps
 > =
   // eslint-disable-next-line react/display-name
-  forwardRef(({ messageData, ws }: ToolTipExpandProps, ref) => {
+  forwardRef(({ messageData }: ToolTipExpandProps, ref) => {
     const router = useRouter();
     const handleDelete = () => {
-      deleteMessage(ws, {
+      deleteMessage(socketFactory(), {
         socketInfo: {
           workspaceId: router.query?.workspace as string,
           channelId: router.query?.channel as string,

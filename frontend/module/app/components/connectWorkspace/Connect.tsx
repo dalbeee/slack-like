@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 import { httpClient } from "@/common/httpClient";
-import { useUser } from "@/user/hooks/useUser";
+import { useUser } from "@/module/user/hooks/useUser";
 import { Workspace } from "@/common";
 
 const Connect = () => {

@@ -1,4 +1,4 @@
-import Connect from "@/components/connectWorkspace/Connect";
+import Connect from "@/module/app/components/connectWorkspace/Connect";
 
 const Page = () => {
   return (

@@ -1,12 +1,11 @@
 import { MouseEvent, useRef, useState } from "react";
 import dayjs from "dayjs";
-import { Socket } from "socket.io-client";
 import { useSelector } from "react-redux";
 
+import { RootState } from "@/common/store/store";
 import ToolTip from "./ToolTip";
-import { RootState } from "@/store/store";
 
-const Content = ({ ws }: { ws: Socket }) => {
+const Content = () => {
   const appData = useSelector((state: RootState) => state.app);
   const [isHighliterLocked, setIsHighliterLocked] = useState(false);
   const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
@@ -58,7 +57,6 @@ const Content = ({ ws }: { ws: Socket }) => {
               }`}
             >
               <ToolTip
-                ws={ws}
                 messageData={m}
                 hightlightedRowId={highlightedRowId}
                 setHighlightedRowId={setHighlightedRowId}

@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 
 import { httpClient } from "@/common/httpClient";
 import { Channel } from "@/common";
-import { setChannels } from "@/store/appSlice";
+import { setChannels } from "@/common/store/appSlice";
 
 export const useGetChannels = () => {
   const dispatch = useDispatch();

@@ -1,6 +1,6 @@
 import React from "react";
 
-import MenuItem from "@/components/common/MenuItem";
+import MenuItem from "@/common/components/MenuItem";
 
 const UpperMenu = () => {
   return (

@@ -2,9 +2,9 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
 
-import MenuItem from "@/components/common/MenuItem";
-import { RootState } from "@/store/store";
-import { useGetChannels } from "./channelMenu/useGetChannels";
+import MenuItem from "@/common/components/MenuItem";
+import { RootState } from "@/common/store/store";
+import { useGetChannels } from "../../hooks/useGetChannels";
 
 const ChannelMenu = () => {
   const router = useRouter();

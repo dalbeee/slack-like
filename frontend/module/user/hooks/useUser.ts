@@ -2,8 +2,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 
 import { httpClient, tokenVault } from "@/common/httpClient";
-import { RootState } from "@/store/store";
-import { setAccessToken } from "@/store/userSlice";
+import { RootState } from "@/common/store/store";
+import { setAccessToken } from "@/common/store/userSlice";
 import { UserJwtToken, UserLoginDto } from "@/common";
 
 export const useUser = () => {

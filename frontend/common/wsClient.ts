@@ -5,11 +5,13 @@ import { tokenVault } from "./httpClient";
 
 const url = process.env.NEXT_PUBLIC_WS_URL;
 
-const socketOptions = () => ({
+const socketOptions = (token?: string) => ({
   transportOptions: {
     polling: {
       extraHeaders: {
-        Authorization: `Bearer ${tokenVault.getAccessToken()}`,
+        Authorization: token
+          ? `Bearer ${token}`
+          : `Bearer ${tokenVault.getAccessToken()}`,
       },
     },
   },
@@ -29,7 +31,14 @@ const init = (ws: Socket, setupCallbacks: CallbackProps[]) => {
   });
 };
 
-const socketFactory = () => io(url as string, socketOptions());
+const socketFactory = (token?: string) => {
+  let ws: Socket | null = null;
+
+  if (!ws) {
+    ws = io(url as string, socketOptions(token));
+  }
+  return ws;
+};
 
 const socketConnect = (
   ws: Socket,

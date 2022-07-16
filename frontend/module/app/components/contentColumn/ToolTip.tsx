@@ -6,7 +6,6 @@ import {
   RefAttributes,
   SetStateAction,
 } from "react";
-import { Socket } from "socket.io-client";
 
 import { Message } from "@/common";
 import ToolTipExpand from "./ToolTipExpand";
@@ -26,7 +25,6 @@ const ButtonItem = ({
 };
 
 type ToolTipProps = {
-  ws: Socket;
   messageData: Message;
   hightlightedRowId: string | null;
   setHighlightedRowId: Dispatch<any>;
@@ -41,7 +39,6 @@ const ToolTip: ForwardRefExoticComponent<
 > = forwardRef(
   (
     {
-      ws,
       messageData,
       hightlightedRowId,
       setHighlightedRowId,
@@ -89,7 +86,7 @@ const ToolTip: ForwardRefExoticComponent<
           </ButtonItem>
         </div>
         {isOnExpand && hightlightedRowId === messageData.id && (
-          <ToolTipExpand messageData={messageData} ws={ws} ref={ref} />
+          <ToolTipExpand messageData={messageData} ref={ref} />
         )}
       </>
     );

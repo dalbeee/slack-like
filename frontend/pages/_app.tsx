@@ -2,9 +2,9 @@
 import type { AppProps } from "next/app";
 import { Provider } from "react-redux";
 
-import { store } from "@/store/store";
+import { store } from "@/common/store/store";
 import "../styles/globals.css";
-import Auth from "@/components/Auth";
+import Auth from "@/module/auth/components/Auth";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
