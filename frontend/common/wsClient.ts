@@ -1,7 +1,7 @@
 import { io, Socket } from "socket.io-client";
-import { tokenVault } from "./httpClient";
 
-import { SocketIOInfo, SocketIOMessage } from "./types";
+import { SocketInfo } from ".";
+import { tokenVault } from "./httpClient";
 
 const url = process.env.NEXT_PUBLIC_WS_URL;
 
@@ -23,17 +23,17 @@ type CallbackProps = {
 const init = (ws: Socket, setupCallbacks: CallbackProps[]) => {
   setupCallbacks.forEach((callback) => {
     ws.off(callback.messageKey);
-    ws.on(callback.messageKey, (res: SocketIOMessage) => {
-      callback.callbackFn(res.message);
+    ws.on(callback.messageKey, (res) => {
+      callback.callbackFn(res);
     });
   });
 };
 
-export const wsClientFactory = () => io(url as string, socketOptions());
+const socketFactory = () => io(url as string, socketOptions());
 
-export const socketConnect = (
+const socketConnect = (
   ws: Socket,
-  socketInfo: SocketIOInfo,
+  socketInfo: SocketInfo,
   callbacks: CallbackProps[]
 ) => {
   if (!ws) return;
@@ -41,7 +41,7 @@ export const socketConnect = (
   init(ws, callbacks);
 };
 
-export const createMessage = (
+const createMessage = (
   ws: Socket,
   data: {
     socketInfo: { workspaceId: string; channelId: string };
@@ -51,7 +51,7 @@ export const createMessage = (
   ws.emit("message.create", data);
 };
 
-export const deleteMessage = (
+const deleteMessage = (
   ws: Socket,
   data: {
     socketInfo: { channelId: string; workspaceId: string };
@@ -60,3 +60,5 @@ export const deleteMessage = (
 ) => {
   ws.emit("message.delete", data);
 };
+
+export { socketFactory, socketConnect, createMessage, deleteMessage };

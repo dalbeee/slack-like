@@ -1,4 +1,3 @@
-import { Message } from "@/common/types";
 import {
   ComponentProps,
   Dispatch,
@@ -9,6 +8,7 @@ import {
 } from "react";
 import { Socket } from "socket.io-client";
 
+import { Message } from "@/common";
 import ToolTipExpand from "./ToolTipExpand";
 
 const ButtonItem = ({

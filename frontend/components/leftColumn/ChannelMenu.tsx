@@ -1,25 +1,29 @@
 import React from "react";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/router";
 
 import MenuItem from "@/components/common/MenuItem";
-import { useChannelMenu } from "./channelMenu/useChannelMenu";
-import { useRouter } from "next/router";
+import { RootState } from "@/store/store";
+import { useGetChannels } from "./channelMenu/useGetChannels";
 
 const ChannelMenu = () => {
   const router = useRouter();
-  const { data } = useChannelMenu();
+  useGetChannels();
+
+  const appData = useSelector((state: RootState) => state.app);
 
   const handleClick = (e: React.MouseEvent) => {
     router.push(
       `/client/${router.query?.workspace as string}/${e.currentTarget.id}`
     );
   };
-
+  if (!appData.channels) return null;
   return (
     <>
       <div className=""></div>
       <MenuItem isParent>
         채널
-        {data?.map((item) => (
+        {appData.channels?.map((item) => (
           <MenuItem id={item.id} key={item.id} onClick={handleClick}>
             {item.name}
           </MenuItem>

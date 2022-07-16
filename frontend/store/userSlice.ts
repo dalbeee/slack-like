@@ -1,14 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
-import { User } from "@/common/types";
+import { User } from "@/common";
 
-export interface userState {
+export interface UserState {
   user?: User;
   access_token?: string;
 }
 
-const initialState: userState = {
+const initialState: UserState = {
   user: undefined,
   access_token: undefined,
 };

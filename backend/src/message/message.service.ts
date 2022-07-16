@@ -6,7 +6,6 @@ import {
 
 import { UserJwtPayload } from '@src/auth/types';
 import { PrismaService } from '@src/prisma.service';
-import { MessageDeleteDto } from './dto/message-delete.dto';
 import { MessageUpdateDto } from './dto/message-update.dto';
 import { MessagesFindDto } from './dto/messages-find.dto';
 import { MessageCreateProps } from './types';

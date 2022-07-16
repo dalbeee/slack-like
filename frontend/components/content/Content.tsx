@@ -1,11 +1,13 @@
 import { MouseEvent, useRef, useState } from "react";
 import dayjs from "dayjs";
-
-import { FetchData } from "@/common/types";
-import ToolTip from "./ToolTip";
 import { Socket } from "socket.io-client";
+import { useSelector } from "react-redux";
 
-const Content = ({ ws, data }: { ws: Socket; data: FetchData }) => {
+import ToolTip from "./ToolTip";
+import { RootState } from "@/store/store";
+
+const Content = ({ ws }: { ws: Socket }) => {
+  const appData = useSelector((state: RootState) => state.app);
   const [isHighliterLocked, setIsHighliterLocked] = useState(false);
   const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
   const [isOnExpand, setIsOnExpand] = useState(false);
@@ -26,12 +28,12 @@ const Content = ({ ws, data }: { ws: Socket; data: FetchData }) => {
     setIsOnExpand(false);
   };
 
-  if (!data) return null;
+  if (!appData) return null;
 
   return (
     <div className="h-full" onClick={handleClickBackground}>
-      {!!data?.Messages?.length &&
-        data?.Messages.map((m) => (
+      {!!appData.currentChannelData.Messages?.length &&
+        appData?.currentChannelData.Messages.map((m) => (
           <div
             className={`relative group bg-opacity-50 justify-between py-2 flex ${
               highlightedRowId === m.id ? "bg-neutral-700" : ""

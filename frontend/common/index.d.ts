@@ -1,14 +1,29 @@
-export interface SocketIOInfo {
+export interface SocketInfo {
   workspaceId: string;
   channelId: string;
 }
 
-export interface SocketIOMessage {
-  socketInfo: SocketIOInfo;
-  type: "message" | "reaction";
-  channelTo?: string;
-  message: string;
+type SocketReactionTarget = "mention" | "channel" | "bookmark";
+
+type Reaction = {
+  target: SocketReactionTarget;
+  channelId?: string;
+};
+
+export interface SocketMessage {
+  socketInfo: SocketInfo;
+  type: "message";
+  data: Message;
+  channelTo: string;
 }
+
+export interface SocketReaction {
+  socketInfo: SocketInfo;
+  type: "reaction";
+  data: Reaction;
+}
+
+export type SocketResponse = SocketMessage | SocketReaction;
 
 export type Message = {
   id: string;
@@ -17,12 +32,12 @@ export type Message = {
   userId: string;
 };
 
-export interface FetchData {
+export interface ChannelData {
   Messages: Message[];
   Users: [];
   createdAt: Date;
   updatedAt: Date;
-  description: null;
+  description?: string;
   id: string;
   name: string;
   workspaceId: string;
@@ -32,7 +47,7 @@ export type Channel = {
   id: string;
   workspaceId: string;
   name: string;
-  description: string | null;
+  description?: string;
   createdAt: Date;
   updatedAt: Date;
 };

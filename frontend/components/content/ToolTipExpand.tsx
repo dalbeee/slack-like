@@ -1,4 +1,4 @@
-import { Message } from "@/common/types";
+import { Message } from "@/common";
 import { deleteMessage } from "@/common/wsClient";
 import { useRouter } from "next/router";
 import React, {

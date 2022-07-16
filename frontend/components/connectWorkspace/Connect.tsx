@@ -2,8 +2,8 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 import { httpClient } from "@/common/httpClient";
-import { Workspace } from "@/common/types";
 import { useUser } from "@/user/hooks/useUser";
+import { Workspace } from "@/common";
 
 const Connect = () => {
   const router = useRouter();
