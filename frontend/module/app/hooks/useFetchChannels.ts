@@ -6,7 +6,7 @@ import { httpClient } from "@/common/httpClient";
 import { Channel } from "@/common";
 import { setChannels } from "@/common/store/appSlice";
 
-export const useGetChannels = () => {
+export const useFetchChannels = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 

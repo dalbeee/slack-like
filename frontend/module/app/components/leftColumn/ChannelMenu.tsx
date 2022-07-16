@@ -4,11 +4,11 @@ import { useRouter } from "next/router";
 
 import MenuItem from "@/common/components/MenuItem";
 import { RootState } from "@/common/store/store";
-import { useGetChannels } from "../../hooks/useGetChannels";
+import { useFetchChannels } from "../../hooks/useFetchChannels";
 
 const ChannelMenu = () => {
   const router = useRouter();
-  useGetChannels();
+  useFetchChannels();
 
   const appData = useSelector((state: RootState) => state.app);
 
