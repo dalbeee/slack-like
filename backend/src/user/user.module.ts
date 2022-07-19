@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 
+import { ChannelModule } from '@src/channel/channel.module';
 import { PrismaService } from '@src/prisma.service';
 import { RedisModule } from '@src/redis/redis.module';
 import { UserController } from '@src/user/user.controller';
 import { UserService } from '@src/user/user.service';
+import { UserRedisService } from './user.redis-service';
 
 @Module({
-  imports: [RedisModule],
+  imports: [RedisModule, ChannelModule],
   controllers: [UserController],
-  providers: [UserService, PrismaService],
-  exports: [UserService],
+  providers: [UserService, UserRedisService, PrismaService],
+  exports: [UserService, UserRedisService],
 })
 export class UserModule {}

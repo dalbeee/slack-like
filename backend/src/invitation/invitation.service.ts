@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import * as dayjs from 'dayjs';
 import { v4 as uuid } from 'uuid';
 
@@ -30,6 +34,11 @@ export class InvitationService {
     { id }: UserJwtPayload,
     { inviteeEmail, workspaceId }: InvitationCreateProps,
   ) {
+    const workspace = await this.workspaceService.findWorkspaceById(
+      workspaceId,
+    );
+    if (!workspace) throw new NotFoundException('not found workspace');
+
     const expiredDate = dayjs(Date.now()).add(7, 'days').toDate();
     const activateCode = encodeURIComponent(dayjs().unix() + '__' + uuid());
     return this.prisma.invitation.create({
@@ -47,13 +56,14 @@ export class InvitationService {
     const invitations = await this._findInvitationsByActivationCode(
       activateCode,
     );
-    return invitations.expiredDate > new Date(Date.now()) ? true : false;
+    return invitations?.expiredDate > new Date(Date.now()) ? true : false;
   }
 
   async hasWorkspaceJoinedUser(activateCode: string) {
     const invitations = await this._findInvitationsByActivationCode(
       activateCode,
     );
+    if (!invitations) throw new NotFoundException();
     const user = await this.userService.findUserByEmail(
       invitations.inviteeEmail,
     );
@@ -81,7 +91,6 @@ export class InvitationService {
     const isValidateExpiredDate = await this.isValidExpiredDate(activateCode);
     if (!isValidateExpiredDate)
       throw new BadRequestException('expired invitations');
-
     const result = await this.workspaceService.joinMember({
       userId: id,
       workspaceId: invitations.workspaceId,

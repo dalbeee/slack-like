@@ -66,14 +66,14 @@ export class WorkspaceService {
     });
     if (hasAlreadyJoinedUser) return true;
 
-    const result = await this.prisma.workspace.update({
-      where: { id: workspaceId },
-      data: { users: { connect: { id: userId } } },
-    });
-    if (!result)
-      throw new InternalServerErrorException(
-        'sorry, wrong action. admin will repair rapidly.',
-      );
-    return true;
+    try {
+      await this.prisma.workspace.update({
+        where: { id: workspaceId },
+        data: { users: { connect: { id: userId } } },
+      });
+      return true;
+    } catch (error) {
+      throw new BadRequestException('not valid invitation code');
+    }
   }
 }

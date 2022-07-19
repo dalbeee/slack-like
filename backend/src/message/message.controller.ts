@@ -7,7 +7,7 @@ import { MessageReactionCreateDto } from './dto/message-reaction-create.dto';
 import { MessageReactionService } from './message-reaction.service';
 import { MessageService } from './message.service';
 
-@Controller('/:workspace/:channel')
+@Controller('/messages/:workspaceId/:channelId')
 export class MessageController {
   constructor(
     private readonly messageService: MessageService,
@@ -22,10 +22,10 @@ export class MessageController {
     return this.messageReactionService.create({ ...data, messageId });
   }
 
-  @Post()
+  @Post('/')
   createMessage(
-    @Param('workspace') workspaceId: string,
-    @Param('channel') channelId: string,
+    @Param('workspaceId') workspaceId: string,
+    @Param('channelId') channelId: string,
     @Body() data: MessageCreateDto,
     @CurrentUser() user: UserJwtPayload,
   ) {
@@ -50,9 +50,10 @@ export class MessageController {
 
   @Get()
   findMessages(
-    @Param('workspace') workspaceId: string,
-    @Param('channel') channelId: string,
+    @Param('workspaceId') workspaceId: string,
+    @Param('channelId') channelId: string,
   ) {
+    console.log('first');
     return this.messageService.findMessages({ channelId, workspaceId });
   }
 }

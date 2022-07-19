@@ -3,7 +3,7 @@ import { User } from '@prisma/client';
 
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorator/current-user.decorator';
-import { Public } from './decorator/public-permission.decorator';
+import { PublicPermission } from './decorator/public-permission.decorator';
 import { LocalAuthGuard } from './guard/local-auth.guard';
 import { UserJwtPayload } from './types';
 
@@ -11,7 +11,7 @@ import { UserJwtPayload } from './types';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Public()
+  @PublicPermission()
   @UseGuards(LocalAuthGuard)
   @Post('/login')
   user(@Request() body: Express.Request & { user: User }) {

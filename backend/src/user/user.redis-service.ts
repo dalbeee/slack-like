@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { ChannelService } from '@src/channel/channel.service';
 
 import { RedisService } from '@src/redis/redis.service';
 
 @Injectable()
 export class UserRedisService {
-  constructor(private readonly redisService: RedisService) {}
+  constructor(
+    private readonly redisService: RedisService,
+    private readonly channelService: ChannelService,
+  ) {}
 
-  saveChannelData = async (
+  saveChannelDataAt = async (
     {
       channelId,
       workspaceId,
@@ -27,7 +31,7 @@ export class UserRedisService {
     return true;
   };
 
-  getChannelData = async ({
+  getChannelDataBy = async ({
     userId,
     workspaceId,
     channelId,
@@ -45,6 +49,24 @@ export class UserRedisService {
           `workspaces.${workspaceId}.${channelId}.${key}`,
         );
         result[key] = data;
+      }),
+    );
+    return result;
+  };
+
+  getChannelDataAll = async (userId: string, workspaceId: string) => {
+    const result = {};
+    const channels = await this.channelService.findchannelsByWorkspaceId(
+      workspaceId,
+    );
+    await Promise.all(
+      channels.map(async (channel) => {
+        const data = await this.getChannelDataBy({
+          userId,
+          workspaceId,
+          channelId: channel.id,
+        });
+        result[channel.id] = data;
       }),
     );
     return result;

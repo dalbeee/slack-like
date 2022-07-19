@@ -19,7 +19,6 @@ export class InvitationController {
     @Body() data: InvitationCreateDto,
     @CurrentUser() user: UserJwtPayload,
   ) {
-    console.log(data);
     return this.invitationService.createInvitations(user, data);
   }
 

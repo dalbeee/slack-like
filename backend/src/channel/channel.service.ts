@@ -6,7 +6,7 @@ import {
 
 import { PrismaService } from '@src/prisma.service';
 import { WorkspaceService } from '@src/workspace/workspace.service';
-import { ChannelCreateProps, findChannelsByIdProps } from './types';
+import { ChannelCreateProps } from './types';
 
 @Injectable()
 export class ChannelService {
@@ -36,9 +36,9 @@ export class ChannelService {
     });
   }
 
-  async findChannelsById({ channelId, workspaceId }: findChannelsByIdProps) {
+  async findChannelsById(channelId: string) {
     const channel = await this.prisma.channel.findFirst({
-      where: { id: channelId, workspaceId },
+      where: { id: channelId },
       include: { Messages: true, Users: true },
     });
     if (!channel) throw new NotFoundException();

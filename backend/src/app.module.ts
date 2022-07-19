@@ -20,12 +20,12 @@ import { WorkspaceModule } from './workspace/workspace.module';
 
 @Module({
   imports: [
-    InvitationModule,
-    UserModule,
-    AuthModule,
-    UploadModule,
     WorkspaceModule,
     ChannelModule,
+    UserModule,
+    InvitationModule,
+    AuthModule,
+    UploadModule,
     MessageModule,
     SocketIOModule,
     RedisModule,
