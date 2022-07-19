@@ -22,9 +22,20 @@ export class RedisService {
     return await this.hGet(key, field);
   }
 
-  async hGet<T = any>(key: string, field: string) {
-    const r = await this.redis.hget(key, field);
-    return this._parseString(r) as T;
+  async hGet<T = any>(key: string, ...fields: any[]) {
+    const [field, ...remainFields] = fields;
+
+    const data = await this.redis
+      .hget(key, field)
+      .then((r) => this._parseString(r));
+
+    const result = remainFields.length
+      ? remainFields.reduce((acc, v) => {
+          acc = acc[v];
+          return acc;
+        }, data)
+      : data;
+    return result as T;
   }
 
   async hAppend(key: string, field: string, value: string | number | object) {
@@ -51,5 +62,19 @@ export class RedisService {
       {},
     );
     return result as T;
+  }
+
+  async clearAllByPattern(pattern: string) {
+    const keys = await this.redis.keys(pattern);
+    await this.redis.del(keys);
+    return true;
+  }
+
+  async clearByKey(key: string) {
+    await this.redis.del(key);
+  }
+
+  async flushAll() {
+    this.redis.flushall();
   }
 }

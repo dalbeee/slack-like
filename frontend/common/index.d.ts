@@ -1,29 +1,43 @@
-export interface SocketInfo {
+interface SocketInfo {
   workspaceId: string;
   channelId: string;
 }
 
-type SocketReactionTarget = "mention" | "channel" | "bookmark";
+type SocketReactionType = "reaction";
+type SocketMessageType = "message.create" | "message.update" | "message.delete";
 
-type Reaction = {
-  target: SocketReactionTarget;
-  channelId?: string;
+type SocketReactionData = {
+  type: SocketReactionType;
+  channelId: string;
+  data: {
+    latestMessageId: string;
+    lastCheckMessageId: string;
+  };
 };
 
-export interface SocketMessage {
-  socketInfo: SocketInfo;
-  type: "message";
+interface SocketMessageCreate {
+  type: "message.create";
   data: Message;
-  channelTo: string;
 }
 
-export interface SocketReaction {
+interface SocketMessageUpdate {
+  type: "message.update";
+  data: Message;
+}
+
+interface SocketMessageDelete {
+  type: "message.delete";
+  data: { messageId: string };
+}
+
+type SocketMessageData =
+  | SocketMessageCreate
+  | SocketMessageUpdate
+  | SocketMessageDelete;
+
+type SocketResponse = (SocketReactionData | SocketMessageData) & {
   socketInfo: SocketInfo;
-  type: "reaction";
-  data: Reaction;
-}
-
-export type SocketResponse = SocketMessage | SocketReaction;
+};
 
 export type Message = {
   id: string;
@@ -43,6 +57,17 @@ export interface ChannelData {
   workspaceId: string;
 }
 
+export type ChannelWithState = Channel & {
+  latestMessageId?: string;
+  lastCheckMessageId?: string;
+};
+
+export interface ChannelsHashMap {
+  byId: string[];
+  byHash: { [key: string]: ChannelWithState };
+}
+
+////
 export type Channel = {
   id: string;
   workspaceId: string;

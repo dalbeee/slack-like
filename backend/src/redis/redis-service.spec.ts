@@ -16,18 +16,45 @@ describe('ioredis default behavior', () => {
   it('hset', async () => {
     const result = await redisService.redis.hset('test', 'test', 'test');
 
-    expect(result).toEqual(0);
+    expect(result).toEqual(expect.any(Number));
   });
 });
 
 describe('redisService behavior', () => {
-  it('hGetItem', async () => {
-    redisService.hSet('a', 'b', { a: 1 });
+  describe('hGet', () => {
+    it('return value', async () => {
+      redisService.hSet('a', 'b', { a: 1 });
 
-    const result = await redisService.hGet('a', 'b');
+      const result = await redisService.hGet('a', 'b');
 
-    expect(result).toEqual(expect.objectContaining({ a: expect.any(Number) }));
-    expect(result.a).toEqual(1);
+      expect(result).toEqual(
+        expect.objectContaining({ a: expect.any(Number) }),
+      );
+    });
+
+    it('return value if nested path point stored value ', async () => {
+      const data = {
+        a: 1,
+        b: { a: 1, b: 2 },
+      };
+      redisService.hSet('a', 'b', data);
+
+      const result = await redisService.hGet('a', 'b', 'a');
+
+      expect(result).toEqual(1);
+    });
+
+    it('return object if nested path point stored object ', async () => {
+      const data = {
+        a: 1,
+        b: { a: 1, b: 2 },
+      };
+      redisService.hSet('a', 'b', data);
+
+      const result = await redisService.hGet('a', 'b', 'b');
+
+      expect(result).toEqual({ a: 1, b: 2 });
+    });
   });
 
   it('hGetAll', async () => {
@@ -68,14 +95,6 @@ describe('redisService behavior', () => {
     );
   });
 
-  // it('hAppend update specific field and return', async () => {
-  //   await redisService.hSet('test', 'test', { test: 'a' });
-  //   const result = await redisService.hSet('test', 'test', {
-  //     test: 'b',
-  //   });
-
-  //   expect(result.test).toEqual('b');
-  // });
   it('hAppend update specific field and return', async () => {
     await redisService.hSet('test', 'test', { test: 'a', target: 'a' });
     const result = await redisService.hAppend('test', 'test', {
@@ -84,33 +103,5 @@ describe('redisService behavior', () => {
     });
 
     expect(result).toEqual({ test: 'a', target: 'b' });
-  });
-});
-
-describe('test redisService with data', () => {
-  it('test User', async () => {
-    const user = {
-      id: 'a',
-      name: 'a',
-      channels: {
-        'channel-01': {
-          latestMessageId: 'b',
-          lastCheckMessageId: 'a',
-        },
-      },
-    };
-    type Channels = typeof user.channels;
-    redisService.hmSet('user:a', user);
-
-    const channels = await redisService.hGet<Channels>('user:a', 'channels');
-    expect(channels['channel-01']).toEqual(
-      expect.objectContaining({
-        latestMessageId: 'b',
-        lastCheckMessageId: 'a',
-      }),
-    );
-
-    const id = await redisService.hGet<string>('user:a', 'id');
-    expect(id).toEqual('a');
   });
 });

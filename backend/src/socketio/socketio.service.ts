@@ -1,25 +1,35 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { Message } from '@prisma/client';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { UserJwtPayload } from '@src/auth/types';
 import { MessageService } from '@src/message/message.service';
-import { SocketReactionTarget, SocketResponse } from '.';
+import { RedisService } from '@src/redis/redis.service';
+import { SocketReactionData, ChannelMetadata } from '.';
 import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageDeleteDto } from './dto/message-delete.dto';
 import { SocketInfo } from './dto/socket-info.dto';
+import { SocketIOGateway } from './socketio.gateway';
 
 @Injectable()
 export class SocketIOService {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    @Inject(forwardRef(() => SocketIOGateway))
+    private readonly socketGateway: SocketIOGateway,
+    private readonly redisService: RedisService,
+  ) {}
 
-  _createReaction(
-    reactionTarget: SocketReactionTarget,
-    socketInfo: SocketInfo,
-  ) {
-    const result: SocketResponse = {
-      socketInfo: socketInfo,
+  async _createReaction(user: UserJwtPayload, socketInfo: SocketInfo) {
+    const data = await this.redisService.hGet(user.id, socketInfo.channelId);
+    const result: SocketReactionData = {
       type: 'reaction',
-      data: { target: reactionTarget, channelId: socketInfo.channelId },
+      channelId: socketInfo.channelId,
+      data: data as ChannelMetadata,
     };
     return result;
   }
@@ -30,13 +40,24 @@ export class SocketIOService {
       workspaceId: message.socketInfo.workspaceId,
       content: message.message,
     });
-    const response: SocketResponse = {
-      socketInfo: message.socketInfo,
-      channelTo: message.socketInfo.channelId,
-      type: 'message',
+    const response = {
+      type: 'message.create',
       data: result,
     };
-    const reaction = this._createReaction('channel', message.socketInfo);
+    const r = await this.redisService.hGet(
+      user.id,
+      message.socketInfo.channelId,
+    );
+    const data = await this.redisService.hAppend(
+      user.id,
+      message.socketInfo.channelId,
+      { latestMessageId: result.id },
+    );
+    const reaction: SocketReactionData = {
+      type: 'reaction',
+      channelId: message.socketInfo.channelId,
+      data,
+    };
     return { response, reaction };
   }
 
@@ -46,15 +67,19 @@ export class SocketIOService {
       message.messageId,
     );
     if (!result) throw new BadRequestException();
-    const response: SocketResponse = {
-      socketInfo: message.socketInfo,
-      channelTo: message.socketInfo.channelId,
-      type: 'message',
-      data: {
-        id: message.messageId,
-      } as Message,
+    const response = {
+      type: 'message.delete',
+      data: { messageId: message.messageId },
     };
-    const reaction = this._createReaction('channel', message.socketInfo);
-    return { response, reaction };
+    return { response };
+  }
+
+  async findMessageAuthor(messageId: string) {
+    const message = await this.messageService.findById(messageId);
+    if (!message) throw new NotFoundException();
+    this.socketGateway.sendReactionToUser(message.userId, {
+      target: 'mention',
+      id: 'a',
+    });
   }
 }
