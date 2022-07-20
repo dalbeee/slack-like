@@ -1,4 +1,4 @@
-import SocketInitializer from "@/module/app/components/SocketInitializer";
+import DataInitializer from "@/module/app/components/DataInitializer";
 import ContentColumnLayout from "./ContentColumnLayout";
 import LeftColumnLayout from "./LeftColumnLayout";
 import RightColumnLayout from "./RightColumnLayout";
@@ -7,7 +7,7 @@ import TopSearchBarLayout from "./TopSearchBarLayout";
 const AppLayout = () => {
   return (
     <>
-      <SocketInitializer />
+      <DataInitializer />
       <TopSearchBarLayout />
       <div className="flex bg-neutral-900 min-h-content">
         <LeftColumnLayout />

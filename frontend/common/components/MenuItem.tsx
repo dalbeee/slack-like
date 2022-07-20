@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ComponentProps, FC, ReactNode } from "react";
 
 type MenuItemProps = {
   children: ReactNode;
@@ -9,13 +9,14 @@ type MenuItemProps = {
   isParent?: boolean;
 };
 
-const MenuItem = ({
+const MenuItem: FC<ComponentProps<"div"> & MenuItemProps> = ({
   children,
   onFocusBrighter = true,
   onClick,
   isParent = false,
+  className,
   ...props
-}: MenuItemProps) => {
+}) => {
   return (
     <div
       onClick={onClick}
@@ -24,7 +25,8 @@ const MenuItem = ({
           !isParent && onFocusBrighter
             ? "hover:cursor-pointer hover:bg-neutral-700"
             : ""
-        }
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        } ${className!}
       `}
       {...props}
     >

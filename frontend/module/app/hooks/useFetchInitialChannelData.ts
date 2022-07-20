@@ -13,11 +13,13 @@ export const useFetchInitialChannelData = () => {
   useEffect(() => {
     const workspace = router.query?.workspace as string;
     const channel = router.query?.channel as string;
-    if (!channel) return;
-    httpClient.get<any, ChannelData>(`${workspace}/${channel}`).then((r) => {
-      dispatch(setCurrentChannelData(r));
-      return;
-    });
+    if (!workspace || !channel) return;
+    httpClient
+      .get<any, ChannelData>(`/channels?channelId=${channel}`)
+      .then((r) => {
+        dispatch(setCurrentChannelData(r));
+        return;
+      });
   }, [dispatch, router.query?.channel, router.query?.workspace]);
   return;
 };

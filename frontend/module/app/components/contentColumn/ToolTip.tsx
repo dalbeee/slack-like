@@ -9,6 +9,7 @@ import {
 
 import { Message } from "@/common";
 import ToolTipExpand from "./ToolTipExpand";
+import { createReaction } from "@/common/wsClient";
 
 const ButtonItem = ({
   handleClick,
@@ -57,13 +58,17 @@ const ToolTip: ForwardRefExoticComponent<
         : setHighlightedRowId(null);
     };
 
+    const handleReaction = (message: Message) => {
+      createReaction(message.id);
+    };
+
     return (
       <>
         <div
           className="z-50 flex justify-center items-center border rounded-lg bg-neutral-900 border-neutral-700 p-2"
           {...props}
         >
-          <ButtonItem>
+          <ButtonItem handleClick={() => handleReaction(messageData)}>
             <span className="material-symbols-outlined">check_box</span>
           </ButtonItem>
           <ButtonItem>

@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 
-import { createMessage, socketFactory } from "@/common/wsClient";
+import { createMessage } from "@/common/wsClient";
 
 const SendCommander = () => {
   const router = useRouter();
@@ -28,7 +28,7 @@ const SendCommander = () => {
       },
       message: value,
     };
-    createMessage(socketFactory(), data);
+    createMessage(data);
     setValue("");
   };
 

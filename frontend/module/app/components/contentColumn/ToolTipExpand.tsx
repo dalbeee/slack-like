@@ -1,5 +1,5 @@
 import { Message } from "@/common";
-import { deleteMessage, socketFactory } from "@/common/wsClient";
+import { deleteMessage } from "@/common/wsClient";
 import { useRouter } from "next/router";
 import React, {
   forwardRef,
@@ -18,7 +18,7 @@ const ToolTipExpand: ForwardRefExoticComponent<
   forwardRef(({ messageData }: ToolTipExpandProps, ref) => {
     const router = useRouter();
     const handleDelete = () => {
-      deleteMessage(socketFactory(), {
+      deleteMessage({
         socketInfo: {
           workspaceId: router.query?.workspace as string,
           channelId: router.query?.channel as string,

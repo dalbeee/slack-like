@@ -57,16 +57,19 @@ export interface ChannelData {
   workspaceId: string;
 }
 
-export type ChannelWithState = Channel & {
+export interface ChannelsHashMap {
+  byId: string[];
+  byHash: { [key: string]: Channel };
+}
+
+export type HttpChannelMetadataResponse = {
+  [channelId: string]: ChannelMetadata;
+};
+
+export type ChannelMetadata = {
   latestMessageId?: string;
   lastCheckMessageId?: string;
 };
-
-export interface ChannelsHashMap {
-  byId: string[];
-  byHash: { [key: string]: ChannelWithState };
-}
-
 ////
 export type Channel = {
   id: string;
@@ -75,7 +78,7 @@ export type Channel = {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
-};
+} & ChannelMetadata;
 
 export type UserJwtToken = {
   access_token?: string;

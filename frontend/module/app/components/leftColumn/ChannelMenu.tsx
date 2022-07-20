@@ -4,30 +4,42 @@ import { useRouter } from "next/router";
 
 import MenuItem from "@/common/components/MenuItem";
 import { RootState } from "@/common/store/store";
-import { useFetchChannels } from "../../hooks/useFetchChannels";
 
 const ChannelMenu = () => {
   const router = useRouter();
-  useFetchChannels();
 
-  const appData = useSelector((state: RootState) => state.app);
+  const { channels } = useSelector((state: RootState) => state.app);
 
   const handleClick = (e: React.MouseEvent) => {
-    router.push(
-      `/client/${router.query?.workspace as string}/${e.currentTarget.id}`
-    );
+    const as = `/client/${router.query?.workspace as string}/${
+      e.currentTarget.id
+    }`;
+    router.push(as);
   };
-  if (!appData.channels) return null;
+  if (!channels) return null;
   return (
     <>
       <div className=""></div>
       <MenuItem isParent>
         채널
-        {appData.channels?.map((item) => (
-          <MenuItem id={item.id} key={item.id} onClick={handleClick}>
-            {item.name}
-          </MenuItem>
-        ))}
+        {channels?.byId?.map((channelId) => {
+          // eslint-disable-next-line security/detect-object-injection
+          const channel = channels.byHash[channelId];
+          return (
+            <MenuItem
+              id={channelId}
+              key={channelId}
+              onClick={handleClick}
+              className={`${
+                channel.lastCheckMessageId !== channel.latestMessageId
+                  ? "bg-neutral-700"
+                  : ""
+              }`}
+            >
+              {channel.name}
+            </MenuItem>
+          );
+        })}
       </MenuItem>
     </>
   );

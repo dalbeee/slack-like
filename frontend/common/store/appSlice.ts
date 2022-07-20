@@ -1,18 +1,28 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { Channel, ChannelData, SocketMessage, SocketReaction } from "@/common";
+import {
+  Channel,
+  ChannelData,
+  ChannelsHashMap,
+  HttpChannelMetadataResponse,
+  SocketMessageCreate,
+  SocketMessageDelete,
+  SocketReactionData,
+} from "@/common";
 
 export interface AppState {
+  initialize: boolean;
   mention: boolean;
   bookmark: boolean;
-  channels: (Channel & { alarm: boolean })[];
+  channels: ChannelsHashMap;
   currentChannelData: ChannelData;
 }
 
 const initialState: AppState = {
+  initialize: false,
   bookmark: false,
   mention: false,
-  channels: [] as (Channel & { alarm: boolean })[],
+  channels: { byId: [], byHash: {} } as ChannelsHashMap,
   currentChannelData: {} as ChannelData,
 };
 
@@ -20,27 +30,51 @@ export const appSlice = createSlice({
   name: "app",
   initialState,
   reducers: {
-    setReaction: (state, action: PayloadAction<SocketReaction>) => {
-      switch (action.payload.data.target) {
-        case "mention":
-        case "bookmark":
-          state[action.payload.data.target] = true;
-          break;
-        case "channel":
-          return state;
-      }
-    },
     setChannels: (state, action: PayloadAction<Channel[]>) => {
-      const channels = action.payload.map((channel) => ({
-        ...channel,
-        alarm: false,
-      }));
+      const channels = action.payload.reduce(
+        (acc, v) => {
+          acc.byId.push(v.id);
+          acc.byHash[v.id] = v;
+          return acc;
+        },
+        { byId: [], byHash: {} } as ChannelsHashMap
+      );
       state.channels = channels;
+      state.initialize = true;
+    },
+    setChannelsMetadata: (
+      state,
+      action: PayloadAction<HttpChannelMetadataResponse>
+    ) => {
+      Object.keys(action.payload).forEach((key) => {
+        state.channels.byHash[key] = {
+          ...state.channels.byHash[key],
+          ...action.payload[key],
+        };
+      });
+    },
+    setReaction: (state, action: PayloadAction<SocketReactionData>) => {
+      const setChannelMetadata = () => {
+        if (!state.channels.byId.includes(action.payload.channelId)) {
+          state.channels.byId = [
+            ...state.channels.byId,
+            action.payload.channelId,
+          ];
+        }
+        state.channels.byHash[action.payload.channelId] = {
+          ...state.channels.byHash[action.payload.channelId],
+          ...action.payload.data,
+        };
+      };
+      setChannelMetadata();
     },
     setCurrentChannelData: (state, action: PayloadAction<ChannelData>) => {
       state.currentChannelData = action.payload;
     },
-    appendCurerntChannelData: (state, action: PayloadAction<SocketMessage>) => {
+    appendCurerntChannelData: (
+      state,
+      action: PayloadAction<SocketMessageCreate>
+    ) => {
       if (
         state.currentChannelData.Messages.some(
           (message) => message.id === action.payload.data.id
@@ -52,12 +86,15 @@ export const appSlice = createSlice({
         Messages: [...state.currentChannelData.Messages, action.payload.data],
       };
     },
-    deleteCurrentChannelData: (state, action: PayloadAction<SocketMessage>) => {
+    deleteCurrentChannelData: (
+      state,
+      action: PayloadAction<SocketMessageDelete>
+    ) => {
       if (!state.currentChannelData.Messages) return state;
       state.currentChannelData = {
         ...state.currentChannelData,
         Messages: state.currentChannelData.Messages.filter(
-          (message) => message.id !== action.payload.data.id
+          (message) => message.id !== action.payload.data.messageId
         ),
       };
     },
@@ -74,6 +111,7 @@ export const {
   appendCurerntChannelData,
   deleteCurrentChannelData,
   resetCurrentChannelData,
+  setChannelsMetadata,
 } = appSlice.actions;
 
 export default appSlice.reducer;

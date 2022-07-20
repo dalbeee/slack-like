@@ -31,7 +31,7 @@ const init = (ws: Socket, setupCallbacks: CallbackProps[]) => {
   });
 };
 
-const socketFactory = (token?: string) => {
+export const socketFactory = (token?: string) => {
   let ws: Socket | null = null;
 
   if (!ws) {
@@ -40,34 +40,37 @@ const socketFactory = (token?: string) => {
   return ws;
 };
 
-const socketConnect = (
-  ws: Socket,
+export const socketConnect = (
   socketInfo: SocketInfo,
   callbacks: CallbackProps[]
 ) => {
-  if (!ws) return;
+  const ws = socketFactory();
   ws.emit("connection", socketInfo);
   init(ws, callbacks);
 };
 
-const createMessage = (
-  ws: Socket,
-  data: {
-    socketInfo: { workspaceId: string; channelId: string };
-    message: string;
-  }
-) => {
-  ws.emit("message.create", data);
+export const createMessage = (data: {
+  socketInfo: { workspaceId: string; channelId: string };
+  message: string;
+}) => {
+  socketFactory().emit("message.create", data);
 };
 
-const deleteMessage = (
-  ws: Socket,
-  data: {
-    socketInfo: { channelId: string; workspaceId: string };
-    messageId: string;
-  }
-) => {
-  ws.emit("message.delete", data);
+export const deleteMessage = (data: {
+  socketInfo: { channelId: string; workspaceId: string };
+  messageId: string;
+}) => {
+  socketFactory().emit("message.delete", data);
 };
 
-export { socketFactory, socketConnect, createMessage, deleteMessage };
+export const createReaction = (messageId: string) => {
+  const data = {
+    messageId,
+    reaction: "mention",
+  };
+  socketFactory().emit("reaction", data);
+};
+
+export const syncChannelData = (data: { socketInfo: SocketInfo }) => {
+  socketFactory().emit("reaction", data);
+};
