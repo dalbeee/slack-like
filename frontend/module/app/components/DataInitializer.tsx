@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { syncChannelData } from "@/common/wsClient";
 import { useSocketConnect } from "@/module/app/hooks/useSocketConnect";
 import { RootState } from "@/common/store/store";
 import { useFetchChannelMetadata } from "../hooks/useFetchChannelMetadata";
@@ -31,12 +30,6 @@ const DataInitializer = () => {
 
   useEffect(() => {
     if (!router.query.channel) return;
-    syncChannelData({
-      socketInfo: {
-        workspaceId: router.query.workspace as string,
-        channelId: router.query.channel as string,
-      },
-    });
   }, [router.query.channel, router.query.workspace]);
 
   return <></>;

@@ -70,7 +70,3 @@ export const createReaction = (messageId: string) => {
   };
   socketFactory().emit("reaction", data);
 };
-
-export const syncChannelData = (data: { socketInfo: SocketInfo }) => {
-  socketFactory().emit("reaction", data);
-};
