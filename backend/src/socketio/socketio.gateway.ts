@@ -94,6 +94,10 @@ export class SocketIOGateway {
     @WebsocketCurrentUser() user: UserJwtPayload,
     @MessageBody() body: ChannelMetadataUpdateDto,
   ) {
-    this.socketIoService.updateChannelMetadata(user, body);
+    this.socketIoService.increaseUnreadMessageCount({
+      channelId: body.socketInfo.channelId,
+      workspaceId: body.socketInfo.workspaceId,
+      userId: user.id,
+    });
   }
 }

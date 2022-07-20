@@ -3,59 +3,57 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ChannelService } from '@src/channel/channel.service';
 import { MessageService } from '@src/message/message.service';
 import { RedisService } from '@src/redis/redis.service';
+import { ChannelMetadata } from '@src/socketio';
+import { ChannelSpecificDto } from '@src/socketio/dto/channel-specific.dto';
+import { UserService } from './user.service';
 
 @Injectable()
 export class UserRedisService {
   constructor(
     private readonly redisService: RedisService,
+    private readonly userService: UserService,
     private readonly channelService: ChannelService,
     private readonly messageService: MessageService,
   ) {}
 
   // channel methods
 
-  async setChannelDataAt(
-    {
-      channelId,
-      workspaceId,
-      userId,
-    }: { userId: string; workspaceId: string; channelId: string },
-    data: {
-      latestMessageId?: string;
-      lastCheckMessageId?: string;
-    },
+  async _setChannelDataAt(
+    channelDto: ChannelSpecificDto,
+    { unreadMessageCount }: ChannelMetadata,
   ) {
-    Object.keys(data).forEach((field) => {
-      this.redisService.redis.hset(
-        `user:${userId}`,
-        `workspaces.${workspaceId}.${channelId}.${field}`,
-        data[field],
-      );
+    this.redisService.redis.hset(
+      `user:${channelDto.userId}`,
+      `workspaces.${channelDto.workspaceId}.${channelDto.channelId}.unreadMessageCount`,
+      unreadMessageCount,
+    );
+    return await this.getChannelDataBy(channelDto);
+  }
+
+  async increaseUnreadMessageCount(channelDto: ChannelSpecificDto) {
+    const count = await this.getChannelDataBy(channelDto);
+
+    return await this._setChannelDataAt(channelDto, {
+      unreadMessageCount: count.unreadMessageCount + 1,
     });
-    return true;
+  }
+
+  async setZeroUnreadMessageCount(channelDto: ChannelSpecificDto) {
+    return await this._setChannelDataAt(channelDto, {
+      unreadMessageCount: 0,
+    });
   }
 
   async getChannelDataBy({
     userId,
     workspaceId,
     channelId,
-  }: {
-    userId: string;
-    workspaceId: string;
-    channelId: string;
-  }) {
-    const result = {};
-    const kies = ['latestMessageId', 'lastCheckMessageId'];
-    await Promise.all(
-      kies.map(async (key) => {
-        const data = await this.redisService.redis.hget(
-          `user:${userId}`,
-          `workspaces.${workspaceId}.${channelId}.${key}`,
-        );
-        result[key] = data;
-      }),
+  }: ChannelSpecificDto) {
+    const result = await this.redisService.redis.hget(
+      `user:${userId}`,
+      `workspaces.${workspaceId}.${channelId}.unreadMessageCount`,
     );
-    return result;
+    return { unreadMessageCount: result ? parseInt(result) : 0 };
   }
 
   async getChannelDataAll(userId: string, workspaceId: string) {
@@ -83,6 +81,8 @@ export class UserRedisService {
   }
 
   async setSocketAt(userId: string, socketId: string) {
+    const user = await this.userService.findUserById(userId);
+    if (!user) throw new NotFoundException();
     return this.redisService.redis.hset(`user:${userId}`, 'socket', socketId);
   }
 

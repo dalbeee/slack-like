@@ -73,8 +73,4 @@ export class RedisService {
   async clearByKey(key: string) {
     await this.redis.del(key);
   }
-
-  async flushAll() {
-    this.redis.flushall();
-  }
 }

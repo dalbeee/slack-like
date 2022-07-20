@@ -4,7 +4,7 @@ import { UserJwtPayload } from '@src/auth/types';
 import { MessageService } from '@src/message/message.service';
 import { UserRedisService } from '@src/user/user.redis-service';
 import { ChannelMetadata, SocketMessageData, SocketChannelData } from '.';
-import { ChannelMetadataUpdateDto } from './dto/channel-metadata-update.dto';
+import { ChannelSpecificDto } from './dto/channel-specific.dto';
 import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageDeleteDto } from './dto/message-delete.dto';
 
@@ -26,19 +26,17 @@ export class SocketIOService {
       data: result,
     };
 
-    await this.userRedisService.setChannelDataAt(
-      {
+    const unreadMessageCount =
+      await this.userRedisService.increaseUnreadMessageCount({
         userId: user.id,
         channelId: data.socketInfo.channelId,
         workspaceId: data.socketInfo.workspaceId,
-      },
-      { latestMessageId: result.id },
-    );
+      });
 
     const channelData: SocketChannelData = {
       type: 'channel',
       channelId: data.socketInfo.channelId,
-      data: { lastCheckMessageId: result.id } as ChannelMetadata,
+      data: unreadMessageCount as ChannelMetadata,
     };
     return { messageData, channelData };
   }
@@ -56,17 +54,11 @@ export class SocketIOService {
     return { messageData };
   }
 
-  async updateChannelMetadata(
-    user: UserJwtPayload,
-    data: ChannelMetadataUpdateDto,
-  ) {
-    return this.userRedisService.setChannelDataAt(
-      {
-        workspaceId: data.socketInfo.workspaceId,
-        channelId: data.socketInfo.channelId,
-        userId: user.id,
-      },
-      { lastCheckMessageId: data.lastCheckMesasgeId },
-    );
+  increaseUnreadMessageCount(channelDto: ChannelSpecificDto) {
+    return this.userRedisService.increaseUnreadMessageCount(channelDto);
+  }
+
+  setZeroUnreadMessageCount(channelDto: ChannelSpecificDto) {
+    return this.userRedisService.setZeroUnreadMessageCount(channelDto);
   }
 }

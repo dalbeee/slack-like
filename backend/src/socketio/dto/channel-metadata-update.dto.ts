@@ -6,5 +6,5 @@ export class ChannelMetadataUpdateDto {
   socketInfo: SocketInfo;
 
   @IsString()
-  lastCheckMesasgeId: string;
+  unreadMessageCount: number;
 }

@@ -7,8 +7,7 @@ type SocketChannelType = "channel";
 type SocketMessageType = "message.create" | "message.update" | "message.delete";
 
 export interface ChannelMetadata {
-  latestMessageId: string;
-  lastCheckMessageId: string;
+  unreadMessageCount: number;
 }
 
 type SocketChannelData = {
