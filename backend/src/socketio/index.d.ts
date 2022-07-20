@@ -5,7 +5,7 @@ interface SocketInfo {
   channelId: string;
 }
 
-type SocketReactionType = 'reaction';
+type SocketChannelType = 'channel';
 type SocketMessageType = 'message.create' | 'message.update' | 'message.delete';
 
 export interface ChannelMetadata {
@@ -13,8 +13,8 @@ export interface ChannelMetadata {
   lastCheckMessageId: string;
 }
 
-type SocketReactionData = {
-  type: SocketReactionType;
+type SocketChannelData = {
+  type: SocketChannelType;
   channelId: string;
   data: ChannelMetadata;
 };
@@ -39,6 +39,6 @@ type SocketMessageData =
   | SocketMessageUpdate
   | SocketMessageDelete;
 
-type SocketResponse = (SocketReactionData | SocketMessageData) & {
+type SocketResponse = (SocketChannelData | SocketMessageData) & {
   socketInfo: SocketInfo;
 };

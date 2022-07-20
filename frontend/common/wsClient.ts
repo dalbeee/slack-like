@@ -63,10 +63,12 @@ export const deleteMessage = (data: {
   socketFactory().emit("message.delete", data);
 };
 
-export const createReaction = (messageId: string) => {
-  const data = {
-    messageId,
-    reaction: "mention",
-  };
-  socketFactory().emit("reaction", data);
-};
+// TODO modify
+// export const createReaction = (messageId: string) => {
+//   const data: SocketChannelData = {
+//     type: "channel",
+//     channelId,
+//     data: {},
+//   };
+//   socketFactory().emit("reaction", data);
+// };

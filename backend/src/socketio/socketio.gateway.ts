@@ -15,7 +15,7 @@ import { MessageCreateDto } from './dto/message-create.dto';
 import { SocketIOService } from './socketio.service';
 import { MessageDeleteDto } from './dto/message-delete.dto';
 import { SocketConnectionDto } from './dto/socket-connection.dto';
-import { SocketInfo } from '.';
+import { ChannelMetadataUpdateDto } from './dto/channel-metadata-update.dto';
 
 type SocketManager = {
   userId: string;
@@ -31,7 +31,7 @@ export class SocketIOGateway {
   io: Server;
   socketManager: SocketManager[] = [] as SocketManager[];
 
-  constructor(private readonly ioService: SocketIOService) {}
+  constructor(private readonly socketIoService: SocketIOService) {}
 
   _findSocketIdFromUserId(userId: string) {
     return this.socketManager.find(({ userId: id }) => id === userId);
@@ -44,29 +44,7 @@ export class SocketIOGateway {
   }) {
     this.socketManager.push(data);
   }
-  /////////
 
-  ///////// public method
-  send(
-    socketInfo: SocketInfo,
-    { data, keyword, sendTo }: { keyword: string; sendTo: string; data: any },
-  ) {
-    this.io.to(sendTo).emit(keyword, {
-      socketInfo,
-      data,
-    });
-  }
-
-  sendReactionToUser(userId: string, data: any) {
-    const user = this._findSocketIdFromUserId(userId);
-    if (!user) return;
-    this.io.to(user.socketId).emit('reaction', { data });
-    // this.send(user.socketId, data);
-  }
-
-  ///////
-
-  ///////// gateway method
   @UseGuards(WsGuard)
   @SubscribeMessage('connection')
   joinClient(
@@ -89,9 +67,12 @@ export class SocketIOGateway {
     @MessageBody() body: MessageCreateDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
-    const { response, reaction } = await this.ioService.saveMessage(user, body);
-    this.io.to(body.socketInfo.workspaceId).emit('message', response);
-    this.io.to(body.socketInfo.workspaceId).emit('reaction', reaction);
+    const { channelData, messageData } = await this.socketIoService.saveMessage(
+      user,
+      body,
+    );
+    this.io.to(body.socketInfo.workspaceId).emit('message', messageData);
+    this.io.to(body.socketInfo.workspaceId).emit('channel', channelData);
   }
 
   @UseGuards(WsGuard)
@@ -100,17 +81,19 @@ export class SocketIOGateway {
     @MessageBody() body: MessageDeleteDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
-    const { response } = await this.ioService.deleteMessage(user, body);
-    this.io.to(body.socketInfo.workspaceId).emit('message', response);
+    const { messageData } = await this.socketIoService.deleteMessage(
+      user,
+      body,
+    );
+    this.io.to(body.socketInfo.workspaceId).emit('message', messageData);
   }
 
-  // @UseGuards(WsGuard)
-  // @SubscribeMessage('reaction')
-  // async createReaction(
-  //   @WebsocketCurrentUser() user: UserJwtPayload,
-  //   @MessageBody() body: unknown,
-  // ) {
-  //   const { socketId } = this._findSocketIdFromUserId(user.id);
-  //   this.ioService.findMessageAuthor((body as any).messageId);
-  // }
+  @UseGuards(WsGuard)
+  @SubscribeMessage('channelMetadata.update')
+  async updateChannelMetadata(
+    @WebsocketCurrentUser() user: UserJwtPayload,
+    @MessageBody() body: ChannelMetadataUpdateDto,
+  ) {
+    this.socketIoService.updateChannelMetadata(user, body);
+  }
 }

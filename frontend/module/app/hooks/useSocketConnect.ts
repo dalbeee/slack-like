@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-import { SocketMessageData, SocketResponse } from "@/common";
+import { SocketChannelData, SocketMessageData } from "@/common";
 import {
   appendCurerntChannelData,
   deleteCurrentChannelData,
@@ -37,12 +37,15 @@ export const useSocketConnect = () => {
           },
         },
         {
-          messageKey: "reaction",
-          callbackFn: (data: SocketResponse) => {
-            const { socketInfo, ...reactionData } = data;
-            if (reactionData.type !== "reaction" || !reactionData.channelId)
-              return;
-            dispatch(setReaction(reactionData));
+          messageKey: "channel",
+          callbackFn: (data: SocketChannelData) => {
+            switch (data.type) {
+              case "channel":
+                dispatch(setReaction(data));
+                break;
+              default:
+                return;
+            }
           },
         },
       ]

@@ -5,9 +5,9 @@ import {
   ChannelData,
   ChannelsHashMap,
   HttpChannelMetadataResponse,
+  SocketChannelData,
   SocketMessageCreate,
   SocketMessageDelete,
-  SocketReactionData,
 } from "@/common";
 
 export interface AppState {
@@ -53,7 +53,7 @@ export const appSlice = createSlice({
         };
       });
     },
-    setReaction: (state, action: PayloadAction<SocketReactionData>) => {
+    setReaction: (state, action: PayloadAction<SocketChannelData>) => {
       const setChannelMetadata = () => {
         if (!state.channels.byId.includes(action.payload.channelId)) {
           state.channels.byId = [

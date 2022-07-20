@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { ChannelService } from '@src/channel/channel.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { ChannelService } from '@src/channel/channel.service';
+import { MessageService } from '@src/message/message.service';
 import { RedisService } from '@src/redis/redis.service';
 
 @Injectable()
@@ -8,9 +9,12 @@ export class UserRedisService {
   constructor(
     private readonly redisService: RedisService,
     private readonly channelService: ChannelService,
+    private readonly messageService: MessageService,
   ) {}
 
-  saveChannelDataAt = async (
+  // channel methods
+
+  async setChannelDataAt(
     {
       channelId,
       workspaceId,
@@ -20,7 +24,7 @@ export class UserRedisService {
       latestMessageId?: string;
       lastCheckMessageId?: string;
     },
-  ) => {
+  ) {
     Object.keys(data).forEach((field) => {
       this.redisService.redis.hset(
         `user:${userId}`,
@@ -29,9 +33,9 @@ export class UserRedisService {
       );
     });
     return true;
-  };
+  }
 
-  getChannelDataBy = async ({
+  async getChannelDataBy({
     userId,
     workspaceId,
     channelId,
@@ -39,7 +43,7 @@ export class UserRedisService {
     userId: string;
     workspaceId: string;
     channelId: string;
-  }) => {
+  }) {
     const result = {};
     const kies = ['latestMessageId', 'lastCheckMessageId'];
     await Promise.all(
@@ -52,9 +56,9 @@ export class UserRedisService {
       }),
     );
     return result;
-  };
+  }
 
-  getChannelDataAll = async (userId: string, workspaceId: string) => {
+  async getChannelDataAll(userId: string, workspaceId: string) {
     const result = {};
     const channels = await this.channelService.findchannelsByWorkspaceId(
       workspaceId,
@@ -70,5 +74,21 @@ export class UserRedisService {
       }),
     );
     return result;
-  };
+  }
+
+  // socket methods
+
+  async _findSocketByUserId(userId: string) {
+    return this.redisService.redis.hget(`user:${userId}`, 'socket');
+  }
+
+  async setSocketAt(userId: string, socketId: string) {
+    return this.redisService.redis.hset(`user:${userId}`, 'socket', socketId);
+  }
+
+  async findSocketByMessageAuthor(messageId: string) {
+    const message = await this.messageService.findById(messageId);
+    if (!message) throw new NotFoundException();
+    return await this._findSocketByUserId(message.userId);
+  }
 }
