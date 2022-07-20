@@ -17,8 +17,8 @@ export class UserRedisService {
       userId,
     }: { userId: string; workspaceId: string; channelId: string },
     data: {
-      latestMessageId: string;
-      lastCheckMessageId: string;
+      latestMessageId?: string;
+      lastCheckMessageId?: string;
     },
   ) => {
     Object.keys(data).forEach((field) => {
