@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 
-import { SocketInfo } from ".";
+import { SocketChannelData, SocketInfo } from ".";
 import { tokenVault } from "./httpClient";
 
 const url = process.env.NEXT_PUBLIC_WS_URL;
@@ -50,25 +50,19 @@ export const socketConnect = (
 };
 
 export const createMessage = (data: {
-  socketInfo: { workspaceId: string; channelId: string };
+  socketInfo: SocketInfo;
   message: string;
 }) => {
   socketFactory().emit("message.create", data);
 };
 
 export const deleteMessage = (data: {
-  socketInfo: { channelId: string; workspaceId: string };
+  socketInfo: SocketInfo;
   messageId: string;
 }) => {
   socketFactory().emit("message.delete", data);
 };
 
-// TODO modify
-// export const createReaction = (messageId: string) => {
-//   const data: SocketChannelData = {
-//     type: "channel",
-//     channelId,
-//     data: {},
-//   };
-//   socketFactory().emit("reaction", data);
-// };
+export const setZeroUnreadMessageCount = (data: { socketInfo: SocketInfo }) => {
+  socketFactory().emit("channel.setZeroUnreadMessageCount", data);
+};

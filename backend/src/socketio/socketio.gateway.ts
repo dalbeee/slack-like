@@ -89,12 +89,12 @@ export class SocketIOGateway {
   }
 
   @UseGuards(WsGuard)
-  @SubscribeMessage('channelMetadata.update')
-  async updateChannelMetadata(
+  @SubscribeMessage('channel.setZeroUnreadMessageCount')
+  updateChannelMetadata(
     @WebsocketCurrentUser() user: UserJwtPayload,
     @MessageBody() body: ChannelMetadataUpdateDto,
   ) {
-    this.socketIoService.increaseUnreadMessageCount({
+    this.socketIoService.setZeroUnreadMessageCount({
       channelId: body.socketInfo.channelId,
       workspaceId: body.socketInfo.workspaceId,
       userId: user.id,

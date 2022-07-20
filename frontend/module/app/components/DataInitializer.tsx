@@ -6,6 +6,7 @@ import { useSocketConnect } from "@/module/app/hooks/useSocketConnect";
 import { RootState } from "@/common/store/store";
 import { useFetchChannelMetadata } from "../hooks/useFetchChannelMetadata";
 import { useFetchChannels } from "../hooks/useFetchChannels";
+import { useWsSetZeroUnreadMessageCount } from "../hooks/useWsSetZeroUnreadMessageCount";
 
 const DataInitializer = () => {
   useSocketConnect();
@@ -14,6 +15,7 @@ const DataInitializer = () => {
   const { initialize } = useSelector((state: RootState) => state.app);
   const { fetch: fetchChannelDatadata } = useFetchChannelMetadata();
   const { fetch: fetchChannels } = useFetchChannels();
+  const { fetch: setZeroUnreadMessageCount } = useWsSetZeroUnreadMessageCount();
 
   useEffect(() => {
     if (!router.isReady || initialize) return;
@@ -27,6 +29,10 @@ const DataInitializer = () => {
     router.isReady,
     router.query.workspace,
   ]);
+
+  useEffect(() => {
+    setZeroUnreadMessageCount();
+  }, [router.query.channel, router.query.workspace, setZeroUnreadMessageCount]);
 
   useEffect(() => {
     if (!router.query.channel) return;
