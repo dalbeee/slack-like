@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 
 import { UserJwtPayload } from '@src/auth/types';
 import { MessageService } from '@src/message/message.service';
@@ -9,9 +14,11 @@ import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageDeleteDto } from './dto/message-delete.dto';
 
 @Injectable()
-export class SocketIOService {
+export class SocketIoInboudService {
   constructor(
+    @Inject(forwardRef(() => MessageService))
     private readonly messageService: MessageService,
+    @Inject(forwardRef(() => UserRedisService))
     private readonly userRedisService: UserRedisService,
   ) {}
 

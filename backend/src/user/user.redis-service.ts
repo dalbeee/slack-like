@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { ChannelService } from '@src/channel/channel.service';
 import { MessageService } from '@src/message/message.service';
@@ -12,8 +17,9 @@ export class UserRedisService {
   constructor(
     private readonly redisService: RedisService,
     private readonly userService: UserService,
-    private readonly channelService: ChannelService,
+    @Inject(forwardRef(() => MessageService))
     private readonly messageService: MessageService,
+    private readonly channelService: ChannelService,
   ) {}
 
   // channel methods

@@ -1,21 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MessageModule } from '@src/message/message.module';
 import { UserModule } from '@src/user/user.module';
-import { SocketIOGateway } from './socketio.gateway';
-import { SocketIOService } from './socketio.service';
+import { SocketIoGateway } from './socketio.gateway';
+import { SocketIoInboudService } from './socketio-inbound.service';
 
 let app: TestingModule;
-let socketGateway: SocketIOGateway;
-let socketService: SocketIOService;
+let socketGateway: SocketIoGateway;
+let socketIoInboundService: SocketIoInboudService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
     imports: [MessageModule, UserModule],
-    providers: [SocketIOGateway, SocketIOService],
+    providers: [SocketIoGateway, SocketIoInboudService],
   }).compile();
   app = await moduleRef.init();
-  socketGateway = app.get(SocketIOGateway);
-  socketService = app.get(SocketIOService);
+  socketGateway = app.get(SocketIoGateway);
+  socketIoInboundService = app.get(SocketIoInboudService);
 });
 
 afterAll(async () => {

@@ -6,20 +6,20 @@ import { PrismaService } from '@src/prisma.service';
 import { RedisModule } from '@src/redis/redis.module';
 import { UserModule } from '@src/user/user.module';
 import { ChannelSpecificDto } from './dto/channel-specific.dto';
-import { SocketIOGateway } from './socketio.gateway';
-import { SocketIOService } from './socketio.service';
+import { SocketIoGateway } from './socketio.gateway';
+import { SocketIoInboudService } from './socketio-inbound.service';
 
 let app: TestingModule;
-let socketIOService: SocketIOService;
+let socketIOService: SocketIoInboudService;
 let prisma: PrismaService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
     imports: [MessageModule, UserModule, RedisModule],
-    providers: [PrismaService, SocketIOGateway, SocketIOService],
+    providers: [PrismaService, SocketIoGateway, SocketIoInboudService],
   }).compile();
   app = await moduleRef.init();
-  socketIOService = app.get(SocketIOService);
+  socketIOService = app.get(SocketIoInboudService);
   prisma = app.get(PrismaService);
 });
 afterEach(async () => {

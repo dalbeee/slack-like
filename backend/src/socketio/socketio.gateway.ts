@@ -12,7 +12,7 @@ import { WebsocketCurrentUser } from '@src/auth/decorator/current-user-websocket
 import { WsGuard } from '@src/auth/guard/websocket.guard';
 import { UserJwtPayload } from '@src/auth/types';
 import { MessageCreateDto } from './dto/message-create.dto';
-import { SocketIOService } from './socketio.service';
+import { SocketIoInboudService } from './socketio-inbound.service';
 import { MessageDeleteDto } from './dto/message-delete.dto';
 import { SocketConnectionDto } from './dto/socket-connection.dto';
 import { ChannelMetadataUpdateDto } from './dto/channel-metadata-update.dto';
@@ -26,12 +26,20 @@ type SocketManager = {
 @WebSocketGateway({
   cors: { origin: 'http://localhost:3001' },
 })
-export class SocketIOGateway {
+export class SocketIoGateway {
   @WebSocketServer()
   io: Server;
   socketManager: SocketManager[] = [] as SocketManager[];
 
-  constructor(private readonly socketIoService: SocketIOService) {}
+  constructor(private readonly socketIoService: SocketIoInboudService) {}
+
+  // outbound methods
+
+  sendToClient(socketId: string) {
+    return this.io.to(socketId).emit('channel.updateMetadata', 'hello');
+  }
+
+  // inbound methods
 
   _findSocketIdFromUserId(userId: string) {
     return this.socketManager.find(({ userId: id }) => id === userId);

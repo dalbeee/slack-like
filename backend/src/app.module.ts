@@ -14,7 +14,7 @@ import { ChannelModule } from './channel/channel.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { MessageModule } from './message/message.module';
 import { RedisModule } from './redis/redis.module';
-import { SocketIOModule } from './socketio/socketio.module';
+import { SocketIoModule } from './socketio/socketio.module';
 import { UploadModule } from './upload/upload.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 
@@ -27,7 +27,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
     AuthModule,
     UploadModule,
     MessageModule,
-    SocketIOModule,
+    SocketIoModule,
     RedisModule,
   ],
   controllers: [AppController],
