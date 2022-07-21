@@ -3,10 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { createChannel } from '@src/channel/__test__/createChannel';
 import { PrismaService } from '@src/prisma.service';
-import { SocketIoModule } from '@src/socketio/socketio.module';
 import { createUser } from '@src/user/__test__/createUser';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
 import { MessageUpdateDto } from './dto/message-update.dto';
+import { MessageModule } from './message.module';
 import { MessageService } from './message.service';
 import { MessageCreateProps } from './types';
 import { createMessage } from './__test__/createMessage';
@@ -17,8 +17,7 @@ let prisma: PrismaService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
-    imports: [SocketIoModule],
-    providers: [MessageService, PrismaService],
+    imports: [MessageModule],
   }).compile();
   app = await moduleRef.init();
   messageService = app.get(MessageService);

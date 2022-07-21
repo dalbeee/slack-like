@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { RedisModule } from './redis.module';
 import { RedisService } from './redis.service';
 
 let app: TestingModule;
@@ -6,14 +8,17 @@ let redisService: RedisService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
-    providers: [RedisService],
+    imports: [RedisModule],
   }).compile();
   app = await moduleRef.init();
   redisService = app.get(RedisService);
 });
 
 afterEach(async () => {
-  await redisService.flushAll();
+  await redisService.redis.flushall();
+});
+afterAll(async () => {
+  await app.close();
 });
 
 describe('test redisService with data', () => {

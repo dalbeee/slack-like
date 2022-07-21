@@ -4,7 +4,7 @@ import { UserService } from '@src/user/user.service';
 import { UserCreateDto } from '@src/user/dto/user-create.dto';
 import { CurrentUser } from '@src/auth/decorator/current-user.decorator';
 import { UserJwtPayload } from '@src/auth/types';
-import { UserRedisService } from './user.redis-service';
+import { UserRedisService } from './user-redis.service';
 import { PublicPermission } from '@src/auth/decorator/public-permission.decorator';
 
 @Controller('/users')

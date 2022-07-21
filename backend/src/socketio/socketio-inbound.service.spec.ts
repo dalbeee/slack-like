@@ -1,29 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import Redis from 'ioredis';
 
-import { MessageModule } from '@src/message/message.module';
 import { PrismaService } from '@src/prisma.service';
-import { RedisModule } from '@src/redis/redis.module';
-import { UserModule } from '@src/user/user.module';
+import { RedisService } from '@src/redis/redis.service';
 import { ChannelSpecificDto } from './dto/channel-specific.dto';
-import { SocketIoGateway } from './socketio.gateway';
 import { SocketIoInboudService } from './socketio-inbound.service';
+import { SocketIoModule } from './socketio.module';
 
 let app: TestingModule;
-let socketIOService: SocketIoInboudService;
+let socketIoInboundService: SocketIoInboudService;
 let prisma: PrismaService;
+let redisService: RedisService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
-    imports: [MessageModule, UserModule, RedisModule],
-    providers: [PrismaService, SocketIoGateway, SocketIoInboudService],
+    imports: [SocketIoModule],
   }).compile();
   app = await moduleRef.init();
-  socketIOService = app.get(SocketIoInboudService);
+  socketIoInboundService = app.get(SocketIoInboudService);
   prisma = app.get(PrismaService);
+  redisService = app.get(RedisService);
 });
 afterEach(async () => {
-  await new Redis(6379, 'localhost').flushall();
+  await redisService.redis.flushall();
   await prisma.clearDatabase();
 });
 afterAll(async () => {
@@ -38,9 +36,9 @@ describe('updateChannelMetadata', () => {
       workspaceId: 'workspaceId',
       userId: 'userId',
     };
-    const result = await socketIOService.increaseUnreadMessageCount(dto);
+    const result = await socketIoInboundService.increaseUnreadMessageCount(dto);
 
-    expect(result).toEqual(1);
+    expect(result).toEqual({ unreadMessageCount: 1 });
   });
 });
 
@@ -51,8 +49,8 @@ describe('setZeroUnreadMessageCount', () => {
       workspaceId: 'workspaceId',
       userId: 'userId',
     };
-    const result = await socketIOService.setZeroUnreadMessageCount(dto);
+    const result = await socketIoInboundService.setZeroUnreadMessageCount(dto);
 
-    expect(result).toEqual(0);
+    expect(result).toEqual({ unreadMessageCount: 0 });
   });
 });

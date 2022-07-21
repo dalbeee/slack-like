@@ -2,11 +2,10 @@ import { faker } from '@faker-js/faker';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { PrismaService } from '@src/prisma.service';
-import { UserModule } from '@src/user/user.module';
 import { createUser } from '@src/user/__test__/createUser';
-import { WorkspaceModule } from '@src/workspace/workspace.module';
 import { WorkspaceService } from '@src/workspace/workspace.service';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
+import { InvitationModule } from './invitation.module';
 import { InvitationService } from './invitation.service';
 import { InvitationCreateProps } from './types';
 import { createInvitations } from './__test__/createInvitations';
@@ -18,8 +17,7 @@ let workspaceService: WorkspaceService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
-    imports: [UserModule, WorkspaceModule],
-    providers: [PrismaService, InvitationService],
+    imports: [InvitationModule],
   }).compile();
   app = await moduleRef.init();
   prisma = app.get(PrismaService);

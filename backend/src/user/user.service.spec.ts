@@ -5,6 +5,7 @@ import { PrismaService } from '@src/prisma.service';
 import { UserCreateDto } from '@src/user/dto/user-create.dto';
 import { UserService } from '@src/user/user.service';
 import { UserUpdateDto } from './dto/user-update.dto';
+import { UserModule } from './user.module';
 
 let userService: UserService;
 let prisma: PrismaService;
@@ -12,7 +13,7 @@ let app: TestingModule;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
-    providers: [PrismaService, UserService],
+    imports: [UserModule],
   }).compile();
   app = await moduleRef.init();
   userService = moduleRef.get(UserService);

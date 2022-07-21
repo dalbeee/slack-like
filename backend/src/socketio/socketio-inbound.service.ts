@@ -7,7 +7,7 @@ import {
 
 import { UserJwtPayload } from '@src/auth/types';
 import { MessageService } from '@src/message/message.service';
-import { UserRedisService } from '@src/user/user.redis-service';
+import { UserRedisService } from '@src/user/user-redis.service';
 import { ChannelMetadata, SocketMessageData, SocketChannelData } from '.';
 import { ChannelSpecificDto } from './dto/channel-specific.dto';
 import { MessageCreateDto } from './dto/message-create.dto';
@@ -41,7 +41,7 @@ export class SocketIoInboudService {
       });
 
     const channelData: SocketChannelData = {
-      type: 'channel',
+      type: 'channel.setZeroUnreadMessageCount',
       channelId: data.socketInfo.channelId,
       data: unreadMessageCount as ChannelMetadata,
     };

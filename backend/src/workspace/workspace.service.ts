@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  InternalServerErrorException,
 } from '@nestjs/common';
 
 import { PrismaService } from '@src/prisma.service';

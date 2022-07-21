@@ -6,7 +6,7 @@ import { PrismaService } from '@src/prisma.service';
 import { createUser } from '@src/user/__test__/createUser';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
 import { MessageReactionService } from './message-reaction.service';
-import { MessageService } from './message.service';
+import { MessageModule } from './message.module';
 import { MessageReactionCreateProps } from './types';
 import { createMessage } from './__test__/createMessage';
 
@@ -16,7 +16,7 @@ let prisma: PrismaService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
-    providers: [PrismaService, MessageReactionService, MessageService],
+    imports: [MessageModule],
   }).compile();
   app = await moduleRef.init();
   messageReactionService = app.get(MessageReactionService);

@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MessageModule } from '@src/message/message.module';
-import { UserModule } from '@src/user/user.module';
+
 import { SocketIoGateway } from './socketio.gateway';
 import { SocketIoInboudService } from './socketio-inbound.service';
+import { SocketIoModule } from './socketio.module';
 
 let app: TestingModule;
 let socketGateway: SocketIoGateway;
@@ -10,8 +10,7 @@ let socketIoInboundService: SocketIoInboudService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
-    imports: [MessageModule, UserModule],
-    providers: [SocketIoGateway, SocketIoInboudService],
+    imports: [SocketIoModule],
   }).compile();
   app = await moduleRef.init();
   socketGateway = app.get(SocketIoGateway);
@@ -47,7 +46,6 @@ it('findByUserId', async () => {
   });
 
   const result = socketGateway._findSocketIdFromUserId('b');
-  console.log(result);
 
   expect(result).toBeDefined();
 });

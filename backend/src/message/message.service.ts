@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
 } from '@nestjs/common';
 
@@ -15,6 +17,7 @@ import { MessageCreateProps } from './types';
 export class MessageService {
   constructor(
     private readonly prisma: PrismaService,
+    @Inject(forwardRef(() => SocketIoOutboundService))
     private readonly socketOutboundService: SocketIoOutboundService,
   ) {}
 

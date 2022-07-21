@@ -7,7 +7,7 @@ import { SocketIoInboudService } from './socketio-inbound.service';
 import { SocketIoOutboundService } from './socketio-outbound.service';
 
 @Module({
-  imports: [forwardRef(() => MessageModule), forwardRef(() => UserModule)],
+  imports: [forwardRef(() => UserModule), forwardRef(() => MessageModule)],
   providers: [SocketIoGateway, SocketIoInboudService, SocketIoOutboundService],
   exports: [SocketIoGateway, SocketIoInboudService, SocketIoOutboundService],
 })

@@ -1,11 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import Redis from 'ioredis';
 
 @Injectable()
-export class RedisService {
+export class RedisService implements OnModuleInit, OnModuleDestroy {
   redis: Redis;
-  constructor() {
-    this.redis = new Redis(6379, 'localhost');
+  constructor(@Inject('REDIS') private readonly redisInstance: Redis) {
+    // this.redis = redis;
+  }
+
+  onModuleInit() {
+    this.redis = this.redisInstance;
+  }
+
+  onModuleDestroy() {
+    this._quit();
+  }
+
+  async _quit() {
+    await this.redisInstance.quit();
   }
 
   _parseString(string: string) {
@@ -18,14 +35,14 @@ export class RedisService {
 
   async hSet(key: string, field: string, value: string | number | object) {
     const parsedValue = value instanceof Object ? JSON.stringify(value) : value;
-    await this.redis.hset(key, field, parsedValue);
+    await this.redisInstance.hset(key, field, parsedValue);
     return await this.hGet(key, field);
   }
 
   async hGet<T = any>(key: string, ...fields: any[]) {
     const [field, ...remainFields] = fields;
 
-    const data = await this.redis
+    const data = await this.redisInstance
       .hget(key, field)
       .then((r) => this._parseString(r));
 
@@ -55,7 +72,7 @@ export class RedisService {
   }
 
   async hGetAll<T = any>(key: string): Promise<T> {
-    const r = await this.redis.hgetall(key);
+    const r = await this.redisInstance.hgetall(key);
     const k = Object.keys(r);
     const result = k.reduce(
       (acc, k) => ({ ...acc, [k]: this._parseString(r[k]) }),
@@ -65,12 +82,12 @@ export class RedisService {
   }
 
   async clearAllByPattern(pattern: string) {
-    const keys = await this.redis.keys(pattern);
-    await this.redis.del(keys);
+    const keys = await this.redisInstance.keys(pattern);
+    await this.redisInstance.del(keys);
     return true;
   }
 
   async clearByKey(key: string) {
-    await this.redis.del(key);
+    await this.redisInstance.del(key);
   }
 }

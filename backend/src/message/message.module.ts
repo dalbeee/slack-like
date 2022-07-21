@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 
 import { PrismaService } from '@src/prisma.service';
 import { SocketIoModule } from '@src/socketio/socketio.module';
@@ -7,7 +7,7 @@ import { MessageController } from './message.controller';
 import { MessageService } from './message.service';
 
 @Module({
-  imports: [SocketIoModule],
+  imports: [forwardRef(() => SocketIoModule)],
   controllers: [MessageController],
   providers: [PrismaService, MessageService, MessageReactionService],
   exports: [MessageReactionService, MessageService],

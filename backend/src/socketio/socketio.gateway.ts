@@ -1,4 +1,4 @@
-import { UseGuards } from '@nestjs/common';
+import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -31,7 +31,10 @@ export class SocketIoGateway {
   io: Server;
   socketManager: SocketManager[] = [] as SocketManager[];
 
-  constructor(private readonly socketIoService: SocketIoInboudService) {}
+  constructor(
+    @Inject(forwardRef(() => SocketIoInboudService))
+    private readonly socketIoService: SocketIoInboudService,
+  ) {}
 
   // outbound methods
 

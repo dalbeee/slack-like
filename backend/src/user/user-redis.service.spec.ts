@@ -1,16 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { ChannelModule } from '@src/channel/channel.module';
 import { createChannel } from '@src/channel/__test__/createChannel';
-import { MessageModule } from '@src/message/message.module';
 import { createMessage } from '@src/message/__test__/createMessage';
 import { PrismaService } from '@src/prisma.service';
-import { RedisModule } from '@src/redis/redis.module';
 import { RedisService } from '@src/redis/redis.service';
-import { WorkspaceModule } from '@src/workspace/workspace.module';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
-import { UserRedisService } from './user.redis-service';
-import { UserService } from './user.service';
+import { UserModule } from './user.module';
+import { UserRedisService } from './user-redis.service';
 import { createUser } from './__test__/createUser';
 
 let app: TestingModule;
@@ -20,8 +16,7 @@ let prisma: PrismaService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
-    imports: [RedisModule, WorkspaceModule, ChannelModule, MessageModule],
-    providers: [UserRedisService, UserService, PrismaService],
+    imports: [UserModule],
   }).compile();
   app = await moduleRef.init();
   userRedisService = app.get(UserRedisService);
@@ -30,7 +25,6 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  await redisService.redis.flushall();
   await prisma.clearDatabase();
 });
 afterAll(async () => {
@@ -66,7 +60,7 @@ describe('channel methods', () => {
       });
       const result = await userRedisService.increaseUnreadMessageCount(dto);
 
-      expect(result).toBe(2);
+      expect(result).toEqual({ unreadMessageCount: 2 });
     });
   });
 
@@ -82,7 +76,7 @@ describe('channel methods', () => {
       });
       const result = await userRedisService.setZeroUnreadMessageCount(dto);
 
-      expect(result).toBe(0);
+      expect(result).toEqual({ unreadMessageCount: 0 });
     });
   });
 
