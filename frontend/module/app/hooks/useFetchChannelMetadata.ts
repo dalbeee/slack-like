@@ -15,7 +15,6 @@ export const useFetchChannelMetadata = () => {
         `/users/metadata?workspaceId=${router.query.workspace as string}`
       )
       .then((r) => {
-        console.log(r);
         dispatch(setChannelsMetadata(r));
         return;
       });

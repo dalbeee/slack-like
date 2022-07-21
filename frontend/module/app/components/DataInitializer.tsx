@@ -2,28 +2,28 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { useSocketConnect } from "@/module/app/hooks/useSocketConnect";
 import { RootState } from "@/common/store/store";
 import { useFetchChannelMetadata } from "../hooks/useFetchChannelMetadata";
 import { useFetchChannels } from "../hooks/useFetchChannels";
 import { useWsSetZeroUnreadMessageCount } from "../hooks/useWsSetZeroUnreadMessageCount";
+import { useSocketServiceManager } from "../hooks/useSocketServiceManager";
 
 const DataInitializer = () => {
-  useSocketConnect();
+  useSocketServiceManager();
   const router = useRouter();
   const dispatch = useDispatch();
   const { initialize } = useSelector((state: RootState) => state.app);
-  const { fetch: fetchChannelDatadata } = useFetchChannelMetadata();
+  const { fetch: fetchChannelMetadata } = useFetchChannelMetadata();
   const { fetch: fetchChannels } = useFetchChannels();
   const { fetch: setZeroUnreadMessageCount } = useWsSetZeroUnreadMessageCount();
 
   useEffect(() => {
     if (!router.isReady || initialize) return;
-    fetchChannelDatadata();
+    fetchChannelMetadata();
     fetchChannels();
   }, [
     dispatch,
-    fetchChannelDatadata,
+    fetchChannelMetadata,
     fetchChannels,
     initialize,
     router.isReady,

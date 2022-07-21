@@ -10,7 +10,7 @@ import {
 } from "@/common/store/appSlice";
 import { socketConnect } from "@/common/wsClient";
 
-export const useSocketConnect = () => {
+export const useSocketServiceManager = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -40,7 +40,7 @@ export const useSocketConnect = () => {
           messageKey: "channel",
           callbackFn: (data: SocketChannelData) => {
             switch (data.type) {
-              case "channel":
+              case "channel.setZeroUnreadMessageCount":
                 dispatch(setReaction(data));
                 break;
               default:

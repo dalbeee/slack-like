@@ -5,7 +5,7 @@ interface SocketInfo {
   channelId: string;
 }
 
-type SocketChannelType = 'channel';
+type SocketChannelType = 'channel.setZeroUnreadMessageCount';
 type SocketMessageType = 'message.create' | 'message.update' | 'message.delete';
 
 export interface ChannelMetadata {
