@@ -1,19 +1,25 @@
+import { useRouter } from "next/router";
+import { useDispatch } from "react-redux";
+
 import { HttpChannelMetadataResponse } from "@/common";
 import { setChannelsMetadata } from "@/common/store/appSlice";
 import { setZeroUnreadMessageCount } from "@/common/wsClient";
-import { useRouter } from "next/router";
-import { useCallback } from "react";
-import { useDispatch } from "react-redux";
 
 export const useWsSetZeroUnreadMessageCount = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const fetch = useCallback(() => {
+  const fetch = ({
+    channelId,
+    workspaceId,
+  }: {
+    workspaceId: string;
+    channelId: string;
+  }) => {
     setZeroUnreadMessageCount({
       socketInfo: {
-        channelId: router.query.channel as string,
-        workspaceId: router.query.workspace as string,
+        channelId,
+        workspaceId,
       },
     });
     const channelMetadata: HttpChannelMetadataResponse = {
@@ -22,7 +28,7 @@ export const useWsSetZeroUnreadMessageCount = () => {
       },
     };
     dispatch(setChannelsMetadata(channelMetadata));
-  }, [dispatch, router.query.channel, router.query.workspace]);
+  };
 
   return { fetch };
 };
