@@ -201,4 +201,38 @@ describe('socket methods', () => {
       expect(result).toContain(id);
     });
   });
+
+  describe('removeSocketAt', () => {
+    it('return true if success', async () => {
+      const user = await createUser();
+      const socketIds = ['socket-01', 'socket-02'];
+      await userRedisService.setSocketAt(user.id, socketIds[0]);
+
+      const result = await userRedisService.removeSocketAt(
+        user.id,
+        socketIds[0],
+      );
+      expect(result).toBeTruthy();
+
+      const result2 = await userRedisService.findSocketByUserId(user.id);
+      expect(result2).toEqual([]);
+    });
+
+    it('return true if success in multiple length', async () => {
+      const user = await createUser();
+      const socketIds = ['socket-01', 'socket-02'];
+      socketIds.forEach((socketId) => {
+        userRedisService.setSocketAt(user.id, socketId);
+      });
+
+      const result = await userRedisService.removeSocketAt(
+        user.id,
+        socketIds[0],
+      );
+      expect(result).toBeTruthy();
+
+      const result2 = await userRedisService.findSocketByUserId(user.id);
+      expect(result2).toEqual(['socket-02']);
+    });
+  });
 });

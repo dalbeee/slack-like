@@ -47,12 +47,16 @@ export class SocketIoGateway {
 
   // connection methods
 
+  _saveSocketId({ socketId, userId }: { userId: string; socketId: string }) {
+    return this.userRedisService.setSocketAt(userId, socketId);
+  }
+
   _findSocketIdFromUserId(userId: string) {
     return this.userRedisService.findSocketByUserId(userId);
   }
 
-  _saveSocketId({ socketId, userId }: { userId: string; socketId: string }) {
-    return this.userRedisService.setSocketAt(userId, socketId);
+  _removeSocketIdFromUser(userId: string, socketId: string) {
+    return this.userRedisService.removeSocketAt(userId, socketId);
   }
 
   // inbound methods

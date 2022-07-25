@@ -88,6 +88,25 @@ describe('connection methods', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('_removeSocketIdFromUser', () => {
+    it('return true if success', async () => {
+      const socketId = 'socketId';
+      const user = await createUser();
+      const dto = {
+        userId: user.id,
+        socketId,
+      };
+      await socketGateway._saveSocketId(dto);
+
+      const result = await socketGateway._removeSocketIdFromUser(
+        user.id,
+        socketId,
+      );
+
+      expect(result).toBeTruthy();
+    });
+  });
 });
 
 describe('outbound methods', () => {

@@ -98,4 +98,11 @@ export class UserRedisService {
     if (!message) throw new NotFoundException();
     return await this.findSocketByUserId(message.userId);
   }
+
+  async removeSocketAt(userId: string, socketId: string) {
+    const user = await this.userService.findUserById(userId);
+    if (!user) throw new NotFoundException();
+    await this.redisService.redis.srem(`user:${userId}:socket`, socketId);
+    return this.findSocketByUserId(userId);
+  }
 }
