@@ -45,7 +45,7 @@ export class SocketIoGateway {
     return this.io.emit(messageKey, data);
   }
 
-  // inbound methods
+  // connection methods
 
   _findSocketIdFromUserId(userId: string) {
     return this.userRedisService.findSocketByUserId(userId);
@@ -55,23 +55,25 @@ export class SocketIoGateway {
     return this.userRedisService.setSocketAt(userId, socketId);
   }
 
+  // inbound methods
+
   // TODO implement authenticate, if unauthorized, disconnect forcely
   // TODO new socket join specific workspace
   @UseGuards(WsGuard)
   @SubscribeMessage('connection')
-  joinClient(
+  async joinClient(
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: SocketConnectionDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
     if (!Object.keys(data).length) return;
-    // socket.join(data.workspaceId);
-    this._saveSocketId({
-      socketId: socket.id,
+
+    await this._saveSocketId({
       userId: user.id,
+      socketId: socket.id,
     });
     // TEMP
-    this.io.to(socket.id).emit('test', 'expectedValue');
+    this.io.to(socket.id).emit('connection', 'valid');
   }
 
   @UseGuards(WsGuard)

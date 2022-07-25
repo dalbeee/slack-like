@@ -33,23 +33,25 @@ afterEach(async () => {
   await app.close();
 });
 
-describe('inbound methods', () => {
+describe('connection methods', () => {
   describe('_saveSocketId', () => {
-    it('return socket if success', async () => {
+    it('return array of socket if success', async () => {
       const user = await createUser();
+      const socketId = 'socketId';
       const dto = {
         userId: user.id,
-        socketId: 'a',
+        socketId,
       };
       const result = await socketGateway._saveSocketId(dto);
 
-      expect(result).toEqual(1);
+      expect(result).toContain(socketId);
     });
 
     it('throw error if invalid userId', async () => {
+      const socketId = 'socketId';
       const dto = {
         userId: 'a',
-        socketId: 'a',
+        socketId,
       };
       const result = () => socketGateway._saveSocketId(dto);
 
@@ -69,10 +71,10 @@ describe('inbound methods', () => {
 
       const result = await socketGateway._findSocketIdFromUserId(user.id);
 
-      expect(result).toEqual(socketId);
+      expect(result).toContain(socketId);
     });
 
-    it('return null if not found data', async () => {
+    it('return empty array if no stored socket', async () => {
       const socketId = 'socketId';
       const users = [await createUser(), await createUser()];
       const dto = {
@@ -83,7 +85,7 @@ describe('inbound methods', () => {
 
       const result = await socketGateway._findSocketIdFromUserId(users[1].id);
 
-      expect(result).toBeNull();
+      expect(result).toEqual([]);
     });
   });
 });
@@ -93,12 +95,13 @@ describe('outbound methods', () => {
     it('send message successfully', (done) => {
       const expectedValue = 'expectedValue';
       const messageKey = 'test';
-      socketFactory()
+      const socket = socketFactory()
         .on('connect', () => {
           socketGateway.broadcastToClients(messageKey, expectedValue);
         })
         .on(messageKey, (data) => {
           expect(data).toEqual(expectedValue);
+          socket.close();
           done();
         });
     });
@@ -106,8 +109,8 @@ describe('outbound methods', () => {
 
   describe('sendToClientBySocketId', () => {
     it('send message successfully', (done) => {
-      const expectedValue = 'expectedValue';
       const messageKey = 'test';
+      const expectedValue = 'expectedValue';
       const socket = socketFactory()
         .on('connect', () => {
           socketGateway.sendToClientBySocketId(
@@ -120,14 +123,15 @@ describe('outbound methods', () => {
         })
         .on(messageKey, (data) => {
           expect(data).toEqual(expectedValue);
+          socket.close();
           done();
         });
     });
   });
 });
 
-describe('integral test', () => {
-  describe('sendToClientByUserId', () => {
+describe('inbound methods', () => {
+  describe('joinClient', () => {
     const getData = async () => {
       const workspace = await createWorkspace();
       const channel = await createChannel({ workspaceId: workspace.id });
@@ -136,9 +140,9 @@ describe('integral test', () => {
       return { user, workspace, channel, access_token };
     };
 
-    it('send message successfully', (done) => {
-      const expectedValue = 'expectedValue';
-      const messageKey = 'test';
+    it('send "valid" if connection successfully', (done) => {
+      const messageKey = 'connection';
+      const expectedValue = 'valid';
       getData().then((r) => {
         const socket = socketFactory({
           auth: { Authorization: `Bearer ${r.access_token}` },
@@ -148,17 +152,10 @@ describe('integral test', () => {
               workspaceId: r.workspace.id,
               channelId: r.channel.id,
             });
-
-            // socketGateway.sendToClientBySocketId(
-            //   {
-            //     socketId: socket.id,
-            //     messageKey,
-            //   },
-            //   expectedValue,
-            // );
           })
           .on(messageKey, (data) => {
             expect(data).toEqual(expectedValue);
+            socket.close();
             done();
           });
       });
