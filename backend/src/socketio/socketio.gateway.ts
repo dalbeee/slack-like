@@ -1,4 +1,4 @@
-import { UseGuards } from '@nestjs/common';
+import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -26,6 +26,7 @@ export class SocketIoGateway {
   io: Server;
 
   constructor(
+    @Inject(forwardRef(() => SocketIoInboudService))
     private readonly socketIoService: SocketIoInboudService,
     private readonly userRedisService: UserRedisService,
   ) {}
@@ -74,22 +75,17 @@ export class SocketIoGateway {
       userId: user.id,
       socketId: socket.id,
     });
-    // TEMP
+    // TODO TEMP
     this.io.to(socket.id).emit('connection', 'valid');
   }
 
   @UseGuards(WsGuard)
   @SubscribeMessage('message.create')
-  async broadcastToWorkspace(
+  broadcastToWorkspace(
     @MessageBody() body: MessageCreateDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
-    const { channelData, messageData } = await this.socketIoService.saveMessage(
-      user,
-      body,
-    );
-    this.io.to(body.socketInfo.workspaceId).emit('message', messageData);
-    this.io.to(body.socketInfo.workspaceId).emit('channel', channelData);
+    return this.socketIoService.saveMessage(user, body);
   }
 
   @UseGuards(WsGuard)

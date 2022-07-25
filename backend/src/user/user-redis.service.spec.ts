@@ -180,6 +180,26 @@ describe('socket methods', () => {
     });
   });
 
+  describe('findSocketByUserId', () => {
+    it('return array of socketId if success', async () => {
+      const users = [await createUser(), await createUser()];
+      const userIds = users.map((user) => user.id);
+      const socketIds = ['socket-01', 'socket-02'];
+
+      await Promise.all(
+        users.map((_, idx) =>
+          userRedisService.setSocketAt(users[idx].id, socketIds[idx]),
+        ),
+      );
+
+      const result = await userRedisService.findSocketByUserIds(userIds);
+
+      socketIds.forEach((socketId) => {
+        expect(result).toContain(socketId);
+      });
+    });
+  });
+
   describe('findSocketByMessageAuthor', () => {
     it('return array of socketId if success', async () => {
       const id = 'id';

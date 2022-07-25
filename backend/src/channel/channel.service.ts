@@ -36,6 +36,21 @@ export class ChannelService {
     });
   }
 
+  async subscribeChannel(userId: string, channelId: string) {
+    const channel = await this.prisma.channel.findFirst({
+      where: { id: channelId },
+    });
+    if (!channel) throw new NotFoundException();
+
+    const result = await this.prisma.channel.update({
+      where: { id: channelId },
+      data: {
+        Users: { connect: { id: userId } },
+      },
+    });
+    return result && true;
+  }
+
   async findChannelsById(channelId: string) {
     const channel = await this.prisma.channel.findFirst({
       where: { id: channelId },

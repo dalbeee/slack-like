@@ -11,16 +11,18 @@ import { socketIoClientFactory } from './__test__/socketIoClientFactory';
 
 let app: INestApplication;
 let socketGateway: SocketIoGateway;
-beforeEach(async () => {
+let port: number;
+
+beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
     imports: [SocketIoModule],
   }).compile();
   app = moduleRef.createNestApplication();
   await app.init();
   socketGateway = app.get(SocketIoGateway);
+  port = app.getHttpServer().listen().address().port;
 });
-
-afterEach(async () => {
+afterAll(async () => {
   await app.close();
 });
 
@@ -105,15 +107,17 @@ describe('outbound methods', () => {
     it('send message successfully', (done) => {
       const expectedValue = 'expectedValue';
       const messageKey = 'test';
-      const socket = socketIoClientFactory(app)
-        .on('connect', () => {
-          socketGateway.broadcastToClients(messageKey, expectedValue);
-        })
-        .on(messageKey, (data) => {
-          expect(data).toEqual(expectedValue);
-          socket.close();
-          done();
-        });
+      socketIoClientFactory(port).then((socket) => {
+        socket
+          .on('connect', () => {
+            socketGateway.broadcastToClients(messageKey, expectedValue);
+          })
+          .on(messageKey, (data) => {
+            expect(data).toEqual(expectedValue);
+            socket.close();
+            done();
+          });
+      });
     });
   });
 
@@ -121,21 +125,23 @@ describe('outbound methods', () => {
     it('send message successfully', (done) => {
       const messageKey = 'test';
       const expectedValue = 'expectedValue';
-      const socket = socketIoClientFactory(app)
-        .on('connect', () => {
-          socketGateway.sendToClientBySocketId(
-            {
-              socketId: socket.id,
-              messageKey,
-            },
-            expectedValue,
-          );
-        })
-        .on(messageKey, (data) => {
-          expect(data).toEqual(expectedValue);
-          socket.close();
-          done();
-        });
+      socketIoClientFactory(port).then((socket) => {
+        socket
+          .on('connect', () => {
+            socketGateway.sendToClientBySocketId(
+              {
+                socketId: socket.id,
+                messageKey,
+              },
+              expectedValue,
+            );
+          })
+          .on(messageKey, (data) => {
+            expect(data).toEqual(expectedValue);
+            socket.close();
+            done();
+          });
+      });
     });
   });
 });
@@ -154,20 +160,22 @@ describe('inbound methods', () => {
       const messageKey = 'connection';
       const expectedValue = 'valid';
       getData().then((r) => {
-        const socket = socketIoClientFactory(app, {
+        socketIoClientFactory(port, {
           auth: { Authorization: `Bearer ${r.access_token}` },
-        })
-          .on('connect', () => {
-            socket.emit('connection', {
-              workspaceId: r.workspace.id,
-              channelId: r.channel.id,
+        }).then((socket) => {
+          socket
+            .on('connect', () => {
+              socket.emit('connection', {
+                workspaceId: r.workspace.id,
+                channelId: r.channel.id,
+              });
+            })
+            .on(messageKey, (data) => {
+              expect(data).toEqual(expectedValue);
+              socket.close();
+              done();
             });
-          })
-          .on(messageKey, (data) => {
-            expect(data).toEqual(expectedValue);
-            socket.close();
-            done();
-          });
+        });
       });
     });
   });
