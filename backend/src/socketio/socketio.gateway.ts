@@ -1,4 +1,4 @@
-import { forwardRef, Inject, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -26,9 +26,7 @@ export class SocketIoGateway {
   io: Server;
 
   constructor(
-    @Inject(forwardRef(() => SocketIoInboudService))
     private readonly socketIoService: SocketIoInboudService,
-    @Inject(forwardRef(() => UserRedisService))
     private readonly userRedisService: UserRedisService,
   ) {}
 
