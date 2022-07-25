@@ -14,14 +14,9 @@ import { UserJwtPayload } from '@src/auth/types';
 import { MessageCreateDto } from './dto/message-create.dto';
 import { SocketIoInboudService } from './socketio-inbound.service';
 import { MessageDeleteDto } from './dto/message-delete.dto';
-import { SocketConnectionDto } from './dto/socket-connection.dto';
 import { ChannelMetadataUpdateDto } from './dto/channel-metadata-update.dto';
-
-type SocketManager = {
-  userId: string;
-  socketId: string;
-  workspaceId: string;
-};
+import { UserRedisService } from '@src/user/user-redis.service';
+import { SocketConnectionDto } from './dto/socket-connection.dto';
 
 @WebSocketGateway({
   cors: { origin: 'http://localhost:3001' },
@@ -29,33 +24,39 @@ type SocketManager = {
 export class SocketIoGateway {
   @WebSocketServer()
   io: Server;
-  socketManager: SocketManager[] = [] as SocketManager[];
 
   constructor(
     @Inject(forwardRef(() => SocketIoInboudService))
     private readonly socketIoService: SocketIoInboudService,
+    @Inject(forwardRef(() => UserRedisService))
+    private readonly userRedisService: UserRedisService,
   ) {}
 
   // outbound methods
 
-  sendToClient(socketId: string) {
-    return this.io.to(socketId).emit('channel.updateMetadata', 'hello');
+  sendToClientBySocketId(
+    { messageKey, socketId }: { socketId: string; messageKey: string },
+    data: any,
+  ) {
+    return this.io.to(socketId).emit(messageKey, data);
+  }
+
+  broadcastToClients(messageKey: string, data: any) {
+    return this.io.emit(messageKey, data);
   }
 
   // inbound methods
 
   _findSocketIdFromUserId(userId: string) {
-    return this.socketManager.find(({ userId: id }) => id === userId);
+    return this.userRedisService.findSocketByUserId(userId);
   }
 
-  _saveSocketId(data: {
-    userId: string;
-    socketId: string;
-    workspaceId: string;
-  }) {
-    this.socketManager.push(data);
+  _saveSocketId({ socketId, userId }: { userId: string; socketId: string }) {
+    return this.userRedisService.setSocketAt(userId, socketId);
   }
 
+  // TODO implement authenticate, if unauthorized, disconnect forcely
+  // TODO new socket join specific workspace
   @UseGuards(WsGuard)
   @SubscribeMessage('connection')
   joinClient(
@@ -63,13 +64,14 @@ export class SocketIoGateway {
     @MessageBody() data: SocketConnectionDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
-    if (Object.keys(data).length === 0) return;
-    socket.join(data.workspaceId);
+    if (!Object.keys(data).length) return;
+    // socket.join(data.workspaceId);
     this._saveSocketId({
       socketId: socket.id,
       userId: user.id,
-      workspaceId: data.workspaceId,
     });
+    // TEMP
+    this.io.to(socket.id).emit('test', 'expectedValue');
   }
 
   @UseGuards(WsGuard)
