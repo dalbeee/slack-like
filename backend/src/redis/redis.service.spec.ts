@@ -12,6 +12,9 @@ beforeAll(async () => {
   app = await moduleRef.init();
   redisService = app.get<RedisService>(RedisService);
 });
+afterEach(async () => {
+  await redisService.redis.flushall();
+});
 afterAll(async () => {
   await app.close();
 });
@@ -61,51 +64,147 @@ describe('redisService behavior', () => {
     });
   });
 
-  it('hGetAll', async () => {
-    redisService.hSet('a', 'a', { a: 1 });
-    redisService.hSet('a', 'b', { b: 1 });
-    redisService.hSet('a', 'c', 1);
+  describe('hGetAll', () => {
+    it('return value if success', async () => {
+      redisService.hSet('a', 'a', { a: 1 });
+      redisService.hSet('a', 'b', { b: 1 });
+      redisService.hSet('a', 'c', 1);
 
-    const result = await redisService.hGetAll<any>('a');
+      const result = await redisService.hGetAll<any>('a');
 
-    expect(result.a).toEqual({ a: 1 });
-    expect(result.b).toEqual({ b: 1 });
-    expect(result.c).toEqual(1);
+      expect(result.a).toEqual({ a: 1 });
+      expect(result.b).toEqual({ b: 1 });
+      expect(result.c).toEqual(1);
+    });
   });
 
-  it('hmSet', async () => {
-    const user = {
-      id: 'a',
-      name: 'a',
-      channels: {
-        'channel-01': {
+  describe('hmSet', () => {
+    it('return value if success', async () => {
+      const user = {
+        id: 'a',
+        name: 'a',
+        channels: {
+          'channel-01': {
+            latestMessageId: 'b',
+            lastCheckMessageId: 'a',
+          },
+        },
+      };
+      type User = typeof user;
+      redisService.hmSet('user:a', user);
+
+      const result = await redisService.hGetAll<User>('user:a');
+
+      expect(result.id).toEqual('a');
+      expect(result.name).toEqual('a');
+      expect(result.channels['channel-01']).toEqual(
+        expect.objectContaining({
           latestMessageId: 'b',
           lastCheckMessageId: 'a',
-        },
-      },
-    };
-    type User = typeof user;
-    redisService.hmSet('user:a', user);
-
-    const result = await redisService.hGetAll<User>('user:a');
-
-    expect(result.id).toEqual('a');
-    expect(result.name).toEqual('a');
-    expect(result.channels['channel-01']).toEqual(
-      expect.objectContaining({
-        latestMessageId: 'b',
-        lastCheckMessageId: 'a',
-      }),
-    );
+        }),
+      );
+    });
   });
 
-  it('hAppend update specific field and return', async () => {
-    await redisService.hSet('test', 'test', { test: 'a', target: 'a' });
-    const result = await redisService.hAppend('test', 'test', {
-      test: 'a',
-      target: 'b',
+  describe('hAppend', () => {
+    it('update specific field and return', async () => {
+      await redisService.hSet('test', 'test', { test: 'a', target: 'a' });
+      const result = await redisService.hAppend('test', 'test', {
+        test: 'a',
+        target: 'b',
+      });
+
+      expect(result).toEqual({ test: 'a', target: 'b' });
+    });
+  });
+
+  const user = {
+    id: 'a',
+    name: 'a',
+    workspaces: {
+      'workspace-01': {
+        'channel-01': {
+          latestMessageId: 'a-1',
+          lastCheckMessageId: 'a-2',
+        },
+        'channel-02': {
+          latestMessageId: 'b-2',
+          lastCheckMessageId: 'a-2',
+        },
+      },
+    },
+    sockets: {
+      'workspace-01': 'string1',
+      'workspace-02': 'string2',
+    },
+  };
+
+  describe('hGet', () => {
+    it('return value if request specific field', async () => {
+      redisService.hmSet(`user:${user.id}`, user);
+
+      const workspaces = await redisService.hGet(
+        `user:${user.id}`,
+        'workspaces',
+      );
+
+      expect(workspaces['workspace-01']).toEqual({
+        'channel-01': {
+          latestMessageId: 'a-1',
+          lastCheckMessageId: 'a-2',
+        },
+        'channel-02': {
+          latestMessageId: 'b-2',
+          lastCheckMessageId: 'a-2',
+        },
+      });
     });
 
-    expect(result).toEqual({ test: 'a', target: 'b' });
+    it('return value if request nested field', async () => {
+      redisService.hmSet(`user:${user.id}`, user);
+
+      const data = await redisService.hGet(
+        `user:${user.id}`,
+        'workspaces',
+        'workspace-01',
+        'channel-01',
+      );
+
+      expect(data).toEqual(
+        expect.objectContaining({
+          latestMessageId: 'a-1',
+          lastCheckMessageId: 'a-2',
+        }),
+      );
+    });
+
+    it('return value if request specific field', async () => {
+      redisService.hmSet(`user:${user.id}`, user);
+
+      const data = await redisService.hGet(
+        `user:${user.id}`,
+        'sockets',
+        'workspace-01',
+      );
+
+      expect(data).toEqual('string1');
+    });
+  });
+
+  describe('save', () => {
+    it('return value if success', async () => {
+      const result = await redisService.save('user', user);
+
+      expect(result).toEqual(user);
+    });
+  });
+
+  describe('get', () => {
+    it('return value if success', async () => {
+      redisService.save('user', user);
+      const result = await redisService.get('user');
+
+      expect(result).toEqual(user);
+    });
   });
 });

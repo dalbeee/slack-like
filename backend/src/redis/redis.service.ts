@@ -8,11 +8,9 @@ import Redis from 'ioredis';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
-  redis: Redis;
-  constructor(@Inject('REDIS') private readonly redisInstance: Redis) {
-    // this.redis = redis;
-  }
+  constructor(@Inject('REDIS') private readonly redisInstance: Redis) {}
 
+  redis: Redis;
   onModuleInit() {
     this.redis = this.redisInstance;
   }
@@ -89,5 +87,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async clearByKey(key: string) {
     await this.redisInstance.del(key);
+  }
+
+  async save(key: string, value: any) {
+    value = typeof value === 'string' ? value : JSON.stringify(value);
+    await this.redisInstance.set(key, value);
+    return await this.get(key);
+  }
+
+  async get(key) {
+    const result = await this.redisInstance.get(key);
+    return JSON.parse(result) || result;
   }
 }
