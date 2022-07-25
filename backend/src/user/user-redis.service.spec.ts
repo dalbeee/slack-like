@@ -3,11 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { createChannel } from '@src/channel/__test__/createChannel';
 import { createMessage } from '@src/message/__test__/createMessage';
 import { PrismaService } from '@src/prisma.service';
-import { RedisService } from '@src/redis/redis.service';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
 import { UserModule } from './user.module';
 import { UserRedisService } from './user-redis.service';
 import { createUser } from './__test__/createUser';
+import { RedisService } from '@src/redis/redis.service';
 
 let app: TestingModule;
 let userRedisService: UserRedisService;
@@ -26,9 +26,9 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await prisma.clearDatabase();
+  await redisService.redis.flushall();
 });
 afterAll(async () => {
-  await prisma.$disconnect();
   await app.close();
 });
 
@@ -83,15 +83,29 @@ describe('channel methods', () => {
   describe('getChannelDataAll', () => {
     it('return value if success', async () => {
       const workspace = await createWorkspace();
-      const channel = await createChannel({ workspaceId: workspace.id });
+      const channels = [
+        await createChannel({ workspaceId: workspace.id }),
+        await createChannel({ workspaceId: workspace.id }),
+        await createChannel({ workspaceId: workspace.id }),
+      ];
+      const targetObject = { unreadMessageCount: 1 };
+      const expectedObject = {
+        [channels[0].id]: targetObject,
+        [channels[1].id]: targetObject,
+        [channels[2].id]: targetObject,
+      };
       const user = await createUser();
-      await userRedisService._setChannelDataAt(
-        {
-          userId: user.id,
-          workspaceId: workspace.id,
-          channelId: channel.id,
-        },
-        { unreadMessageCount: 1 },
+      await Promise.all(
+        channels.map((channel) =>
+          userRedisService._setChannelDataAt(
+            {
+              userId: user.id,
+              workspaceId: workspace.id,
+              channelId: channel.id,
+            },
+            targetObject,
+          ),
+        ),
       );
 
       const result = await userRedisService.getChannelDataAll(
@@ -99,7 +113,7 @@ describe('channel methods', () => {
         workspace.id,
       );
 
-      expect(result).toEqual({ [channel.id]: { unreadMessageCount: 1 } });
+      expect(result).toEqual(expectedObject);
     });
   });
 
@@ -122,14 +136,24 @@ describe('channel methods', () => {
 });
 
 describe('socket methods', () => {
-  describe('_findSocketByUserId', () => {
+  describe('findSocketByUserId', () => {
     it('return value if success', async () => {
       const user = await createUser();
       const socketId = 'socket-01';
       await userRedisService.setSocketAt(user.id, socketId);
-      const result = await userRedisService._findSocketByUserId(user.id);
+      const result = await userRedisService.findSocketByUserId(user.id);
 
       expect(result).toEqual(socketId);
+    });
+
+    it('return null if not found socket', async () => {
+      const users = [await createUser(), await createUser()];
+      const socketId = 'socket-01';
+      await userRedisService.setSocketAt(users[0].id, socketId);
+
+      const result = await userRedisService.findSocketByUserId(users[1].id);
+
+      expect(result).toBeNull();
     });
   });
 
@@ -141,6 +165,7 @@ describe('socket methods', () => {
 
       expect(result).toEqual(expect.any(Number));
     });
+
     it('throw error if not found user', async () => {
       const notExistUserId = 'abc';
 

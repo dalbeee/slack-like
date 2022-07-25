@@ -82,7 +82,7 @@ export class UserRedisService {
 
   // socket methods
 
-  async _findSocketByUserId(userId: string) {
+  async findSocketByUserId(userId: string) {
     return this.redisService.redis.hget(`user:${userId}`, 'socket');
   }
 
@@ -95,6 +95,6 @@ export class UserRedisService {
   async findSocketByMessageAuthor(messageId: string) {
     const message = await this.messageService.findById(messageId);
     if (!message) throw new NotFoundException();
-    return await this._findSocketByUserId(message.userId);
+    return await this.findSocketByUserId(message.userId);
   }
 }
