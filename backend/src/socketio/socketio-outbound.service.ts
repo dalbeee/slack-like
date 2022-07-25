@@ -1,22 +1,18 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-import { UserRedisService } from '@src/user/user-redis.service';
 import { SocketIoGateway } from './socketio.gateway';
 
 @Injectable()
 export class SocketIoOutboundService {
-  constructor(
-    @Inject(forwardRef(() => SocketIoGateway))
-    private readonly socketGateway: SocketIoGateway,
-    @Inject(forwardRef(() => UserRedisService))
-    private readonly userRedisService: UserRedisService,
-  ) {}
+  constructor(private readonly socketGateway: SocketIoGateway) {}
 
-  async sendToClient(data: { messageId: string; workspaceId: string }) {
-    const socket = await this.userRedisService.findSocketByMessageAuthor(
-      data.messageId,
+  async sendToClient(
+    { messageKey, socketId }: { messageKey: string; socketId: string },
+    data: any,
+  ) {
+    return this.socketGateway.sendToClientBySocketId(
+      { messageKey, socketId },
+      data,
     );
-    if (!socket) return;
-    // return this.socketGateway.sendToClient(socket);
   }
 }
