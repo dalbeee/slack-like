@@ -44,7 +44,11 @@ export type Message = {
   id: string;
   content: string;
   createdAt: Date;
+  updatedAt: Date;
+  ancestorId: string;
   userId: string;
+  workspaceId: string;
+  channelId: string;
 };
 
 export interface ChannelData {
