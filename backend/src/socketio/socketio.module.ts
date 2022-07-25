@@ -5,9 +5,10 @@ import { UserModule } from '@src/user/user.module';
 import { SocketIoGateway } from './socketio.gateway';
 import { SocketIoInboudService } from './socketio-inbound.service';
 import { SocketIoOutboundService } from './socketio-outbound.service';
+import { ChannelModule } from '@src/channel/channel.module';
 
 @Module({
-  imports: [UserModule, MessageModule],
+  imports: [UserModule, MessageModule, ChannelModule],
   providers: [SocketIoGateway, SocketIoInboudService, SocketIoOutboundService],
   exports: [SocketIoGateway, SocketIoInboudService, SocketIoOutboundService],
 })
