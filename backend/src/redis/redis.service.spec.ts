@@ -20,10 +20,26 @@ afterAll(async () => {
 });
 
 describe('ioredis default behavior', () => {
-  it('hset', async () => {
-    const result = await redisService.redis.hset('test', 'test', 'test');
+  describe('hset', () => {
+    it('hset', async () => {
+      const result = await redisService.redis.hset('test', 'test', 'test');
 
-    expect(result).toEqual(expect.any(Number));
+      expect(result).toEqual(expect.any(Number));
+    });
+  });
+
+  describe('sadd, smember', () => {
+    it('sadd has no ordering information', async () => {
+      const key = 'key';
+      const values = ['test', 'test2', 'test3', 'test4'];
+      redisService.redis.sadd(key, values);
+
+      const result = await redisService.redis.smembers(key);
+
+      values.forEach((value) => {
+        expect(result).toContain(value);
+      });
+    });
   });
 });
 
