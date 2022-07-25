@@ -136,34 +136,17 @@ describe('channel methods', () => {
 });
 
 describe('socket methods', () => {
-  describe('findSocketByUserId', () => {
-    it('return value if success', async () => {
-      const user = await createUser();
-      const socketId = 'socket-01';
-      await userRedisService.setSocketAt(user.id, socketId);
-      const result = await userRedisService.findSocketByUserId(user.id);
-
-      expect(result).toEqual(socketId);
-    });
-
-    it('return null if not found socket', async () => {
-      const users = [await createUser(), await createUser()];
-      const socketId = 'socket-01';
-      await userRedisService.setSocketAt(users[0].id, socketId);
-
-      const result = await userRedisService.findSocketByUserId(users[1].id);
-
-      expect(result).toBeNull();
-    });
-  });
-
   describe('setSocketAt', () => {
     it('return value if success', async () => {
       const user = await createUser();
+      const socketIds = ['socket-01', 'socket-02'];
+      await userRedisService.setSocketAt(user.id, socketIds[0]);
 
-      const result = await userRedisService.setSocketAt(user.id, 'socket-01');
+      const result = await userRedisService.setSocketAt(user.id, socketIds[1]);
 
-      expect(result).toEqual(expect.any(Number));
+      socketIds.forEach((socketId) => {
+        expect(result).toContain(socketId);
+      });
     });
 
     it('throw error if not found user', async () => {
@@ -176,8 +159,29 @@ describe('socket methods', () => {
     });
   });
 
+  describe('findSocketByUserId', () => {
+    it('return array of socketId if success', async () => {
+      const user = await createUser();
+      const socketId = 'socket-01';
+      await userRedisService.setSocketAt(user.id, socketId);
+      const result = await userRedisService.findSocketByUserId(user.id);
+
+      expect(result).toContain(socketId);
+    });
+
+    it('return empty array if not found socket', async () => {
+      const users = [await createUser(), await createUser()];
+      const socketId = 'socket-01';
+      await userRedisService.setSocketAt(users[0].id, socketId);
+
+      const result = await userRedisService.findSocketByUserId(users[1].id);
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('findSocketByMessageAuthor', () => {
-    it('return socketId if success', async () => {
+    it('return array of socketId if success', async () => {
       const id = 'id';
       const user = await createUser();
       const workspace = await createWorkspace();
@@ -194,7 +198,7 @@ describe('socket methods', () => {
         message.id,
       );
 
-      expect(result).toEqual(id);
+      expect(result).toContain(id);
     });
   });
 });
