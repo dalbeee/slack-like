@@ -1,5 +1,4 @@
 import { Test } from '@nestjs/testing';
-import { io, Socket, SocketOptions, ManagerOptions } from 'socket.io-client';
 import { INestApplication } from '@nestjs/common';
 
 import { SocketIoGateway } from './socketio.gateway';
@@ -8,13 +7,10 @@ import { createUser } from '@src/user/__test__/createUser';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
 import { createChannel } from '@src/channel/__test__/createChannel';
 import { createAccessToken } from '@src/auth/__test__/createAccessToken';
+import { socketIoClientFactory } from './__test__/socketIoClientFactory';
 
 let app: INestApplication;
 let socketGateway: SocketIoGateway;
-let socketFactory: (
-  options?: Partial<ManagerOptions | SocketOptions>,
-) => Socket;
-
 beforeEach(async () => {
   const moduleRef = await Test.createTestingModule({
     imports: [SocketIoModule],
@@ -22,11 +18,6 @@ beforeEach(async () => {
   app = moduleRef.createNestApplication();
   await app.init();
   socketGateway = app.get(SocketIoGateway);
-
-  socketFactory = (options?: SocketOptions) => {
-    const getPort = () => app.getHttpServer().listen().address().port;
-    return io(`http://localhost:${getPort()}`, options || {});
-  };
 });
 
 afterEach(async () => {
@@ -114,7 +105,7 @@ describe('outbound methods', () => {
     it('send message successfully', (done) => {
       const expectedValue = 'expectedValue';
       const messageKey = 'test';
-      const socket = socketFactory()
+      const socket = socketIoClientFactory(app)
         .on('connect', () => {
           socketGateway.broadcastToClients(messageKey, expectedValue);
         })
@@ -130,7 +121,7 @@ describe('outbound methods', () => {
     it('send message successfully', (done) => {
       const messageKey = 'test';
       const expectedValue = 'expectedValue';
-      const socket = socketFactory()
+      const socket = socketIoClientFactory(app)
         .on('connect', () => {
           socketGateway.sendToClientBySocketId(
             {
@@ -163,7 +154,7 @@ describe('inbound methods', () => {
       const messageKey = 'connection';
       const expectedValue = 'valid';
       getData().then((r) => {
-        const socket = socketFactory({
+        const socket = socketIoClientFactory(app, {
           auth: { Authorization: `Bearer ${r.access_token}` },
         })
           .on('connect', () => {
