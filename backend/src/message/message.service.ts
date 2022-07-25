@@ -1,25 +1,18 @@
 import {
   BadRequestException,
   ForbiddenException,
-  forwardRef,
-  Inject,
   Injectable,
 } from '@nestjs/common';
 
 import { UserJwtPayload } from '@src/auth/types';
 import { PrismaService } from '@src/prisma.service';
-import { SocketIoOutboundService } from '@src/socketio/socketio-outbound.service';
 import { MessageUpdateDto } from './dto/message-update.dto';
 import { MessagesFindDto } from './dto/messages-find.dto';
 import { MessageCreateProps } from './types';
 
 @Injectable()
 export class MessageService {
-  constructor(
-    private readonly prisma: PrismaService,
-    @Inject(forwardRef(() => SocketIoOutboundService))
-    private readonly socketOutboundService: SocketIoOutboundService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async _validateCollectUser({ id, userId }: { id: string; userId: string }) {
     const message = await this.prisma.message.findUnique({
@@ -34,7 +27,7 @@ export class MessageService {
     { content, channelId, workspaceId }: MessageCreateProps,
   ) {
     try {
-      const result = await this.prisma.message.create({
+      return await this.prisma.message.create({
         data: {
           content,
           user: { connect: { id } },
@@ -42,12 +35,6 @@ export class MessageService {
           channel: { connect: { id: channelId } },
         },
       });
-      // TODO increase unreadMessageCount
-      this.socketOutboundService.sendToClient({
-        workspaceId,
-        messageId: result.id,
-      });
-      return result;
     } catch (error) {
       throw new BadRequestException();
     }
