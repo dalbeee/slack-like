@@ -13,9 +13,10 @@ export class WsGuard implements CanActivate {
   canActivate(
     context: any,
   ): boolean | any | Promise<boolean | any> | Observable<boolean | any> {
+    const handshake = context.args[0].handshake;
     const bearerToken =
-      context.args[0].handshake.auth.Authorization.split(' ')[1] ??
-      context.args[0].handshake.headers.authorization.split(' ')[1];
+      handshake.auth.Authorization?.split(' ')[1] ??
+      handshake.headers.authorization?.split(' ')[1];
     if (!bearerToken) throw new UnauthorizedException();
 
     try {

@@ -1,4 +1,4 @@
-import { PrismaClient, Workspace } from '@prisma/client';
+import { Channel, PrismaClient, User, Workspace } from '@prisma/client';
 
 import { ChannelService } from '../src/channel/channel.service';
 import { PrismaService } from '../src/prisma.service';
@@ -69,10 +69,19 @@ const createUsers = async ({ workspaces }: { workspaces: Workspace[] }) => {
   return [user1, user2, user3];
 };
 
+const channelSubscribe = (user: User, channels: Channel[]) => {
+  channels.map((channel) => {
+    channelService.subscribeChannel(user.id, channel.id);
+  });
+};
+
 const main = async () => {
   const workspaces = await createWorkspaces();
   const channels = await createChannels({ workspaces });
   const users = await createUsers({ workspaces });
+  channelSubscribe(users[0], channels);
+  channelSubscribe(users[1], channels);
+  channelSubscribe(users[2], channels);
 };
 
 main();

@@ -35,7 +35,7 @@ const DataInitializer = () => {
       channelId: router.query.channel as string,
       workspaceId: router.query.workspace as string,
     });
-  }, [router.query.channel, router.query.workspace, setZeroUnreadMessageCount]);
+  }, [router.query.channel, router.query.workspace]);
 
   useEffect(() => {
     if (!router.query.channel) return;
