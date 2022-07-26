@@ -2,11 +2,11 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-import { SocketChannelData, SocketMessageData } from "@/common";
+import { SocketInfo, SocketMessageCreate, SocketMessageDelete } from "@/common";
 import {
+  appendChannelMetadata,
   appendCurerntChannelData,
   deleteCurrentChannelData,
-  setReaction,
 } from "@/common/store/appSlice";
 import { socketConnect } from "@/common/wsClient";
 
@@ -22,31 +22,25 @@ export const useSocketServiceManager = () => {
       },
       [
         {
-          messageKey: "message",
-          callbackFn: (data: SocketMessageData) => {
-            switch (data.type) {
-              case "message.create":
-                dispatch(appendCurerntChannelData(data));
-                break;
-              case "message.delete":
-                dispatch(deleteCurrentChannelData(data));
-                break;
-              default:
-                return;
-            }
+          messageKey: "message.create",
+          callbackFn: (data: SocketMessageCreate) => {
+            const socketInfo: SocketInfo = {
+              workspaceId: data.data.workspaceId,
+              channelId: data.data.channelId,
+            };
+            dispatch(appendCurerntChannelData(data.data));
+            dispatch(
+              appendChannelMetadata({
+                metadata: data.metadata,
+                socketInfo: socketInfo,
+              })
+            );
           },
         },
         {
-          messageKey: "channel",
-          callbackFn: (data: SocketChannelData) => {
-            switch (data.type) {
-              case "channel.setZeroUnreadMessageCount":
-                dispatch(setReaction(data));
-                break;
-              default:
-                return;
-            }
-          },
+          messageKey: "message.delete",
+          callbackFn: (data: SocketMessageDelete) =>
+            dispatch(deleteCurrentChannelData(data.messageId)),
         },
       ]
     );
