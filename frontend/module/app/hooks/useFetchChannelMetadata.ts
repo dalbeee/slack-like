@@ -9,7 +9,7 @@ export const useFetchChannelMetadata = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const fetch = () =>
+  const fetchChannelMetadata = () =>
     httpClient
       .get<any, HttpChannelMetadataResponse>(
         `/users/metadata?workspaceId=${router.query.workspace as string}`
@@ -19,5 +19,5 @@ export const useFetchChannelMetadata = () => {
         return;
       });
 
-  return { fetch };
+  return { fetchChannelMetadata };
 };

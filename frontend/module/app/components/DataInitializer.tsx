@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/common/store/store";
 import { useFetchChannelMetadata } from "../hooks/useFetchChannelMetadata";
 import { useFetchChannels } from "../hooks/useFetchChannels";
-import { useWsSetZeroUnreadMessageCount } from "../hooks/useWsSetZeroUnreadMessageCount";
+import { useWsChannelOutbound } from "../hooks/useWsChannelOutbound";
 import { useSocketServiceManager } from "../hooks/useSocketServiceManager";
 
 const DataInitializer = () => {
@@ -13,9 +13,9 @@ const DataInitializer = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const { initialize } = useSelector((state: RootState) => state.app);
-  const { fetch: fetchChannelMetadata } = useFetchChannelMetadata();
-  const { fetch: fetchChannels } = useFetchChannels();
-  const { fetch: setZeroUnreadMessageCount } = useWsSetZeroUnreadMessageCount();
+  const { fetchChannelMetadata } = useFetchChannelMetadata();
+  const { fetchChannels } = useFetchChannels();
+  const { setZeroUnreadMessageCount } = useWsChannelOutbound();
 
   useEffect(() => {
     if (!router.isReady || initialize) return;

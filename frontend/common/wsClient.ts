@@ -49,20 +49,6 @@ export const socketConnect = (
   init(ws, callbacks);
 };
 
-export const createMessage = (data: {
-  socketInfo: SocketInfo;
-  message: string;
-}) => {
-  socketFactory().emit("message.create", data);
-};
-
-export const deleteMessage = (data: {
-  socketInfo: SocketInfo;
-  messageId: string;
-}) => {
-  socketFactory().emit("message.delete", data);
-};
-
 export const setZeroUnreadMessageCount = (data: { socketInfo: SocketInfo }) => {
   socketFactory().emit("channel.setZeroUnreadMessageCount", data);
 };
