@@ -1,5 +1,4 @@
 import { Message } from "@/common";
-import { deleteMessage } from "@/common/wsClient";
 import { useRouter } from "next/router";
 import React, {
   forwardRef,
@@ -8,6 +7,7 @@ import React, {
 } from "react";
 
 import MenuItem from "../../../../common/components/MenuItem";
+import { useWsMessageOutbound } from "../../hooks/useWsMessageOutbound";
 
 type ToolTipExpandProps = { messageData: Message };
 
@@ -17,6 +17,7 @@ const ToolTipExpand: ForwardRefExoticComponent<
   // eslint-disable-next-line react/display-name
   forwardRef(({ messageData }: ToolTipExpandProps, ref) => {
     const router = useRouter();
+    const { deleteMessage } = useWsMessageOutbound();
     const handleDelete = () => {
       deleteMessage({
         socketInfo: {

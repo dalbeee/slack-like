@@ -9,7 +9,7 @@ export const useFetchChannels = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const fetch = () =>
+  const fetchChannels = () =>
     httpClient
       .get<any, Channel[]>(
         `/channels?workspaceId=${router.query.workspace as string}`
@@ -19,5 +19,5 @@ export const useFetchChannels = () => {
         return;
       });
 
-  return { fetch };
+  return { fetchChannels };
 };

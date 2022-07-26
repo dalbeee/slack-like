@@ -1,10 +1,10 @@
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
-
-import { createMessage } from "@/common/wsClient";
+import { useWsMessageOutbound } from "../../hooks/useWsMessageOutbound";
 
 const SendCommander = () => {
   const router = useRouter();
+  const { createMessage } = useWsMessageOutbound();
   const [value, setValue] = useState("");
   const ref = useRef<HTMLInputElement>(null);
 
