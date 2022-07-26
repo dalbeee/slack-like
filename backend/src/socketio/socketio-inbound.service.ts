@@ -5,7 +5,7 @@ import { UserJwtPayload } from '@src/auth/types';
 import { ChannelService } from '@src/channel/channel.service';
 import { MessageService } from '@src/message/message.service';
 import { UserRedisService } from '@src/user/user-redis.service';
-import { SocketMessageData } from '.';
+import { SocketMessageCreate, SocketMessageDelete } from '.';
 import { ChannelSpecificDto } from './dto/channel-specific.dto';
 import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageDeleteDto } from './dto/message-delete.dto';
@@ -29,7 +29,10 @@ export class SocketIoInboudService {
           workspaceId: data.socketInfo.workspaceId,
         });
       });
-    const sendMessageToClients = (userIds: string[], message: Message) =>
+    const sendMessageToClients = async (
+      userIds: string[],
+      message: Message,
+    ) => {
       userIds.forEach(async (userId) => {
         const socketIds = await this.userRedisService.findSocketByUserId(
           userId,
@@ -45,10 +48,12 @@ export class SocketIoInboudService {
               messageKey: 'message.create',
               socketId,
             },
-            { message, metadata },
+            { data: message, metadata } as SocketMessageCreate,
           );
         });
       });
+      return true;
+    };
 
     const message = await this.messageService.createMessage(user, {
       channelId: data.socketInfo.channelId,
@@ -69,11 +74,26 @@ export class SocketIoInboudService {
       data.messageId,
     );
     if (!result) throw new BadRequestException();
-    const messageData: SocketMessageData = {
-      type: 'message.delete',
-      data: { messageId: data.messageId },
+
+    const messageData: SocketMessageDelete = {
+      messageId: data.messageId,
     };
-    return { messageData };
+    const channelSubscribeUserIds = (
+      await this.channelService.findChannelsById(data.socketInfo.channelId)
+    ).Users.map((user) => user.id);
+    const socketIds = await this.userRedisService.findSocketByUserIds(
+      channelSubscribeUserIds,
+    );
+    socketIds.forEach((socketId) => {
+      this.socketOutboundService.sendToClient(
+        {
+          messageKey: 'message.delete',
+          socketId,
+        },
+        messageData,
+      );
+    });
+    return;
   }
 
   increaseUnreadMessageCount(channelDto: ChannelSpecificDto) {

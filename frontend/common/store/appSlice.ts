@@ -3,11 +3,11 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   Channel,
   ChannelData,
+  ChannelMetadata,
   ChannelsHashMap,
   HttpChannelMetadataResponse,
-  SocketChannelData,
-  SocketMessageCreate,
-  SocketMessageDelete,
+  Message,
+  SocketInfo,
 } from "@/common";
 
 export interface AppState {
@@ -53,17 +53,25 @@ export const appSlice = createSlice({
         };
       });
     },
-    setReaction: (state, action: PayloadAction<SocketChannelData>) => {
+    appendChannelMetadata: (
+      state,
+      action: PayloadAction<{
+        socketInfo: SocketInfo;
+        metadata: ChannelMetadata;
+      }>
+    ) => {
       const setChannelMetadata = () => {
-        if (!state.channels.byId.includes(action.payload.channelId)) {
+        if (
+          !state.channels.byId.includes(action.payload.socketInfo.channelId)
+        ) {
           state.channels.byId = [
             ...state.channels.byId,
-            action.payload.channelId,
+            action.payload.socketInfo.channelId,
           ];
         }
-        state.channels.byHash[action.payload.channelId] = {
-          ...state.channels.byHash[action.payload.channelId],
-          ...action.payload.data,
+        state.channels.byHash[action.payload.socketInfo.channelId] = {
+          ...state.channels.byHash[action.payload.socketInfo.channelId],
+          ...action.payload.metadata,
         };
       };
       setChannelMetadata();
@@ -71,30 +79,24 @@ export const appSlice = createSlice({
     setCurrentChannelData: (state, action: PayloadAction<ChannelData>) => {
       state.currentChannelData = action.payload;
     },
-    appendCurerntChannelData: (
-      state,
-      action: PayloadAction<SocketMessageCreate>
-    ) => {
+    appendCurerntChannelData: (state, action: PayloadAction<Message>) => {
       if (
         state.currentChannelData.Messages.some(
-          (message) => message.id === action.payload.data.id
+          (message) => message.id === action.payload.id
         )
       )
         return state;
       state.currentChannelData = {
         ...state.currentChannelData,
-        Messages: [...state.currentChannelData.Messages, action.payload.data],
+        Messages: [...state.currentChannelData.Messages, action.payload],
       };
     },
-    deleteCurrentChannelData: (
-      state,
-      action: PayloadAction<SocketMessageDelete>
-    ) => {
+    deleteCurrentChannelData: (state, action: PayloadAction<string>) => {
       if (!state.currentChannelData.Messages) return state;
       state.currentChannelData = {
         ...state.currentChannelData,
         Messages: state.currentChannelData.Messages.filter(
-          (message) => message.id !== action.payload.data.messageId
+          (message) => message.id !== action.payload
         ),
       };
     },
@@ -105,7 +107,7 @@ export const appSlice = createSlice({
 });
 
 export const {
-  setReaction,
+  appendChannelMetadata,
   setChannels,
   setCurrentChannelData,
   appendCurerntChannelData,

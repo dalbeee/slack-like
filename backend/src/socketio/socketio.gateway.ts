@@ -94,11 +94,7 @@ export class SocketIoGateway {
     @MessageBody() body: MessageDeleteDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
-    const { messageData } = await this.socketIoService.deleteMessage(
-      user,
-      body,
-    );
-    this.io.to(body.socketInfo.workspaceId).emit('message', messageData);
+    return await this.socketIoService.deleteMessage(user, body);
   }
 
   @UseGuards(WsGuard)
@@ -112,5 +108,6 @@ export class SocketIoGateway {
       workspaceId: body.socketInfo.workspaceId,
       userId: user.id,
     });
+    return;
   }
 }
