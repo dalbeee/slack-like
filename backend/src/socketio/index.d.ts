@@ -5,39 +5,26 @@ interface SocketInfo {
   channelId: string;
 }
 
-type SocketChannelType = 'channel.setZeroUnreadMessageCount';
-type SocketMessageType = 'message.create' | 'message.update' | 'message.delete';
-
 export interface ChannelMetadata {
   unreadMessageCount: number;
 }
 
-type SocketChannelData = {
-  type: SocketChannelType;
-  channelId: string;
-  data: ChannelMetadata;
-};
-
 interface SocketMessageCreate {
-  type: 'message.create';
   data: Message;
+  metadata: ChannelMetadata;
 }
 
 interface SocketMessageUpdate {
-  type: 'message.update';
   data: Message;
 }
 
 interface SocketMessageDelete {
-  type: 'message.delete';
-  data: { messageId: string };
+  messageId: string;
 }
 
-type SocketMessageData =
+type SocketMessageResponse =
   | SocketMessageCreate
   | SocketMessageUpdate
   | SocketMessageDelete;
 
-type SocketResponse = (SocketChannelData | SocketMessageData) & {
-  socketInfo: SocketInfo;
-};
+type SocketResponse = SocketMessageResponse;
