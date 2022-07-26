@@ -64,9 +64,11 @@ export class UserRedisService {
 
   async getChannelDataAll(userId: string, workspaceId: string) {
     const result = {};
-    const channels = await this.channelService.findchannelsByWorkspaceId(
-      workspaceId,
-    );
+    const channels =
+      await this.userService.findSubscribedChannelsByWorkspaceIdAndUserId(
+        userId,
+        workspaceId,
+      );
     await Promise.all(
       channels.map(async (channel) => {
         const data = await this.getChannelDataBy({

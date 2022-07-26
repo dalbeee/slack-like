@@ -38,6 +38,25 @@ export class UserService {
     });
   }
 
+  findWorkspacesByUserId(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { workspaces: true },
+    });
+  }
+
+  async findSubscribedChannelsByWorkspaceIdAndUserId(
+    userId: string,
+    workspaceId: string,
+  ) {
+    return (
+      await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: { channels: { where: { workspaceId } } },
+      })
+    ).channels;
+  }
+
   findUserByEmail(email: string) {
     return this.prisma.user.findFirst({
       where: { email },

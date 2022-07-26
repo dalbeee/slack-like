@@ -19,7 +19,7 @@ import { UserRedisService } from '@src/user/user-redis.service';
 import { SocketConnectionDto } from './dto/socket-connection.dto';
 
 @WebSocketGateway({
-  cors: { origin: 'http://localhost:3001' },
+  cors: { origin: '*' },
 })
 export class SocketIoGateway {
   @WebSocketServer()
@@ -69,6 +69,8 @@ export class SocketIoGateway {
     @MessageBody() data: SocketConnectionDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
+    console.log(socket.id);
+
     if (!Object.keys(data).length) return;
 
     await this._saveSocketId({
