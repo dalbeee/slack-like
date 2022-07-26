@@ -2,9 +2,9 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-import { ChannelData } from "@/common";
 import { httpClient } from "@/common/httpClient";
 import { setCurrentChannelData } from "@/common/store/appSlice";
+import { ChannelData } from "@/common";
 
 export const useFetchInitialChannelData = () => {
   const router = useRouter();

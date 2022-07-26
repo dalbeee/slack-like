@@ -1,10 +1,14 @@
+// http
+
+export type ChannelDataResponse = {
+  workspaceId: string;
+  channels: ChannelData[];
+};
+
+// socket
 interface SocketInfo {
   workspaceId: string;
   channelId: string;
-}
-
-export interface ChannelMetadata {
-  unreadMessageCount: number;
 }
 
 interface SocketMessageCreate {
@@ -27,6 +31,38 @@ type SocketMessageResponse =
 
 type SocketResponse = SocketMessageResponse;
 
+// AppSlice
+export interface AppState {
+  initialize: boolean;
+  currentWorkspaceId?: string;
+  currentChannelId?: string;
+  currentChannelData: ChannelData;
+  workspaces: WorkspacesHashMap;
+}
+
+export interface ChannelMetadata {
+  unreadMessageCount?: number;
+}
+
+export type WorkspaceData = Workspace & {
+  hasNewMessage: boolean;
+  channels: ChannelsHashMap;
+};
+
+export type ChannelData = Channel & ChannelMetadata;
+
+export interface WorkspacesHashMap {
+  byId: string[];
+  byHash: { [workspaceId: string]: WorkspaceData };
+}
+
+export interface ChannelsHashMap {
+  byId: string[];
+  byHash: { [channelId: string]: ChannelData };
+}
+
+//
+
 export type Message = {
   id: string;
   content: string;
@@ -38,39 +74,16 @@ export type Message = {
   channelId: string;
 };
 
-export interface ChannelData {
-  Messages: Message[];
-  Users: [];
-  createdAt: Date;
-  updatedAt: Date;
-  description?: string;
-  id: string;
-  name: string;
-  workspaceId: string;
-}
-
-export interface ChannelsHashMap {
-  byId: string[];
-  byHash: { [key: string]: Channel };
-}
-
-export type HttpChannelMetadataResponse = {
-  [channelId: string]: ChannelMetadata;
-};
-
-export type ChannelMetadata = {
-  latestMessageId?: string;
-  lastCheckMessageId?: string;
-};
-////
 export type Channel = {
   id: string;
   workspaceId: string;
   name: string;
   description?: string;
+  Users: User[];
+  Messages: Message[];
   createdAt: Date;
   updatedAt: Date;
-} & ChannelMetadata;
+};
 
 export type UserJwtToken = {
   access_token?: string;

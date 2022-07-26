@@ -7,8 +7,13 @@ import { RootState } from "@/common/store/store";
 
 const ChannelMenu = () => {
   const router = useRouter();
+  const { workspace } = router.query;
+  const { workspaces } = useSelector((state: RootState) => state.app);
 
-  const { channels } = useSelector((state: RootState) => state.app);
+  const channels =
+    workspaces.byHash?.[router.query?.workspace as string]?.channels;
+
+  if (!channels || !workspace) return null;
 
   const handleClick = (e: React.MouseEvent) => {
     const as = `/client/${router.query?.workspace as string}/${
@@ -16,7 +21,6 @@ const ChannelMenu = () => {
     }`;
     router.push(as);
   };
-  if (!channels) return null;
   return (
     <>
       <div className=""></div>
@@ -31,9 +35,7 @@ const ChannelMenu = () => {
               key={channelId}
               onClick={handleClick}
               className={`${
-                channel.lastCheckMessageId !== channel.latestMessageId
-                  ? "bg-neutral-700"
-                  : ""
+                channel.unreadMessageCount ? "bg-neutral-700" : ""
               }`}
             >
               {channel.name}

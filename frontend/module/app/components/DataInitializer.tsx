@@ -1,34 +1,30 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import { RootState } from "@/common/store/store";
-import { useFetchChannelMetadata } from "../hooks/useFetchChannelMetadata";
-import { useFetchChannels } from "../hooks/useFetchChannels";
 import { useWsChannelOutbound } from "../hooks/useWsChannelOutbound";
 import { useSocketServiceManager } from "../hooks/useSocketServiceManager";
+import { useFetchSubscribedChannels } from "../hooks/useFetchSubscribedChannels";
+import { useFetchJoinedWorkspaces } from "../hooks/useFetchJoinedWorkspaces";
 
 const DataInitializer = () => {
   useSocketServiceManager();
   const router = useRouter();
-  const dispatch = useDispatch();
   const { initialize } = useSelector((state: RootState) => state.app);
-  const { fetchChannelMetadata } = useFetchChannelMetadata();
-  const { fetchChannels } = useFetchChannels();
+  const { fetchJoinedWorkspaces } = useFetchJoinedWorkspaces();
+  const { fetchSubscribedChannels } = useFetchSubscribedChannels();
   const { setZeroUnreadMessageCount } = useWsChannelOutbound();
 
   useEffect(() => {
-    if (!router.isReady || initialize) return;
-    fetchChannelMetadata();
-    fetchChannels();
-  }, [
-    dispatch,
-    fetchChannelMetadata,
-    fetchChannels,
-    initialize,
-    router.isReady,
-    router.query.workspace,
-  ]);
+    if (initialize) return;
+    fetchJoinedWorkspaces().then(() => {
+      setTimeout(() => {
+        fetchSubscribedChannels();
+      }, 100);
+      return;
+    });
+  }, [fetchJoinedWorkspaces, fetchSubscribedChannels, initialize]);
 
   useEffect(() => {
     setZeroUnreadMessageCount({

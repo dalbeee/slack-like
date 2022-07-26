@@ -1,58 +1,75 @@
+/* eslint-disable security/detect-object-injection */
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import {
+  AppState,
   Channel,
   ChannelData,
   ChannelMetadata,
   ChannelsHashMap,
-  HttpChannelMetadataResponse,
+  ChannelDataResponse,
   Message,
   SocketInfo,
+  Workspace,
+  WorkspacesHashMap,
 } from "@/common";
 
-export interface AppState {
-  initialize: boolean;
-  mention: boolean;
-  bookmark: boolean;
-  channels: ChannelsHashMap;
-  currentChannelData: ChannelData;
-}
+const initialWorkspace: WorkspacesHashMap = {
+  byId: [],
+  byHash: {},
+};
+
+const initialChannel: ChannelsHashMap = {
+  byId: [],
+  byHash: {},
+};
 
 const initialState: AppState = {
   initialize: false,
-  bookmark: false,
-  mention: false,
-  channels: { byId: [], byHash: {} } as ChannelsHashMap,
   currentChannelData: {} as ChannelData,
+  workspaces: {} as WorkspacesHashMap,
 };
 
 export const appSlice = createSlice({
   name: "app",
   initialState,
   reducers: {
-    setChannels: (state, action: PayloadAction<Channel[]>) => {
-      const channels = action.payload.reduce(
-        (acc, v) => {
-          acc.byId.push(v.id);
-          acc.byHash[v.id] = v;
+    // workspaces
+    setWorkspaces: (state, action: PayloadAction<Workspace[]>) => {
+      const workspaces = action.payload.reduce(
+        (acc, workspace) => {
+          acc.byId.push(workspace.id);
+          acc.byHash[workspace.id] = {
+            ...workspace,
+            hasNewMessage: false,
+            channels: initialChannel,
+          };
+          return acc;
+        },
+        { byId: [], byHash: {} } as WorkspacesHashMap
+      );
+      state.workspaces = workspaces;
+      state.initialize = true;
+    },
+
+    // channels
+    // currentChannelData
+    //
+
+    setChannels: (state, action: PayloadAction<ChannelDataResponse>) => {
+      const { channels, workspaceId } = action.payload;
+      const newChannelData = channels.reduce(
+        (acc, channel) => {
+          acc.byId.push(channel.id);
+          acc.byHash[channel.id] = channel;
           return acc;
         },
         { byId: [], byHash: {} } as ChannelsHashMap
       );
-      state.channels = channels;
+      state.workspaces.byHash[workspaceId].channels = newChannelData;
       state.initialize = true;
     },
-    setChannelsMetadata: (
-      state,
-      action: PayloadAction<HttpChannelMetadataResponse>
-    ) => {
-      Object.keys(action.payload).forEach((key) => {
-        state.channels.byHash[key] = {
-          ...state.channels.byHash[key],
-          ...action.payload[key],
-        };
-      });
-    },
+
     appendChannelMetadata: (
       state,
       action: PayloadAction<{
@@ -61,24 +78,27 @@ export const appSlice = createSlice({
       }>
     ) => {
       const setChannelMetadata = () => {
-        if (
-          !state.channels.byId.includes(action.payload.socketInfo.channelId)
-        ) {
-          state.channels.byId = [
-            ...state.channels.byId,
-            action.payload.socketInfo.channelId,
+        const { metadata, socketInfo } = action.payload;
+        const currentWorkspace =
+          state.workspaces.byHash[socketInfo.workspaceId];
+        if (!currentWorkspace?.channels?.byId.includes(socketInfo.channelId)) {
+          currentWorkspace.channels.byId = [
+            ...currentWorkspace.channels.byId,
+            socketInfo.channelId,
           ];
         }
-        state.channels.byHash[action.payload.socketInfo.channelId] = {
-          ...state.channels.byHash[action.payload.socketInfo.channelId],
-          ...action.payload.metadata,
+        currentWorkspace.channels.byHash[socketInfo.channelId] = {
+          ...currentWorkspace.channels.byHash[socketInfo.channelId],
+          ...metadata,
         };
       };
       setChannelMetadata();
     },
+
     setCurrentChannelData: (state, action: PayloadAction<ChannelData>) => {
       state.currentChannelData = action.payload;
     },
+
     appendCurerntChannelData: (state, action: PayloadAction<Message>) => {
       if (
         state.currentChannelData.Messages.some(
@@ -107,13 +127,13 @@ export const appSlice = createSlice({
 });
 
 export const {
+  setWorkspaces,
   appendChannelMetadata,
   setChannels,
   setCurrentChannelData,
   appendCurerntChannelData,
   deleteCurrentChannelData,
   resetCurrentChannelData,
-  setChannelsMetadata,
 } = appSlice.actions;
 
 export default appSlice.reducer;
