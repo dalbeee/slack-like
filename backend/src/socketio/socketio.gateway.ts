@@ -51,7 +51,7 @@ export class SocketIoGateway {
   }
 
   _findSocketIdFromUserId(userId: string) {
-    return this.userRedisService.findSocketByUserId(userId);
+    return this.userRedisService.findSocketsByUserId(userId);
   }
 
   _removeSocketIdFromUser(userId: string, socketId: string) {
