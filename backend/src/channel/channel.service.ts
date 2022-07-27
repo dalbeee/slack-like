@@ -6,7 +6,7 @@ import {
 
 import { PrismaService } from '@src/prisma.service';
 import { WorkspaceService } from '@src/workspace/workspace.service';
-import { ChannelCreateProps } from './types';
+import { ChannelCreateDto } from './dto/channel-create.dto';
 
 @Injectable()
 export class ChannelService {
@@ -15,7 +15,7 @@ export class ChannelService {
     private readonly workspaceService: WorkspaceService,
   ) {}
 
-  async createChannel(dto: ChannelCreateProps) {
+  async createChannel(dto: ChannelCreateDto) {
     const { workspaceId, ...data } = dto;
     const workspace = await this.workspaceService.findWorkspaceById(
       workspaceId,
@@ -41,14 +41,23 @@ export class ChannelService {
       where: { id: channelId },
     });
     if (!channel) throw new NotFoundException();
-
     const result = await this.prisma.channel.update({
       where: { id: channelId },
       data: {
         Users: { connect: { id: userId } },
       },
     });
-    return result && true;
+    return result ? true : false;
+  }
+
+  async unsubscribeChannel(userId: string, channelId: string) {
+    const result = await this.prisma.channel.update({
+      where: { id: channelId },
+      data: {
+        Users: { disconnect: { id: userId } },
+      },
+    });
+    return result ? true : false;
   }
 
   async findChannelsById(channelId: string) {
