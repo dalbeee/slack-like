@@ -1,51 +1,59 @@
-import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { Channel, ChannelDataResponse } from "@/common";
 import { httpClient } from "@/common/httpClient";
 import { RootState } from "@/common/store/store";
-import {
-  appendChannel,
-  deleteChannel,
-  setChannels,
-} from "@/common/store/channelSlice";
+import { setChannels } from "@/common/store/channelSlice";
 
 export const useFetchChannels = () => {
-  const router = useRouter();
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.user);
+  const [workspaceChannels, setWorkspaceChannels] = useState<Channel[]>([]);
+  const { currentWorkspaceId } = useSelector(
+    (state: RootState) => state.workspaces
+  );
+
+  const fetchChannels = useCallback((workspaceId: string) => {
+    return httpClient
+      .get<any, Channel[]>(`/channels`, {
+        params: { workspaceId },
+      })
+      .then((r) => setWorkspaceChannels(r));
+  }, []);
 
   const fetchSubscribedChannels = useCallback(() => {
-    if (!user) return;
+    if (!user || !currentWorkspaceId) return;
     httpClient
       .get<any, ChannelDataResponse>(`/users/subscribed-channels`, {
-        params: { workspaceId: router.query?.workspace as string },
+        params: { workspaceId: currentWorkspaceId },
       })
-      .then((r) => dispatch(setChannels(r)));
-  }, [dispatch, router.query?.workspace, user]);
+      .then(async (r) => dispatch(setChannels(r)));
+  }, [currentWorkspaceId, dispatch, user]);
 
   const fetchSubscribe = useCallback(
     (channelId: string) => {
-      if (!user) return;
-      httpClient
+      if (!user || !currentWorkspaceId) return;
+      return httpClient
         .post<any, Channel>(`/channels/subscribe?channelId=${channelId}`)
-        .then((result) => dispatch(appendChannel(result)));
+        .then(() => fetchSubscribedChannels());
     },
-    [dispatch, user]
+    [currentWorkspaceId, fetchSubscribedChannels, user]
   );
 
   const fetchUnsubscribe = useCallback(
     (channelId: string) => {
-      if (!user) return;
-      httpClient
+      if (!user || !currentWorkspaceId) return;
+      return httpClient
         .post<any, Channel>(`/channels/unsubscribe?channelId=${channelId}`)
-        .then((result) => dispatch(deleteChannel(result)));
+        .then(() => fetchSubscribedChannels());
     },
-    [dispatch, user]
+    [currentWorkspaceId, fetchSubscribedChannels, user]
   );
 
   return {
+    workspaceChannels,
+    fetchChannels,
     fetchSubscribe,
     fetchUnsubscribe,
     fetchSubscribedChannels,

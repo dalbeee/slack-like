@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { WorkspaceCreateDto } from './dto/workspace-create.dto';
 import { WorkspaceService } from './workspace.service';
@@ -12,13 +12,10 @@ export class WorkspaceController {
     return this.workspaceService.createWorkspace(data);
   }
 
-  @Get(':name')
-  findWorkspaceChannelByName(@Param('name') name: string) {
-    return this.workspaceService.findWorkspaceByName(name);
-  }
-
   @Get()
-  findWorkspaces() {
+  findOneById(@Query('id') id: string, @Query('name') name: string) {
+    if (name) return this.workspaceService.findWorkspaceByName(name);
+    if (id) return this.workspaceService.findWorkspaceById(id);
     return this.workspaceService.findWorkspaces();
   }
 }
