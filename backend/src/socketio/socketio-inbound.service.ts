@@ -39,7 +39,7 @@ export class SocketIoInboudService {
       userIds: string[],
       message: Message,
     ) => {
-      userIds.forEach(async (userId) => {
+      userIds.map(async (userId) => {
         const socketIds = await this.userRedisService.findSocketsByUserId(
           userId,
         );
@@ -49,7 +49,7 @@ export class SocketIoInboudService {
           userId,
         });
         socketIds.forEach((socketId) => {
-          this.socketOutboundService.sendToClient(
+          return this.socketOutboundService.sendToClient(
             {
               messageKey: 'message.create',
               socketId,
@@ -70,8 +70,26 @@ export class SocketIoInboudService {
       await this.channelService.findChannelsById(data.socketInfo.channelId)
     ).Users.map((user) => user.id);
     updateChannelMetadataByUserIds(channelSubscribeUserIds);
-    sendMessageToClients(channelSubscribeUserIds, message);
-    return;
+
+    return sendMessageToClients(channelSubscribeUserIds, message);
+    // const metadata = await this.userRedisService.getChannelDataBy({
+    //   workspaceId: data.socketInfo.workspaceId,
+    //   channelId: data.socketInfo.channelId,
+    //   userId,
+    // });
+
+    // const responseData = {
+    //   data: message,
+    //   metadata,
+    // };
+
+    // return this.socketOutboundService.sendToClient(
+    //   {
+    //     messageKey: 'message.create',
+    //     socketId: '',
+    //   },
+    //   { data: message, metadata: null } as SocketMessageCreate,
+    // );
   }
 
   async deleteMessage(user: UserJwtPayload, data: MessageDeleteDto) {

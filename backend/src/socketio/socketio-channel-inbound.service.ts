@@ -23,6 +23,7 @@ export class SocketIoChannelInboundService {
         result,
       );
     });
+    return true;
   }
 
   async subscribeChannel(userId: string, channelId: string) {
@@ -37,6 +38,7 @@ export class SocketIoChannelInboundService {
         result,
       );
     });
+    return true;
   }
 
   async unsubscribeChannel(userId: string, channelId: string) {
@@ -54,5 +56,6 @@ export class SocketIoChannelInboundService {
         result,
       );
     });
+    return true;
   }
 }

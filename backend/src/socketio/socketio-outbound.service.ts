@@ -15,10 +15,19 @@ export class SocketIoOutboundService {
     { messageKey, socketId }: { messageKey: string; socketId: string },
     data: any,
   ) {
-    return this.socketGateway.sendToClientBySocketId(
-      { messageKey, socketId },
-      data,
-    );
+    this.socketGateway.sendToClientBySocketId({ messageKey, socketId }, data);
+    return;
+  }
+  test() {
+    return;
+  }
+
+  async sendToUser(userId: string, messageKey: string, data: any) {
+    const sockets = await this.userRedisService.findSocketsByUserId(userId);
+    console.log(sockets);
+    sockets.forEach((socketId) => {
+      this.sendToClient({ messageKey, socketId }, data);
+    });
   }
   test() {
     return;

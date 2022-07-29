@@ -34,7 +34,15 @@ describe('subscribeChannel', () => {
 
     const result = await channelService.subscribeChannel(user.id, channel.id);
 
-    expect(result).toEqual(true);
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: expect.any(String),
+        name: expect.any(String),
+        workspaceId: expect.any(String),
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+      }),
+    );
   });
 
   it('throw notfoundexcection if notfound channel', async () => {
@@ -57,7 +65,16 @@ describe('unsubscribeChannel', () => {
     await channelService.subscribeChannel(user.id, channel.id);
 
     const result = await channelService.unsubscribeChannel(user.id, channel.id);
-    expect(result).toEqual(true);
+ 
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: expect.any(String),
+        name: expect.any(String),
+        workspaceId: expect.any(String),
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+      }),
+    ); 
 
     const channelAfter = await channelService.findChannelsById(channel.id);
     expect(channelAfter.Users).not.toContain(user);

@@ -6,7 +6,6 @@ import { Channel } from "@/common";
 import { useFetchChannels } from "../hooks/useFetchChannels";
 import { channelSearchTextScript } from "./textScript";
 import { RootState } from "@/common/store/store";
-import { httpClient } from "@/common/httpClient";
 
 const ChannelController = ({
   isHover,
@@ -112,8 +111,18 @@ const ChannelItem = ({ channel }: { channel: Channel }) => {
   );
 };
 
-const ChannelSearchResult = ({ channels }: { channels: Channel[] }) => {
-  if (!channels.length) return null;
+const ChannelSearchResult = () => {
+  const { fetchChannels, workspaceChannels: channels } = useFetchChannels();
+  const { currentWorkspaceId } = useSelector(
+    (state: RootState) => state.workspaces
+  );
+  const { subscribedChannels } = useSelector(
+    (state: RootState) => state.channels
+  );
+
+  useEffect(() => {
+    fetchChannels(currentWorkspaceId);
+  }, [currentWorkspaceId, fetchChannels, subscribedChannels]);
 
   return (
     <div className="pt-6">
@@ -132,17 +141,7 @@ const ChannelSearchResult = ({ channels }: { channels: Channel[] }) => {
   );
 };
 
-const fetchChannels = (workspaceId: string) =>
-  httpClient.get<any, Channel[]>(`/channels`, { params: { workspaceId } });
-
 const ChannelSearch = () => {
-  const router = useRouter();
-  const [channels, setChannels] = useState<Channel[]>([]);
-
-  useEffect(() => {
-    fetchChannels(router.query.workspace as string).then((r) => setChannels(r));
-  }, [router.query.workspace]);
-
   return (
     <div className="p-6 flex flex-col">
       <div className="pb-2 flex justify-between">
@@ -160,7 +159,7 @@ const ChannelSearch = () => {
           placeholder={channelSearchTextScript.searchInputPlaceholder}
         />
       </div>
-      <ChannelSearchResult channels={channels} />
+      <ChannelSearchResult />
 
       <div className="pt-10 flex justify-center ">
         <button className="px-3 py-2 font-bold rounded-md button-green">
