@@ -1,35 +1,30 @@
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
-import { useWsMessageOutbound } from "../../hooks/useWsMessageOutbound";
+
+import { useWsMessageOutbound } from "../../message/hooks/useWsMessageOutbound";
 
 const SendCommander = () => {
   const router = useRouter();
   const { createMessage } = useWsMessageOutbound();
-  const [value, setValue] = useState("");
+  const [message, setMessage] = useState("");
   const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     ref.current?.focus();
     return () => {
-      setValue("");
+      setMessage("");
     };
   }, [router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.currentTarget.value);
+    setMessage(e.currentTarget.value);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = {
-      socketInfo: {
-        workspaceId: router.query?.workspace as string,
-        channelId: router.query?.channel as string,
-      },
-      message: value,
-    };
-    createMessage(data);
-    setValue("");
+    if (!message) return;
+    createMessage(message);
+    setMessage("");
   };
 
   return (
@@ -40,11 +35,11 @@ const SendCommander = () => {
           <form action="" onSubmit={handleSubmit}>
             <input
               ref={ref}
-              className="block w-full text-xl bg-transparent py-2 text-neutral-300 focus:outline-none"
+              className="w-full text-xl py-2 text-neutral-300"
               type="text"
               placeholder={`# 에 메세지 보내기.`}
               onChange={handleInputChange}
-              value={value}
+              value={message}
             />
           </form>
           <div className="group-focus-within:text-neutral-400">하단메뉴들</div>

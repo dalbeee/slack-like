@@ -1,9 +1,9 @@
-import Connect from "@/module/app/components/connectWorkspace/Connect";
+import WorkspaceConnector from "@/module/app/workspace/components/WorkspaceConnector";
 
 const Page = () => {
   return (
     <>
-      <Connect />
+      <WorkspaceConnector />
     </>
   );
 };

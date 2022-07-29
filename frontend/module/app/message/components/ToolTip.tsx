@@ -9,7 +9,6 @@ import {
 
 import { Message } from "@/common";
 import ToolTipExpand from "./ToolTipExpand";
-import { createReaction } from "@/common/wsClient";
 
 const ButtonItem = ({
   handleClick,
@@ -59,7 +58,8 @@ const ToolTip: ForwardRefExoticComponent<
     };
 
     const handleReaction = (message: Message) => {
-      createReaction(message.id);
+      // TODO createReaction
+      // createReaction(message.id);
     };
 
     return (

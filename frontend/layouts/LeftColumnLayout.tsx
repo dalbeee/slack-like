@@ -1,7 +1,7 @@
-import ChannelMenu from "../module/app/components/leftColumn/ChannelMenu";
-import FavoriteMenu from "../module/app/components/leftColumn/FavoriteMenu";
-import NewWorkspace from "../module/app/components/leftColumn/NewWorkspace";
-import UpperMenu from "../module/app/components/leftColumn/UpperMenu";
+import ChannelMenu from "../module/app/channel/components/ChannelMenu";
+import FavoriteMenu from "../module/app/channel/components/FavoriteMenu";
+import NewWorkspace from "../module/app/workspace/components/NewWorkspace";
+import UpperMenu from "../module/app/channel/components/UpperMenu";
 
 const Hr = () => {
   return <div className="border-b-neutral-700 w-full border-b"></div>;

@@ -1,25 +1,11 @@
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
 
-import { httpClient } from "@/common/httpClient";
-import { useUser } from "@/module/user/hooks/useUser";
 import { Workspace } from "@/common";
+import { useFetchWorkspaces } from "../hooks/useFetchWorkspaces";
 
-const Connect = () => {
+const WorkspaceConnector = () => {
   const router = useRouter();
-  const { user } = useUser();
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-
-  useEffect(() => {
-    const getWorkspaces = () => {
-      httpClient
-        .get<any, Workspace[]>("/workspaces", {
-          headers: { Authorization: `Bearer ${user.access_token as string}` },
-        })
-        .then((r) => setWorkspaces(r));
-    };
-    getWorkspaces();
-  }, [user.access_token]);
+  const { workspaces } = useFetchWorkspaces();
 
   const handleClick = (workspace: Workspace) => {
     router.push(`/client/${workspace.id}`);
@@ -44,4 +30,4 @@ const Connect = () => {
   );
 };
 
-export default Connect;
+export default WorkspaceConnector;
