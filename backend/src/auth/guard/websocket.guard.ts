@@ -1,6 +1,8 @@
-import { CanActivate, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { verify } from 'jsonwebtoken';
+import { WsException } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
 
 import { UserService } from '@src/user/user.service';
 import { jwtConstants } from '../config/constants';
@@ -11,13 +13,12 @@ export class WsGuard implements CanActivate {
   constructor(private userService: UserService) {}
 
   canActivate(
-    context: any,
+    context: ExecutionContext,
   ): boolean | any | Promise<boolean | any> | Observable<boolean | any> {
-    const handshake = context.args[0].handshake;
-    const bearerToken =
-      handshake.auth.Authorization?.split(' ')[1] ??
-      handshake.headers.authorization?.split(' ')[1];
-    if (!bearerToken) throw new UnauthorizedException();
+    const socket = context.switchToWs().getClient() as Socket;
+    const handshake = socket.handshake;
+    const bearerToken = handshake.auth.token;
+    if (!bearerToken) throw new WsException(new Error('token required'));
 
     try {
       const decoded = verify(
@@ -27,7 +28,7 @@ export class WsGuard implements CanActivate {
       return new Promise((resolve, reject) => {
         return this.userService.findUserByEmail(decoded.email).then((user) => {
           if (user) {
-            context.args[0].user = decoded;
+            (socket as any).user = decoded;
             resolve(user);
           } else {
             reject(false);
@@ -35,7 +36,7 @@ export class WsGuard implements CanActivate {
         });
       });
     } catch (ex) {
-      return false;
+      throw new WsException(new Error('token required'));
     }
   }
 }

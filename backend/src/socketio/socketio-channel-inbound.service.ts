@@ -1,5 +1,4 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { UserJwtPayload } from '@src/auth/types';
 
 import { ChannelService } from '@src/channel/channel.service';
 import { ChannelCreateDto } from '@src/channel/dto/channel-create.dto';
@@ -15,11 +14,9 @@ export class SocketIoChannelInboundService {
     private readonly userRedisService: UserRedisService,
   ) {}
 
-  async createChannel(user: UserJwtPayload, dto: ChannelCreateDto) {
+  async createChannel(userId: string, dto: ChannelCreateDto) {
     const result = await this.channelService.createChannel(dto);
-    const userSockets = await this.userRedisService.findSocketsByUserId(
-      user.id,
-    );
+    const userSockets = await this.userRedisService.findSocketsByUserId(userId);
     userSockets.forEach((socketId) => {
       this.socketIoOutboundService.sendToClient(
         { messageKey: 'channel.create', socketId },

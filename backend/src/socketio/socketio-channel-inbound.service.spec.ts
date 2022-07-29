@@ -49,28 +49,29 @@ describe('createChannel', () => {
       const channel = await createChannel({ workspaceId: workspace.id });
       await channelService.subscribeChannel(user.id, channel.id);
       socketIoClientFactory(port).then((socket) => {
+        const doneCallback = (data: any) => {
+          expect(data).toEqual(
+            expect.objectContaining({
+              id: expect.any(String),
+              name: expect.any(String),
+              workspaceId: expect.any(String),
+            }),
+          );
+          socket.close();
+          done();
+        };
+
         socket
           .on('connect', async () => {
             await userRedisService.setSocketAt(user.id, socket.id);
 
-            await socketIoChannelInboundService.createChannel(user, {
+            await socketIoChannelInboundService.createChannel(user.id, {
               name: 'channel',
               workspaceId: workspace.id,
             });
           })
           .on('channel.create', doneCallback);
       });
-
-      const doneCallback = (data: any) => {
-        expect(data).toEqual(
-          expect.objectContaining({
-            id: expect.any(String),
-            name: expect.any(String),
-            workspaceId: expect.any(String),
-          }),
-        );
-        done();
-      };
     };
     asyncEvaluationFunction();
   });
@@ -83,7 +84,13 @@ describe('subscribeChannel', () => {
       const workspace = await createWorkspace();
       const channel = await createChannel({ workspaceId: workspace.id });
       await channelService.subscribeChannel(user.id, channel.id);
-      socketIoClientFactory(port).then((socket) => {
+      await socketIoClientFactory(port).then((socket) => {
+        const doneCallback = (data: any) => {
+          expect(data).toEqual(true);
+          socket.close();
+          done();
+        };
+
         socket
           .on('connect', async () => {
             await userRedisService.setSocketAt(user.id, socket.id);
@@ -95,12 +102,8 @@ describe('subscribeChannel', () => {
           })
           .on('channel.subscribe', doneCallback);
       });
-
-      const doneCallback = (data: any) => {
-        expect(data).toEqual(true);
-        done();
-      };
     };
+
     asyncEvaluationFunction();
   });
 });
@@ -113,6 +116,12 @@ describe('unsubscribeChannel', () => {
       const channel = await createChannel({ workspaceId: workspace.id });
       await channelService.subscribeChannel(user.id, channel.id);
       socketIoClientFactory(port).then((socket) => {
+        const doneCallback = (data: any) => {
+          expect(data).toEqual(true);
+          socket.close();
+          done();
+        };
+
         socket
           .on('connect', async () => {
             await userRedisService.setSocketAt(user.id, socket.id);
@@ -124,11 +133,6 @@ describe('unsubscribeChannel', () => {
           })
           .on('channel.unsubscribe', doneCallback);
       });
-
-      const doneCallback = (data: any) => {
-        expect(data).toEqual(true);
-        done();
-      };
     };
     asyncEvaluationFunction();
   });

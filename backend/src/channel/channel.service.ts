@@ -47,7 +47,7 @@ export class ChannelService {
         Users: { connect: { id: userId } },
       },
     });
-    return result ? true : false;
+    return result;
   }
 
   async unsubscribeChannel(userId: string, channelId: string) {
@@ -57,7 +57,7 @@ export class ChannelService {
         Users: { disconnect: { id: userId } },
       },
     });
-    return result ? true : false;
+    return result;
   }
 
   async findChannelsById(channelId: string) {
@@ -70,6 +70,9 @@ export class ChannelService {
   }
 
   async findchannelsByWorkspaceId(workspaceId: string) {
-    return this.prisma.channel.findMany({ where: { workspaceId } });
+    return this.prisma.channel.findMany({
+      where: { workspaceId },
+      include: { Users: true },
+    });
   }
 }
