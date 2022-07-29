@@ -10,6 +10,7 @@ import { createUser } from '@src/user/__test__/createUser';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
 import { SocketIoChannelInboundService } from './socketio-channel-inbound.service';
 import { SocketIoModule } from './socketio.module';
+ 
 
 let app: INestApplication;
 let socketIoChannelInboundService: SocketIoChannelInboundService;
@@ -17,7 +18,7 @@ let channelService: ChannelService;
 let prismaService: PrismaService;
 let userRedisService: UserRedisService;
 let redis: RedisService;
-
+ 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
     imports: [SocketIoModule],
@@ -29,6 +30,7 @@ beforeAll(async () => {
   prismaService = app.get(PrismaService);
   redis = app.get(RedisService);
   userRedisService = app.get(UserRedisService);
+ 
 });
 afterEach(async () => {
   await redis.redis.flushdb();

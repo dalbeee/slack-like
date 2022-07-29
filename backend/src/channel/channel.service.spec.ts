@@ -65,6 +65,7 @@ describe('unsubscribeChannel', () => {
     await channelService.subscribeChannel(user.id, channel.id);
 
     const result = await channelService.unsubscribeChannel(user.id, channel.id);
+ 
     expect(result).toEqual(
       expect.objectContaining({
         id: expect.any(String),
@@ -73,7 +74,7 @@ describe('unsubscribeChannel', () => {
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
       }),
-    );
+    ); 
 
     const channelAfter = await channelService.findChannelsById(channel.id);
     expect(channelAfter.Users).not.toContain(user);
