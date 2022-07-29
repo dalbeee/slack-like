@@ -52,7 +52,9 @@ export class UserService {
     return (
       await this.prisma.user.findUnique({
         where: { id: userId },
-        include: { channels: { where: { workspaceId } } },
+        include: {
+          channels: { where: { workspaceId } },
+        },
       })
     ).channels;
   }

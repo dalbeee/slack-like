@@ -1,4 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { UserRedisService } from '@src/user/user-redis.service';
 
 import { SocketIoGateway } from './socketio.gateway';
 
@@ -7,6 +8,7 @@ export class SocketIoOutboundService {
   constructor(
     @Inject(forwardRef(() => SocketIoGateway))
     private readonly socketGateway: SocketIoGateway,
+    private readonly userRedisService: UserRedisService,
   ) {}
 
   async sendToClient(
@@ -17,5 +19,16 @@ export class SocketIoOutboundService {
       { messageKey, socketId },
       data,
     );
+  }
+  test() {
+    return;
+  }
+
+  async sendToUser(userId: string, messageKey: string, data: any) {
+    const sockets = await this.userRedisService.findSocketsByUserId(userId);
+    console.log(sockets);
+    sockets.forEach((socketId) => {
+      this.sendToClient({ messageKey, socketId }, data);
+    });
   }
 }

@@ -62,7 +62,7 @@ describe('saveMessage', () => {
           .on('message.create', (data) => {
             expect(data).toEqual(
               expect.objectContaining({
-                message: expect.any(Object),
+                data: expect.any(Object),
                 metadata: expect.any(Object),
               }),
             );
@@ -85,7 +85,7 @@ describe('saveMessage', () => {
         if (resultArray.length === 2) {
           expect(resultArray[1]).toEqual(
             expect.objectContaining({
-              message: expect.any(Object),
+              data: expect.any(Object),
               metadata: { unreadMessageCount: 2 },
             }),
           );

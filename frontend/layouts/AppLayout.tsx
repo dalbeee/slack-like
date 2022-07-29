@@ -1,4 +1,4 @@
-import DataInitializer from "@/module/app/components/DataInitializer";
+import DataInitializer from "@/module/app/core/components/DataInitializer";
 import ContentColumnLayout from "./ContentColumnLayout";
 import LeftColumnLayout from "./LeftColumnLayout";
 import RightColumnLayout from "./RightColumnLayout";

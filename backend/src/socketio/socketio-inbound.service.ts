@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { Message } from '@prisma/client';
 
 import { UserJwtPayload } from '@src/auth/types';
@@ -17,6 +22,7 @@ export class SocketIoInboudService {
     private readonly messageService: MessageService,
     private readonly userRedisService: UserRedisService,
     private readonly channelService: ChannelService,
+    @Inject(forwardRef(() => SocketIoOutboundService))
     private readonly socketOutboundService: SocketIoOutboundService,
   ) {}
 
@@ -34,7 +40,7 @@ export class SocketIoInboudService {
       message: Message,
     ) => {
       userIds.forEach(async (userId) => {
-        const socketIds = await this.userRedisService.findSocketByUserId(
+        const socketIds = await this.userRedisService.findSocketsByUserId(
           userId,
         );
         const metadata = await this.userRedisService.getChannelDataBy({

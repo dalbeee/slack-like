@@ -47,3 +47,19 @@ describe('subscribeChannel', () => {
     await expect(result).rejects.toThrowError();
   });
 });
+
+describe('unsubscribeChannel', () => {
+  it('return true if success', async () => {
+    const workspace = await createWorkspace();
+    const channel = await createChannel({ workspaceId: workspace.id });
+    const user = await createUser();
+
+    await channelService.subscribeChannel(user.id, channel.id);
+
+    const result = await channelService.unsubscribeChannel(user.id, channel.id);
+    expect(result).toEqual(true);
+
+    const channelAfter = await channelService.findChannelsById(channel.id);
+    expect(channelAfter.Users).not.toContain(user);
+  });
+});

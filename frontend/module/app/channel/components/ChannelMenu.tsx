@@ -4,16 +4,16 @@ import { useRouter } from "next/router";
 
 import MenuItem from "@/common/components/MenuItem";
 import { RootState } from "@/common/store/store";
+import ChannelCreateButton from "./ChannelCreateButton";
 
 const ChannelMenu = () => {
   const router = useRouter();
-  const { workspace } = router.query;
-  const { workspaces } = useSelector((state: RootState) => state.app);
 
-  const channels =
-    workspaces.byHash?.[router.query?.workspace as string]?.channels;
+  const { subscribedChannels } = useSelector(
+    (state: RootState) => state.channels
+  );
 
-  if (!channels || !workspace) return null;
+  if (!subscribedChannels) return null;
 
   const handleClick = (e: React.MouseEvent) => {
     const as = `/client/${router.query?.workspace as string}/${
@@ -21,18 +21,17 @@ const ChannelMenu = () => {
     }`;
     router.push(as);
   };
+
   return (
     <>
       <div className=""></div>
       <MenuItem isParent>
         채널
-        {channels?.byId?.map((channelId) => {
-          // eslint-disable-next-line security/detect-object-injection
-          const channel = channels.byHash[channelId];
+        {subscribedChannels?.map((channel) => {
           return (
             <MenuItem
-              id={channelId}
-              key={channelId}
+              id={channel.id}
+              key={channel.id}
               onClick={handleClick}
               className={`${
                 channel.unreadMessageCount ? "bg-neutral-700" : ""
@@ -42,6 +41,7 @@ const ChannelMenu = () => {
             </MenuItem>
           );
         })}
+        <ChannelCreateButton />
       </MenuItem>
     </>
   );
