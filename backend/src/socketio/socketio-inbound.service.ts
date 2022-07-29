@@ -72,24 +72,6 @@ export class SocketIoInboudService {
     updateChannelMetadataByUserIds(channelSubscribeUserIds);
 
     return sendMessageToClients(channelSubscribeUserIds, message);
-    // const metadata = await this.userRedisService.getChannelDataBy({
-    //   workspaceId: data.socketInfo.workspaceId,
-    //   channelId: data.socketInfo.channelId,
-    //   userId,
-    // });
-
-    // const responseData = {
-    //   data: message,
-    //   metadata,
-    // };
-
-    // return this.socketOutboundService.sendToClient(
-    //   {
-    //     messageKey: 'message.create',
-    //     socketId: '',
-    //   },
-    //   { data: message, metadata: null } as SocketMessageCreate,
-    // );
   }
 
   async deleteMessage(user: UserJwtPayload, data: MessageDeleteDto) {
