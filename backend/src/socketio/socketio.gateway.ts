@@ -8,6 +8,7 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { verify } from 'jsonwebtoken';
 
 import { WebsocketCurrentUser } from '@src/auth/decorator/current-user-websocket.decorator';
 import { WsGuard } from '@src/auth/guard/websocket.guard';
@@ -20,7 +21,6 @@ import { UserRedisService } from '@src/user/user-redis.service';
 import { ChannelCreateDto } from '@src/channel/dto/channel-create.dto';
 import { SocketIoChannelInboundService } from './socketio-channel-inbound.service';
 import { ChannelSubscribeDto } from '@src/channel/dto/channel-subscribe.dto';
-import { verify } from 'jsonwebtoken';
 import { jwtConstants } from '../auth/config/constants';
 
 @WebSocketGateway({

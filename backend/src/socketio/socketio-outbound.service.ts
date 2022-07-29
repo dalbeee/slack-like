@@ -15,10 +15,8 @@ export class SocketIoOutboundService {
     { messageKey, socketId }: { messageKey: string; socketId: string },
     data: any,
   ) {
-    return this.socketGateway.sendToClientBySocketId(
-      { messageKey, socketId },
-      data,
-    );
+    this.socketGateway.sendToClientBySocketId({ messageKey, socketId }, data);
+    return;
   }
   test() {
     return;

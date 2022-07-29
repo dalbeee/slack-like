@@ -1,12 +1,10 @@
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { Server } from 'socket.io';
 
 import { SocketIoGateway } from './socketio.gateway';
 import { SocketIoModule } from './socketio.module';
 import { createUser } from '@src/user/__test__/createUser';
-import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
-import { createChannel } from '@src/channel/__test__/createChannel';
-import { createAccessToken } from '@src/auth/__test__/createAccessToken';
 import { socketIoClientFactory } from './__test__/socketIoClientFactory';
 
 let app: INestApplication;
@@ -105,6 +103,9 @@ describe('connection methods', () => {
 describe('outbound methods', () => {
   describe('broadcastToClients', () => {
     it('send message successfully', (done) => {
+      jest
+        .spyOn(socketGateway, 'handleConnection')
+        .mockImplementation(() => Promise.resolve(new Server()) as any);
       const expectedValue = 'expectedValue';
       const messageKey = 'test';
       socketIoClientFactory(port).then((socket) => {
@@ -123,6 +124,9 @@ describe('outbound methods', () => {
 
   describe('sendToClientBySocketId', () => {
     it('send message successfully', (done) => {
+      jest
+        .spyOn(socketGateway, 'handleConnection')
+        .mockImplementation(() => Promise.resolve(new Server()) as any);
       const messageKey = 'test';
       const expectedValue = 'expectedValue';
       socketIoClientFactory(port).then((socket) => {
@@ -141,41 +145,6 @@ describe('outbound methods', () => {
             socket.close();
             done();
           });
-      });
-    });
-  });
-});
-
-describe('inbound methods', () => {
-  describe('joinClient', () => {
-    const getData = async () => {
-      const workspace = await createWorkspace();
-      const channel = await createChannel({ workspaceId: workspace.id });
-      const user = await createUser();
-      const access_token = await createAccessToken(user);
-      return { user, workspace, channel, access_token };
-    };
-
-    it('send "valid" if connection successfully', (done) => {
-      const messageKey = 'connection';
-      const expectedValue = 'valid';
-      getData().then((r) => {
-        socketIoClientFactory(port, {
-          auth: { Authorization: `Bearer ${r.access_token}` },
-        }).then((socket) => {
-          socket
-            .on('connect', () => {
-              socket.emit('connection', {
-                workspaceId: r.workspace.id,
-                channelId: r.channel.id,
-              });
-            })
-            .on(messageKey, (data) => {
-              expect(data).toEqual(expectedValue);
-              socket.close();
-              done();
-            });
-        });
       });
     });
   });
