@@ -72,7 +72,8 @@ export class SocketIoInboudService {
     updateChannelMetadataByUserIds(channelSubscribeUserIds);
 
     return sendMessageToClients(channelSubscribeUserIds, message); 
-
+    }
+    
   async deleteMessage(user: UserJwtPayload, data: MessageDeleteDto) {
     const result = await this.messageService.deleteMessage(
       user,
