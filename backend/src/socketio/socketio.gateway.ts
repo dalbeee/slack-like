@@ -1,10 +1,11 @@
 import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import {
-  ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
@@ -16,20 +17,42 @@ import { SocketIoInboudService } from './socketio-inbound.service';
 import { MessageDeleteDto } from './dto/message-delete.dto';
 import { ChannelMetadataUpdateDto } from './dto/channel-metadata-update.dto';
 import { UserRedisService } from '@src/user/user-redis.service';
-import { SocketConnectionDto } from './dto/socket-connection.dto';
+import { ChannelCreateDto } from '@src/channel/dto/channel-create.dto';
+import { SocketIoChannelInboundService } from './socketio-channel-inbound.service';
+import { ChannelSubscribeDto } from '@src/channel/dto/channel-subscribe.dto';
+import { verify } from 'jsonwebtoken';
+import { jwtConstants } from '../auth/config/constants';
 
 @WebSocketGateway({
   cors: { origin: '*' },
 })
-export class SocketIoGateway {
+export class SocketIoGateway implements OnGatewayConnection {
   @WebSocketServer()
   io: Server;
 
   constructor(
     @Inject(forwardRef(() => SocketIoInboudService))
     private readonly socketIoService: SocketIoInboudService,
+    @Inject(forwardRef(() => SocketIoChannelInboundService))
+    private readonly socketIoChannelInboundService: SocketIoChannelInboundService,
     private readonly userRedisService: UserRedisService,
   ) {}
+
+  async handleConnection(socket: Socket) {
+    const token = socket.handshake.auth.token;
+    if (!token) return socket.disconnect();
+
+    try {
+      const user = verify(token, jwtConstants.secret) as UserJwtPayload;
+      await this._saveSocketId({
+        userId: user.id,
+        socketId: socket.id,
+      });
+      return;
+    } catch (ex) {
+      throw new WsException('token required');
+    }
+  }
 
   // outbound methods
 
@@ -51,7 +74,7 @@ export class SocketIoGateway {
   }
 
   _findSocketIdFromUserId(userId: string) {
-    return this.userRedisService.findSocketByUserId(userId);
+    return this.userRedisService.findSocketsByUserId(userId);
   }
 
   _removeSocketIdFromUser(userId: string, socketId: string) {
@@ -60,33 +83,13 @@ export class SocketIoGateway {
 
   // inbound methods
 
-  // TODO implement authenticate, if unauthorized, disconnect forcely
-  // TODO new socket join specific workspace
-  @UseGuards(WsGuard)
-  @SubscribeMessage('connection')
-  async joinClient(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() data: SocketConnectionDto,
-    @WebsocketCurrentUser() user: UserJwtPayload,
-  ) {
-    console.log(socket.id);
-
-    if (!Object.keys(data).length) return;
-
-    await this._saveSocketId({
-      userId: user.id,
-      socketId: socket.id,
-    });
-    // TODO TEMP
-    this.io.to(socket.id).emit('connection', 'valid');
-  }
-
   @UseGuards(WsGuard)
   @SubscribeMessage('message.create')
   broadcastToWorkspace(
     @MessageBody() body: MessageCreateDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
+    console.log('message.create event');
     return this.socketIoService.saveMessage(user, body);
   }
 
@@ -97,6 +100,39 @@ export class SocketIoGateway {
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
     return await this.socketIoService.deleteMessage(user, body);
+  }
+
+  @UseGuards(WsGuard)
+  @SubscribeMessage('channel.create')
+  createChannel(
+    @WebsocketCurrentUser() user: UserJwtPayload,
+    @MessageBody() data: ChannelCreateDto,
+  ) {
+    return this.socketIoChannelInboundService.createChannel(user.id, data);
+  }
+
+  @UseGuards(WsGuard)
+  @SubscribeMessage('channel.subscribe')
+  subscribeChannel(
+    @WebsocketCurrentUser() user: UserJwtPayload,
+    @MessageBody() data: ChannelSubscribeDto,
+  ) {
+    return this.socketIoChannelInboundService.subscribeChannel(
+      user.id,
+      data.channelId,
+    );
+  }
+
+  @UseGuards(WsGuard)
+  @SubscribeMessage('channel.unsubscribe')
+  unsubscribeChannel(
+    @WebsocketCurrentUser() user: UserJwtPayload,
+    @MessageBody() data: ChannelSubscribeDto,
+  ) {
+    return this.socketIoChannelInboundService.unsubscribeChannel(
+      user.id,
+      data.channelId,
+    );
   }
 
   @UseGuards(WsGuard)

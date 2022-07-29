@@ -40,7 +40,7 @@ const Login = () => {
           <div className="flex py-4">
             <span className="w-24">email</span>
             <input
-              className="border-b border-neutral-500 w-60"
+              className="rounded-none focus:ring-0 border-b border-neutral-500 w-60"
               type="text"
               {...register("email")}
             />
@@ -49,7 +49,7 @@ const Login = () => {
           <div className="flex py-4">
             <span className="w-24">password</span>
             <input
-              className="border-b border-neutral-500 w-60"
+              className="rounded-none focus:ring-0 border-b border-neutral-500 w-60"
               type="password"
               {...register("password")}
             />

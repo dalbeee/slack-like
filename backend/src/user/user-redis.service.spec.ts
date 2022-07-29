@@ -8,11 +8,13 @@ import { UserModule } from './user.module';
 import { UserRedisService } from './user-redis.service';
 import { createUser } from './__test__/createUser';
 import { RedisService } from '@src/redis/redis.service';
+import { ChannelService } from '@src/channel/channel.service';
 
 let app: TestingModule;
 let userRedisService: UserRedisService;
 let redisService: RedisService;
 let prisma: PrismaService;
+let channelService: ChannelService;
 
 beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
@@ -21,6 +23,7 @@ beforeAll(async () => {
   app = await moduleRef.init();
   userRedisService = app.get(UserRedisService);
   redisService = app.get(RedisService);
+  channelService = app.get(ChannelService);
   prisma = app.get(PrismaService);
 });
 
@@ -96,16 +99,17 @@ describe('channel methods', () => {
       };
       const user = await createUser();
       await Promise.all(
-        channels.map((channel) =>
-          userRedisService._setChannelDataAt(
+        channels.map(async (channel) => {
+          await channelService.subscribeChannel(user.id, channel.id);
+          await userRedisService._setChannelDataAt(
             {
               userId: user.id,
               workspaceId: workspace.id,
               channelId: channel.id,
             },
             targetObject,
-          ),
-        ),
+          );
+        }),
       );
 
       const result = await userRedisService.getChannelDataAll(
@@ -159,12 +163,12 @@ describe('socket methods', () => {
     });
   });
 
-  describe('findSocketByUserId', () => {
+  describe('findSocketsByUserId', () => {
     it('return array of socketId if success', async () => {
       const user = await createUser();
       const socketId = 'socket-01';
       await userRedisService.setSocketAt(user.id, socketId);
-      const result = await userRedisService.findSocketByUserId(user.id);
+      const result = await userRedisService.findSocketsByUserId(user.id);
 
       expect(result).toContain(socketId);
     });
@@ -174,13 +178,13 @@ describe('socket methods', () => {
       const socketId = 'socket-01';
       await userRedisService.setSocketAt(users[0].id, socketId);
 
-      const result = await userRedisService.findSocketByUserId(users[1].id);
+      const result = await userRedisService.findSocketsByUserId(users[1].id);
 
       expect(result).toEqual([]);
     });
   });
 
-  describe('findSocketByUserId', () => {
+  describe('findSocketsByUserId', () => {
     it('return array of socketId if success', async () => {
       const users = [await createUser(), await createUser()];
       const userIds = users.map((user) => user.id);
@@ -234,7 +238,7 @@ describe('socket methods', () => {
       );
       expect(result).toBeTruthy();
 
-      const result2 = await userRedisService.findSocketByUserId(user.id);
+      const result2 = await userRedisService.findSocketsByUserId(user.id);
       expect(result2).toEqual([]);
     });
 
@@ -251,7 +255,7 @@ describe('socket methods', () => {
       );
       expect(result).toBeTruthy();
 
-      const result2 = await userRedisService.findSocketByUserId(user.id);
+      const result2 = await userRedisService.findSocketsByUserId(user.id);
       expect(result2).toEqual(['socket-02']);
     });
   });

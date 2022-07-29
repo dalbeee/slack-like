@@ -88,16 +88,16 @@ export class UserRedisService {
     const user = await this.userService.findUserById(userId);
     if (!user) throw new NotFoundException();
     await this.redisService.redis.sadd(`user:${userId}:socket`, socketId);
-    return this.findSocketByUserId(userId);
+    return this.findSocketsByUserId(userId);
   }
 
-  async findSocketByUserId(userId: string) {
+  async findSocketsByUserId(userId: string) {
     return this.redisService.redis.smembers(`user:${userId}:socket`);
   }
 
   async findSocketByUserIds(userIds: string[]) {
     const socketIds = await Promise.all(
-      userIds.map((userId) => this.findSocketByUserId(userId)),
+      userIds.map((userId) => this.findSocketsByUserId(userId)),
     );
     return socketIds.flat();
   }
@@ -105,13 +105,13 @@ export class UserRedisService {
   async findSocketByMessageAuthor(messageId: string) {
     const message = await this.messageService.findById(messageId);
     if (!message) throw new NotFoundException();
-    return await this.findSocketByUserId(message.userId);
+    return await this.findSocketsByUserId(message.userId);
   }
 
   async removeSocketAt(userId: string, socketId: string) {
     const user = await this.userService.findUserById(userId);
     if (!user) throw new NotFoundException();
     await this.redisService.redis.srem(`user:${userId}:socket`, socketId);
-    return this.findSocketByUserId(userId);
+    return this.findSocketsByUserId(userId);
   }
 }

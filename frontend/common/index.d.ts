@@ -40,6 +40,11 @@ export interface AppState {
   workspaces: WorkspacesHashMap;
 }
 
+export interface UpdateChannelMetadata {
+  socketInfo: SocketInfo;
+  metadata: ChannelMetadata;
+}
+
 export interface ChannelMetadata {
   unreadMessageCount?: number;
 }
