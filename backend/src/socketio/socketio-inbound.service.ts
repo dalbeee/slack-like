@@ -67,13 +67,13 @@ export class SocketIoInboudService {
       content: data.message,
     });
     const channelSubscribeUserIds = (
-      await this.channelService.findChannelsById(data.socketInfo.channelId)
+      await this.channelService.findChannelById(data.socketInfo.channelId)
     ).Users.map((user) => user.id);
     updateChannelMetadataByUserIds(channelSubscribeUserIds);
 
-    return sendMessageToClients(channelSubscribeUserIds, message);
+    return sendMessageToClients(channelSubscribeUserIds, message); 
   }
-
+    
   async deleteMessage(user: UserJwtPayload, data: MessageDeleteDto) {
     const result = await this.messageService.deleteItem(user, data.messageId);
     if (!result) throw new BadRequestException();
@@ -82,7 +82,7 @@ export class SocketIoInboudService {
       messageId: data.messageId,
     };
     const channelSubscribeUserIds = (
-      await this.channelService.findChannelsById(data.socketInfo.channelId)
+      await this.channelService.findChannelById(data.socketInfo.channelId)
     ).Users.map((user) => user.id);
     const socketIds = await this.userRedisService.findSocketByUserIds(
       channelSubscribeUserIds,

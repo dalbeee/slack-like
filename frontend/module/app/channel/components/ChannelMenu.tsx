@@ -24,25 +24,21 @@ const ChannelMenu = () => {
 
   return (
     <>
-      <div className=""></div>
-      <MenuItem isParent>
-        채널
-        {subscribedChannels?.map((channel) => {
-          return (
-            <MenuItem
-              id={channel.id}
-              key={channel.id}
-              onClick={handleClick}
-              className={`${
-                channel.unreadMessageCount ? "bg-neutral-700" : ""
-              }`}
-            >
-              {channel.name}
-            </MenuItem>
-          );
-        })}
-        <ChannelCreateButton />
-      </MenuItem>
+      <MenuItem isParent>채널</MenuItem>
+      {subscribedChannels?.map((channel) => {
+        return (
+          <MenuItem
+            id={channel.id}
+            key={channel.id}
+            onClick={handleClick}
+            className={`${channel.unreadMessageCount ? "bg-neutral-700" : ""}`}
+          >
+            <span className="material-symbols-outlined w-6 h-6">tag</span>
+            {channel.name}
+          </MenuItem>
+        );
+      })}
+      <ChannelCreateButton />
     </>
   );
 };

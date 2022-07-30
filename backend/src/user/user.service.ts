@@ -53,7 +53,7 @@ export class UserService {
       await this.prisma.user.findUnique({
         where: { id: userId },
         include: {
-          channels: { where: { workspaceId } },
+          channels: { where: { workspaceId, NOT: { type: 'DIRECT_MESSAGE' } } },
         },
       })
     ).channels;

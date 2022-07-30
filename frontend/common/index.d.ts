@@ -88,6 +88,8 @@ export type Channel = {
   Messages: Message[];
   createdAt: Date;
   updatedAt: Date;
+  password?: string;
+  type: "PUBLIC" | "PRIVATE" | "DIRECT_MESSAGE";
 };
 
 export type UserJwtToken = {
@@ -104,6 +106,7 @@ export type User = {
   pictureSrc: string | null;
   createdAt?: Date;
   updatedAt?: Date;
+  avatar?: string;
 };
 
 export type UserLoginDto = {

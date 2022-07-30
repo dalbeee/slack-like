@@ -20,7 +20,7 @@ const MenuItem: FC<ComponentProps<"div"> & MenuItemProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`block w-full text-neutral-400 text-left text-lg p-1  
+      className={`flex items-center w-full text-neutral-400 text-left text-lg p-1 text-ellipsis overflow-hidden truncate
         ${
           !isParent && onFocusBrighter
             ? "hover:cursor-pointer hover:bg-neutral-700"
@@ -30,7 +30,10 @@ const MenuItem: FC<ComponentProps<"div"> & MenuItemProps> = ({
       `}
       {...props}
     >
-      <span>{children}</span>
+      {isParent && (
+        <span className="material-symbols-outlined">expand_more</span>
+      )}
+      {children}
     </div>
   );
 };

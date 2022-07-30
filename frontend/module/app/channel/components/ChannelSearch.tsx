@@ -6,6 +6,7 @@ import { Channel } from "@/common";
 import { useFetchChannels } from "../hooks/useFetchChannels";
 import { channelSearchTextScript } from "./textScript";
 import { RootState } from "@/common/store/store";
+import ContentComponent from "../../core/components/ContentComponent";
 
 const ChannelController = ({
   isHover,
@@ -90,11 +91,24 @@ const ChannelItem = ({ channel }: { channel: Channel }) => {
         onClick={handleView}
       >
         <div className="p-2">
-          <div className="text-xl text-neutral-300">#{channel.name}</div>
+          <div className="text-xl text-neutral-300 font-semibold">
+            # {channel.name}
+          </div>
           <div className="">
-            <span className="px-1">{`${subscribed ? "참여함" : ""}`}</span>
+            <span className="px-1 text-emerald-600 font-semibold">
+              {subscribed ? (
+                <>
+                  <span className="text-sm text-emerald-600 material-symbols-outlined">
+                    check
+                  </span>
+                  참여함
+                </>
+              ) : (
+                ""
+              )}
+            </span>
             <span className="px-1">{`${
-              channel?.Users && `* ${channel.Users.length}명의 맴버`
+              channel?.Users && `· ${channel.Users.length}명의 맴버`
             }`}</span>
             <span className="px-1">{channel?.description}</span>
           </div>
@@ -127,7 +141,7 @@ const ChannelSearchResult = () => {
   return (
     <div className="pt-6">
       <div className="text-neutral-200 divide-y">
-        <div className="pb-1">
+        <div className="pb-1 font-bold ">
           {channels.length} {channelSearchTextScript.searchResult}
         </div>
         <div className=""></div>
@@ -141,20 +155,12 @@ const ChannelSearchResult = () => {
   );
 };
 
-const ChannelSearch = () => {
+const Content = () => {
   return (
     <div className="p-6 flex flex-col">
-      <div className="pb-2 flex justify-between">
-        <h1 className="text-neutral-200 font-bold">
-          {channelSearchTextScript.title}
-        </h1>
-        <button className="px-2 py-1 border text-sm button-base">
-          {channelSearchTextScript.createChannelButton}
-        </button>
-      </div>
       <div className="py-4">
         <input
-          className="w-full"
+          className="w-full outline-1 border border-neutral-500 placeholder-neutral-400 placeholder:font-semibold"
           type=""
           placeholder={channelSearchTextScript.searchInputPlaceholder}
         />
@@ -168,6 +174,21 @@ const ChannelSearch = () => {
       </div>
     </div>
   );
+};
+
+const Title = () => (
+  <div className="flex justify-between">
+    <h1 className="text-neutral-200 font-bold">
+      {channelSearchTextScript.title}
+    </h1>
+    <button className="px-2 py-1 border text-sm button-base">
+      {channelSearchTextScript.createChannelButton}
+    </button>
+  </div>
+);
+
+const ChannelSearch = () => {
+  return <ContentComponent title={<Title />} content={<Content />} />;
 };
 
 export default ChannelSearch;
