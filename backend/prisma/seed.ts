@@ -10,7 +10,11 @@ if (process.env.NODE_ENV === 'production') throw Error('run only dev mode');
 const prismaClient = new PrismaClient() as PrismaService;
 const userService = new UserService(prismaClient);
 const workspaceService = new WorkspaceService(prismaClient);
-const channelService = new ChannelService(prismaClient, workspaceService);
+const channelService = new ChannelService(
+  prismaClient,
+  workspaceService,
+  userService,
+);
 
 const createWorkspaces = async () => {
   const workspace1 = await workspaceService.createWorkspace({

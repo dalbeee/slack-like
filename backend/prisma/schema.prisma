@@ -37,8 +37,16 @@ model Workspace {
   updatedAt   DateTime  @updatedAt
 }
 
+enum ChannelType {
+  PUBLIC
+  PRIVATE
+  DIRECT_MESSAGE
+}
+
 model Channel {
   id          String    @id @default(uuid())
+  type        ChannelType @default(PUBLIC)
+  password    String?
   workspaceId String
   WorkSpace   Workspace @relation(fields: [workspaceId], references: [id])
   name        String

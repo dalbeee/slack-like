@@ -4,7 +4,13 @@ import { useCallback, useState } from "react";
 import { Channel, ChannelDataResponse } from "@/common";
 import { httpClient } from "@/common/httpClient";
 import { RootState } from "@/common/store/store";
-import { setChannels } from "@/common/store/channelSlice";
+import {
+  setChannels,
+  setCurrentChannel,
+  setDMChannels,
+} from "@/common/store/channelSlice";
+
+const reservedChannelId = ["browse-channels", "all-dms"];
 
 export const useFetchChannels = () => {
   const dispatch = useDispatch();
@@ -12,6 +18,9 @@ export const useFetchChannels = () => {
   const [workspaceChannels, setWorkspaceChannels] = useState<Channel[]>([]);
   const { currentWorkspaceId } = useSelector(
     (state: RootState) => state.workspaces
+  );
+  const { directMessageChannels } = useSelector(
+    (state: RootState) => state.channels
   );
 
   const fetchChannels = useCallback((workspaceId: string) => {
@@ -21,6 +30,18 @@ export const useFetchChannels = () => {
       })
       .then((r) => setWorkspaceChannels(r));
   }, []);
+
+  const fetchCurrentChannel = useCallback(
+    (channelId: string) => {
+      if (!channelId || reservedChannelId.includes(channelId)) return;
+      httpClient
+        .get<any, Channel>(`/channels`, {
+          params: { channelId },
+        })
+        .then((r) => dispatch(setCurrentChannel(r)));
+    },
+    [dispatch]
+  );
 
   const fetchSubscribedChannels = useCallback(() => {
     if (!user || !currentWorkspaceId) return;
@@ -51,11 +72,40 @@ export const useFetchChannels = () => {
     [currentWorkspaceId, fetchSubscribedChannels, user]
   );
 
+  const findOneDMChannel = useCallback(
+    ({ userIds, workspaceId }: { workspaceId: string; userIds: string[] }) => {
+      if (!user || !currentWorkspaceId || !userIds || !workspaceId) return;
+      return httpClient.get<any, Channel>(`/channels/direct-message-channel`, {
+        params: {
+          workspaceId,
+          userIds,
+        },
+      });
+    },
+    [currentWorkspaceId, user]
+  );
+
+  const fetchManyDMChannels = useCallback(
+    (userId: string) => {
+      if (!currentWorkspaceId || !userId) return;
+      httpClient
+        .get<any, Channel[]>(`/channels/direct-message-channels`, {
+          params: { userIds: userId },
+        })
+        .then((r) => dispatch(setDMChannels(r)));
+    },
+    [currentWorkspaceId, dispatch]
+  );
+
   return {
     workspaceChannels,
     fetchChannels,
     fetchSubscribe,
+    fetchCurrentChannel,
     fetchUnsubscribe,
     fetchSubscribedChannels,
+    findOneDMChannel,
+    fetchManyDMChannels,
+    directMessageChannels,
   };
 };
