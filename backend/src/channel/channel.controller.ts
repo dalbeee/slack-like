@@ -57,4 +57,9 @@ export class ChannelController {
   findDirectMessageChannel(@Query() dto: ChannelFindDirectMesageDto) {
     return this.channelService.findDMChannelByUserIds(dto);
   }
+
+  @Get('/direct-message-channels')
+  findManyDMChannelsByUserId(@Query('userId') userId: string) {
+    return this.channelService.findManyDMChannelsByUserId(userId);
+  }
 }

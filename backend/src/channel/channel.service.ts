@@ -83,7 +83,7 @@ export class ChannelService {
 
   async findchannelsByWorkspaceId(workspaceId: string) {
     return this.prisma.channel.findMany({
-      where: { workspaceId },
+      where: { workspaceId, NOT: { type: 'DIRECT_MESSAGE' } },
       include: { Users: true },
     });
   }
@@ -121,6 +121,7 @@ export class ChannelService {
         WorkSpace: { connect: { id: workspaceId } },
         Users: { connect: [{ id: userIds[0] }, { id: userIds[1] }] },
       },
+      include: { Users: true, Messages: true },
     });
   }
 
@@ -135,8 +136,19 @@ export class ChannelService {
           { Users: { some: { id: userIds[1] } } },
         ],
       },
+      include: { Messages: true, Users: true },
     });
     if (channel) return channel;
     return this._createDirectMessageChannel(dto);
+  }
+
+  async findManyDMChannelsByUserId(userId: string) {
+    return this.prisma.channel.findMany({
+      where: { type: 'DIRECT_MESSAGE', Users: { some: { id: userId } } },
+      include: {
+        Users: true,
+        Messages: { orderBy: { createdAt: 'desc' }, take: 1 },
+      },
+    });
   }
 }
