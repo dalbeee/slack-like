@@ -6,9 +6,9 @@ import {
 
 import { UserJwtPayload } from '@src/auth/types';
 import { PrismaService } from '@src/prisma.service';
+import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageUpdateDto } from './dto/message-update.dto';
 import { MessagesFindDto } from './dto/messages-find.dto';
-import { MessageCreateProps } from './types';
 
 @Injectable()
 export class MessageService {
@@ -22,9 +22,9 @@ export class MessageService {
     return true;
   }
 
-  async createMessage(
+  async createItem(
     { id }: UserJwtPayload,
-    { content, channelId, workspaceId }: MessageCreateProps,
+    { content, channelId, workspaceId }: MessageCreateDto,
   ) {
     try {
       return await this.prisma.message.create({
@@ -40,7 +40,7 @@ export class MessageService {
     }
   }
 
-  async updateMessage(
+  async updateItem(
     { id: userId }: UserJwtPayload,
     { id, ...data }: MessageUpdateDto,
   ) {
@@ -51,15 +51,15 @@ export class MessageService {
     });
   }
 
-  async deleteMessage({ id: userId }: UserJwtPayload, id: string) {
+  async deleteItem({ id: userId }: UserJwtPayload, id: string) {
     await this._validateCollectUser({ id, userId });
     await this.prisma.message.delete({ where: { id } });
     return true;
   }
 
-  findMessages({ channelId, workspaceId }: MessagesFindDto) {
+  findMany(dto: MessagesFindDto) {
     return this.prisma.message.findMany({
-      where: { channelId, workspaceId },
+      where: { ...dto },
     });
   }
 

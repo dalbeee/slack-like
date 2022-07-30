@@ -61,7 +61,7 @@ export class SocketIoInboudService {
       return true;
     };
 
-    const message = await this.messageService.createMessage(user, {
+    const message = await this.messageService.createItem(user, {
       channelId: data.socketInfo.channelId,
       workspaceId: data.socketInfo.workspaceId,
       content: data.message,
@@ -71,14 +71,11 @@ export class SocketIoInboudService {
     ).Users.map((user) => user.id);
     updateChannelMetadataByUserIds(channelSubscribeUserIds);
 
-    return sendMessageToClients(channelSubscribeUserIds, message); 
+    return sendMessageToClients(channelSubscribeUserIds, message);
   }
-    
+
   async deleteMessage(user: UserJwtPayload, data: MessageDeleteDto) {
-    const result = await this.messageService.deleteMessage(
-      user,
-      data.messageId,
-    );
+    const result = await this.messageService.deleteItem(user, data.messageId);
     if (!result) throw new BadRequestException();
 
     const messageData: SocketMessageDelete = {

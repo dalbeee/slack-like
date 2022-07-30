@@ -5,10 +5,10 @@ import { createChannel } from '@src/channel/__test__/createChannel';
 import { PrismaService } from '@src/prisma.service';
 import { createUser } from '@src/user/__test__/createUser';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
+import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageUpdateDto } from './dto/message-update.dto';
 import { MessageModule } from './message.module';
 import { MessageService } from './message.service';
-import { MessageCreateProps } from './types';
 import { createMessage } from './__test__/createMessage';
 
 let app: TestingModule;
@@ -74,21 +74,21 @@ describe('_validateCollectUser', () => {
   });
 });
 
-describe('createMessage', () => {
-  it('return message', async () => {
+describe('createItem', () => {
+  it('return Message', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
       name: faker.datatype.string(),
       workspaceId: workspace.id,
     });
     const user = await createUser();
-    const messageDto: MessageCreateProps = {
+    const messageDto: MessageCreateDto = {
       content: '😊',
       channelId: channel.id,
       workspaceId: workspace.id,
     };
 
-    const result = await messageService.createMessage(user, messageDto);
+    const result = await messageService.createItem(user, messageDto);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -103,8 +103,8 @@ describe('createMessage', () => {
   });
 });
 
-describe('updateMessage', () => {
-  it('return message if success', async () => {
+describe('updateItem', () => {
+  it('return Message', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
       name: faker.datatype.string(),
@@ -122,7 +122,7 @@ describe('updateMessage', () => {
       id: message.id,
     };
 
-    const result = await messageService.updateMessage(user, updateDto);
+    const result = await messageService.updateItem(user, updateDto);
 
     expect(result).toBeDefined();
   });
@@ -146,14 +146,14 @@ describe('updateMessage', () => {
       id: message.id,
     };
 
-    const result = () => messageService.updateMessage(invalidUser, updateDto);
+    const result = () => messageService.updateItem(invalidUser, updateDto);
 
     await expect(result).rejects.toThrowError();
   });
 });
 
-describe('deleteMessage', () => {
-  it('return true if success', async () => {
+describe('deleteItem', () => {
+  it('return true', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
       name: faker.datatype.string(),
@@ -167,7 +167,7 @@ describe('deleteMessage', () => {
       workspaceId: workspace.id,
     });
 
-    const result = await messageService.deleteMessage(user, message.id);
+    const result = await messageService.deleteItem(user, message.id);
 
     expect(result).toEqual(true);
   });
@@ -187,7 +187,7 @@ describe('deleteMessage', () => {
     });
     const invalidUser = await createUser();
 
-    const result = () => messageService.deleteMessage(invalidUser, message.id);
+    const result = () => messageService.deleteItem(invalidUser, message.id);
 
     await expect(result).rejects.toThrowError();
   });
