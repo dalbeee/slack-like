@@ -75,7 +75,7 @@ export class ChannelService {
   async findChannelById(channelId: string) {
     const channel = await this.prisma.channel.findFirst({
       where: { id: channelId },
-      include: { Messages: true, Users: true },
+      include: { Messages: { include: { reactions: true } }, Users: true },
     });
     if (!channel) throw new NotFoundException();
     return channel;

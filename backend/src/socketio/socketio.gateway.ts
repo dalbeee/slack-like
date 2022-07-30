@@ -13,15 +13,16 @@ import { verify } from 'jsonwebtoken';
 import { WebsocketCurrentUser } from '@src/auth/decorator/current-user-websocket.decorator';
 import { WsGuard } from '@src/auth/guard/websocket.guard';
 import { UserJwtPayload } from '@src/auth/types';
-import { MessageCreateDto } from './dto/message-create.dto';
 import { SocketIoInboudService } from './socketio-inbound.service';
-import { MessageDeleteDto } from './dto/message-delete.dto';
-import { ChannelMetadataUpdateDto } from './dto/channel-metadata-update.dto';
 import { UserRedisService } from '@src/user/user-redis.service';
 import { ChannelCreateDto } from '@src/channel/dto/channel-create.dto';
 import { SocketIoChannelInboundService } from './socketio-channel-inbound.service';
 import { ChannelSubscribeDto } from '@src/channel/dto/channel-subscribe.dto';
 import { jwtConstants } from '../auth/config/constants';
+import { SocketIoMessageInboundService } from './socketio-message-inbound.service';
+import { SocketWrapper } from './dto/socket-wrapper.dto';
+import { MessageDeleteDto } from '@src/message/dto/message-delete.dto';
+import { MessageCreateDto } from '@src/message/dto/message-create.dto';
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -35,6 +36,8 @@ export class SocketIoGateway implements OnGatewayConnection {
     private readonly socketIoService: SocketIoInboudService,
     @Inject(forwardRef(() => SocketIoChannelInboundService))
     private readonly socketIoChannelInboundService: SocketIoChannelInboundService,
+    @Inject(forwardRef(() => SocketIoMessageInboundService))
+    private readonly socketIoMessageInboundService: SocketIoMessageInboundService,
     private readonly userRedisService: UserRedisService,
   ) {}
 
@@ -44,10 +47,11 @@ export class SocketIoGateway implements OnGatewayConnection {
 
     try {
       const user = verify(token, jwtConstants.secret) as UserJwtPayload;
-      await this._saveSocketId({
+      const data = {
         userId: user.id,
         socketId: socket.id,
-      });
+      };
+      await this._saveSocketId(data);
       return;
     } catch (ex) {
       throw new WsException('token required');
@@ -55,7 +59,6 @@ export class SocketIoGateway implements OnGatewayConnection {
   }
 
   // outbound methods
-
   sendToClientBySocketId(
     { messageKey, socketId }: { socketId: string; messageKey: string },
     data: any,
@@ -68,7 +71,6 @@ export class SocketIoGateway implements OnGatewayConnection {
   }
 
   // connection methods
-
   _saveSocketId({ socketId, userId }: { userId: string; socketId: string }) {
     return this.userRedisService.setSocketAt(userId, socketId);
   }
@@ -81,27 +83,45 @@ export class SocketIoGateway implements OnGatewayConnection {
     return this.userRedisService.removeSocketAt(userId, socketId);
   }
 
-  // inbound methods
-
+  // Message
   @UseGuards(WsGuard)
   @SubscribeMessage('message.create')
   broadcastToWorkspace(
-    @MessageBody() body: MessageCreateDto,
+    @MessageBody() body: SocketWrapper & MessageCreateDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
-    console.log('message.create event');
-    return this.socketIoService.saveMessage(user, body);
+    return this.socketIoMessageInboundService.createItem(user, body);
   }
 
   @UseGuards(WsGuard)
   @SubscribeMessage('message.delete')
   async deleteMessage(
-    @MessageBody() body: MessageDeleteDto,
+    @MessageBody() body: SocketWrapper & MessageDeleteDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
-    return await this.socketIoService.deleteMessage(user, body);
+    return await this.socketIoMessageInboundService.deleteItem(user, body);
   }
 
+  // MessageReaction
+  @UseGuards(WsGuard)
+  @SubscribeMessage('message_reaction.create')
+  createMessageReaction(
+    @MessageBody() body: SocketWrapper & MessageCreateDto,
+    @WebsocketCurrentUser() user: UserJwtPayload,
+  ) {
+    return this.socketIoMessageInboundService.createItem(user, body);
+  }
+
+  @UseGuards(WsGuard)
+  @SubscribeMessage('message_reaction.delete')
+  deleteMessageReaction(
+    @MessageBody() body: SocketWrapper & MessageDeleteDto,
+    @WebsocketCurrentUser() user: UserJwtPayload,
+  ) {
+    return this.socketIoMessageInboundService.deleteItem(user, body);
+  }
+
+  // Channel
   @UseGuards(WsGuard)
   @SubscribeMessage('channel.create')
   createChannel(
@@ -139,7 +159,7 @@ export class SocketIoGateway implements OnGatewayConnection {
   @SubscribeMessage('channel.setZeroUnreadMessageCount')
   updateChannelMetadata(
     @WebsocketCurrentUser() user: UserJwtPayload,
-    @MessageBody() body: ChannelMetadataUpdateDto,
+    @MessageBody() body: SocketWrapper,
   ) {
     this.socketIoService.setZeroUnreadMessageCount({
       channelId: body.socketInfo.channelId,

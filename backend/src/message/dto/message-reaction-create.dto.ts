@@ -6,8 +6,5 @@ export class MessageReactionCreateDto {
   content!: string;
 
   @IsString()
-  userId!: string;
-
-  @IsString()
   messageId!: string;
 }

@@ -1,8 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 
 import { CurrentUser } from '@src/auth/decorator/current-user.decorator';
 import { UserJwtPayload } from '@src/auth/types';
 import { MessageCreateDto } from './dto/message-create.dto';
+import { MessageDeleteDto } from './dto/message-delete.dto';
 import { MessageReactionCreateDto } from './dto/message-reaction-create.dto';
 import { MessagesFindDto } from './dto/messages-find.dto';
 import { MessageReactionService } from './message-reaction.service';
@@ -23,23 +32,26 @@ export class MessageController {
     return this.messageService.createItem(user, dto);
   }
 
-  @Delete('/messages/:messageId')
-  deleteMessage(
-    @Param('messageId') id: string,
-    @CurrentUser() user: UserJwtPayload,
-  ) {
-    return this.messageService.deleteItem(user, id);
+  @Get('/messages')
+  findMessages(@Query() dto: MessagesFindDto) {
+    return this.messageService.findMany(dto);
   }
 
-  @Get('/messages')
-  findMessages(@Param() dto: MessagesFindDto) {
-    return this.messageService.findMany(dto);
+  @Delete('/messages/:messageId')
+  deleteMessage(
+    @Body() dto: MessageDeleteDto,
+    @CurrentUser() user: UserJwtPayload,
+  ) {
+    return this.messageService.deleteItem(user, dto.messageId);
   }
 
   // MessageReaction
   @Post('/reactions')
-  createMessageReaction(@Body() dto: MessageReactionCreateDto) {
-    return this.messageReactionService.createItem(dto);
+  createMessageReaction(
+    @Body() dto: MessageReactionCreateDto,
+    @CurrentUser() user: UserJwtPayload,
+  ) {
+    return this.messageReactionService.createItem(user, dto);
   }
 
   @Delete('/reactions/:reactionId')

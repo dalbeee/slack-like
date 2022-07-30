@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { ChannelData } from "@/common";
+import { ChannelData, MessageReaction } from "@/common";
 import { httpClient } from "@/common/httpClient";
 import { setMessages } from "@/common/store/messageSlice";
 import { RootState } from "@/common/store/store";
@@ -22,5 +22,13 @@ export const useFetchMessages = () => {
       .then((r) => dispatch(setMessages(r.Messages)));
   }, [dispatch, router.query?.channel, user]);
 
-  return { fetchMessages, messages };
+  const postMessageReaction = useCallback(
+    (dto: { messageId: string; userId: string; content: string }) => {
+      if (!user) return;
+      return httpClient.post<any, MessageReaction>(`/messages/reactions`, dto);
+    },
+    [user]
+  );
+
+  return { fetchMessages, messages, postMessageReaction };
 };

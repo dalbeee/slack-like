@@ -46,11 +46,10 @@ describe('createItem', () => {
     });
     const dto: MessageReactionCreateDto = {
       content: '😊',
-      userId: user.id,
       messageId: message.id,
     };
 
-    const result = await messageReactionService.createItem(dto);
+    const result = await messageReactionService.createItem(user, dto);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -77,10 +76,9 @@ describe('createItem', () => {
     const dto: MessageReactionCreateDto = {
       content: '😊😊',
       messageId: message.id,
-      userId: user.id,
     };
 
-    const result = messageReactionService.createItem(dto);
+    const result = messageReactionService.createItem(user, dto);
 
     await expect(result).rejects.toThrowError();
   });
@@ -102,9 +100,8 @@ describe('deleteItem', () => {
     const createDto: MessageReactionCreateDto = {
       content: '😊',
       messageId: message.id,
-      userId: user.id,
     };
-    const reaction = await messageReactionService.createItem(createDto);
+    const reaction = await messageReactionService.createItem(user, createDto);
 
     const result = await messageReactionService.deleteItem(user, reaction.id);
 
@@ -132,9 +129,8 @@ describe('deleteItem', () => {
     const createDto: MessageReactionCreateDto = {
       content: '😊',
       messageId: message.id,
-      userId: user.id,
     };
-    const reaction = await messageReactionService.createItem(createDto);
+    const reaction = await messageReactionService.createItem(user, createDto);
 
     const result = () =>
       messageReactionService.deleteItem(invalid_user, reaction.id);

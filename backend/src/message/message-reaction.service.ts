@@ -16,7 +16,10 @@ export class MessageReactionService {
     private readonly messageService: MessageService,
   ) {}
 
-  async createItem({ content, messageId, userId }: MessageReactionCreateDto) {
+  async createItem(
+    user: UserJwtPayload,
+    { content, messageId }: MessageReactionCreateDto,
+  ) {
     if (content.length !== 2) throw new BadRequestException();
 
     const message = await this.messageService.findById(messageId);
@@ -26,7 +29,7 @@ export class MessageReactionService {
       data: {
         content,
         message: { connect: { id: messageId } },
-        user: { connect: { id: userId } },
+        user: { connect: { id: user.id } },
       },
     });
   }

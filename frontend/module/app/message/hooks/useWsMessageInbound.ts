@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useDispatch } from "react-redux";
 
-import { SocketMessageCreate, SocketMessageDelete } from "@/common";
+import { Message } from "@/common";
 import { appendMessage, deleteMessage } from "@/common/store/messageSlice";
 
 export const useWsMessageInbound = () => {
@@ -10,8 +10,8 @@ export const useWsMessageInbound = () => {
   const messageCreateCallback = useMemo(
     () => ({
       messageKey: "message.create",
-      callbackFn: (data: SocketMessageCreate) => {
-        dispatch(appendMessage(data.data));
+      callbackFn: (data: Message) => {
+        dispatch(appendMessage(data));
       },
     }),
     [dispatch]
@@ -20,8 +20,7 @@ export const useWsMessageInbound = () => {
   const messageDeleteCallback = useMemo(
     () => ({
       messageKey: "message.delete",
-      callbackFn: (data: SocketMessageDelete) =>
-        dispatch(deleteMessage(data.messageId)),
+      callbackFn: (data: Message) => dispatch(deleteMessage(data)),
     }),
     [dispatch]
   );

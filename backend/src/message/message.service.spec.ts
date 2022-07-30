@@ -33,7 +33,7 @@ afterAll(async () => {
   await app.close();
 });
 
-describe('_validateCollectUser', () => {
+describe('_validateCorrectUser', () => {
   it('return true if user match', async () => {
     const user = await createUser();
     const workspace = await createWorkspace();
@@ -45,7 +45,7 @@ describe('_validateCollectUser', () => {
       workspaceId: workspace.id,
     });
 
-    const result = await messageService._validateCollectUser({
+    const result = await messageService._validateCorrectUser({
       id: message.id,
       userId: user.id,
     });
@@ -65,7 +65,7 @@ describe('_validateCollectUser', () => {
     });
 
     const result = () =>
-      messageService._validateCollectUser({
+      messageService._validateCorrectUser({
         id: message.id,
         userId: 'abcd',
       });
@@ -169,7 +169,14 @@ describe('deleteItem', () => {
 
     const result = await messageService.deleteItem(user, message.id);
 
-    expect(result).toEqual(true);
+    expect(result).toEqual(
+      expect.objectContaining({
+        userId: expect.any(String),
+        content: expect.any(String),
+        workspaceId: expect.any(String),
+        channelId: expect.any(String),
+      }),
+    );
   });
 
   it('throw forbidden error if not valid user', async () => {

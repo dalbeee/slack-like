@@ -14,7 +14,7 @@ import { MessagesFindDto } from './dto/messages-find.dto';
 export class MessageService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async _validateCollectUser({ id, userId }: { id: string; userId: string }) {
+  async _validateCorrectUser({ id, userId }: { id: string; userId: string }) {
     const message = await this.prisma.message.findUnique({
       where: { id },
     });
@@ -44,7 +44,7 @@ export class MessageService {
     { id: userId }: UserJwtPayload,
     { id, ...data }: MessageUpdateDto,
   ) {
-    await this._validateCollectUser({ id, userId });
+    await this._validateCorrectUser({ id, userId });
     return this.prisma.message.update({
       where: { id },
       data,
@@ -52,9 +52,8 @@ export class MessageService {
   }
 
   async deleteItem({ id: userId }: UserJwtPayload, id: string) {
-    await this._validateCollectUser({ id, userId });
-    await this.prisma.message.delete({ where: { id } });
-    return true;
+    await this._validateCorrectUser({ id, userId });
+    return await this.prisma.message.delete({ where: { id } });
   }
 
   findMany(dto: MessagesFindDto) {
