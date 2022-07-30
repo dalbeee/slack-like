@@ -20,7 +20,7 @@ const MenuItem: FC<ComponentProps<"div"> & MenuItemProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`flex items-center w-full text-neutral-400 text-left text-lg p-1  
+      className={`flex items-center w-full text-neutral-400 text-left text-lg p-1 text-ellipsis overflow-hidden truncate
         ${
           !isParent && onFocusBrighter
             ? "hover:cursor-pointer hover:bg-neutral-700"

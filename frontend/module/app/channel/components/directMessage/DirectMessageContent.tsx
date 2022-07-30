@@ -59,11 +59,11 @@ const DirectMessageContentItem = ({
   );
 };
 
-const DirectMessageContent = () => {
+const Content = () => {
   const { directMessageChannels } = useFetchChannels();
 
   return (
-    <ContentComponent title="다이렉트 메시지">
+    <>
       <div className="px-4 py-1 flex items-center">
         <span className="w-24">받는 사람:</span>
         <input
@@ -78,8 +78,12 @@ const DirectMessageContent = () => {
           );
         })}
       </div>
-    </ContentComponent>
+    </>
   );
+};
+
+const DirectMessageContent = () => {
+  return <ContentComponent title="다이렉트 메시지" content={<Content />} />;
 };
 
 export default DirectMessageContent;

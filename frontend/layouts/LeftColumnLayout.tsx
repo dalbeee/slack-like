@@ -10,7 +10,7 @@ const Hr = () => {
 
 const LeftColumnLayout = () => {
   return (
-    <div className="w-4/12 pl-2">
+    <div className="w-2/12 pl-2 sm:w-3/12 divide-y">
       <NewWorkspace />
       <div className="h-leftColumnContent scrollbar-base">
         <UpperMenu />
