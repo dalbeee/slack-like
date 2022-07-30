@@ -11,12 +11,14 @@ import { UserJwtPayload } from '@src/auth/types';
 
 import { ChannelService } from './channel.service';
 import { ChannelCreateDto } from './dto/channel-create.dto';
+import { ChannelFindDirectMesageDto } from './dto/channel-find-dm.dto';
 import { ChannelSubscribeDto } from './dto/channel-subscribe.dto';
 
 @Controller('/channels')
 export class ChannelController {
   constructor(private readonly channelService: ChannelService) {}
 
+  // PUBLIC, PRIVATE
   @Post()
   createChannel(@Body() data: ChannelCreateDto) {
     return this.channelService.createChannel(data);
@@ -45,7 +47,14 @@ export class ChannelController {
   ) {
     if (workspaceId)
       return this.channelService.findchannelsByWorkspaceId(workspaceId);
-    if (channelId) return this.channelService.findChannelsById(channelId);
+    if (channelId) return this.channelService.findChannelById(channelId);
     throw new BadRequestException();
+  }
+
+  // DM
+
+  @Get('/direct-message-channel')
+  findDirectMessageChannel(@Query() dto: ChannelFindDirectMesageDto) {
+    return this.channelService.findDMChannelByUserIds(dto);
   }
 }
