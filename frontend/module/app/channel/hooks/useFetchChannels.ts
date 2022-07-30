@@ -4,7 +4,13 @@ import { useCallback, useState } from "react";
 import { Channel, ChannelDataResponse } from "@/common";
 import { httpClient } from "@/common/httpClient";
 import { RootState } from "@/common/store/store";
-import { setChannels, setDMChannels } from "@/common/store/channelSlice";
+import {
+  setChannels,
+  setCurrentChannel,
+  setDMChannels,
+} from "@/common/store/channelSlice";
+
+const reservedChannelId = ["browse-channels", "all-dms"];
 
 export const useFetchChannels = () => {
   const dispatch = useDispatch();
@@ -24,6 +30,18 @@ export const useFetchChannels = () => {
       })
       .then((r) => setWorkspaceChannels(r));
   }, []);
+
+  const fetchCurrentChannel = useCallback(
+    (channelId: string) => {
+      if (!channelId || reservedChannelId.includes(channelId)) return;
+      httpClient
+        .get<any, Channel>(`/channels`, {
+          params: { channelId },
+        })
+        .then((r) => dispatch(setCurrentChannel(r)));
+    },
+    [dispatch]
+  );
 
   const fetchSubscribedChannels = useCallback(() => {
     if (!user || !currentWorkspaceId) return;
@@ -83,6 +101,7 @@ export const useFetchChannels = () => {
     workspaceChannels,
     fetchChannels,
     fetchSubscribe,
+    fetchCurrentChannel,
     fetchUnsubscribe,
     fetchSubscribedChannels,
     findOneDMChannel,
