@@ -1,11 +1,15 @@
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
+import { useSelector } from "react-redux";
 
 import ToolTip from "./ToolTip";
 import { useWsChannelOutbound } from "../../channel/hooks/useWsChannelOutbound";
 import { useFetchMessages } from "../hooks/useFetchMessages";
+import ContentComponent from "../../core/components/ContentComponent";
+import { RootState } from "@/common/store/store";
+import SendCommander from "./SendCommander";
 
-const MessagesViewer = () => {
+const Content = () => {
   const { fetchMessages, messages } = useFetchMessages();
   const { setZeroUnreadMessageCount } = useWsChannelOutbound();
   const [isHighliterLocked, setIsHighliterLocked] = useState(false);
@@ -39,7 +43,7 @@ const MessagesViewer = () => {
   if (!messages) return null;
 
   return (
-    <div className="h-full" onClick={handleClickBackground}>
+    <div className="" onClick={handleClickBackground}>
       {messages.map((m) => (
         <div
           className={`relative group bg-opacity-50 justify-between py-2 flex ${
@@ -77,6 +81,43 @@ const MessagesViewer = () => {
         </div>
       ))}
     </div>
+  );
+};
+
+const Title = () => {
+  const { currentChannel } = useSelector((state: RootState) => state.channels);
+  const { user: currentUser } = useSelector((state: RootState) => state.user);
+
+  if (!currentChannel || !currentUser) return null;
+
+  const opponentUser = currentChannel.Users.filter(
+    (user) => user.id !== currentUser.id
+  )[0];
+  const channelName =
+    currentChannel.type === "PUBLIC" || currentChannel.type === "PRIVATE"
+      ? currentChannel.name
+      : currentChannel.type === "DIRECT_MESSAGE" && opponentUser.name;
+
+  return (
+    <div className="flex items-center text-light">
+      {channelName}
+      <button className="material-symbols-outlined">expand_more</button>
+    </div>
+  );
+};
+
+const Bottom = () => {
+  const { currentChannel } = useSelector((state: RootState) => state.channels);
+  return <>{currentChannel && <SendCommander />}</>;
+};
+
+const MessagesViewer = () => {
+  return (
+    <ContentComponent
+      title={<Title />}
+      content={<Content />}
+      bottom={<Bottom />}
+    />
   );
 };
 
