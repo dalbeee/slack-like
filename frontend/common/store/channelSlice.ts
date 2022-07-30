@@ -7,8 +7,12 @@ import {
   UpdateChannelMetadata,
 } from "@/common";
 
-const initialState: { subscribedChannels: ChannelData[] } = {
+const initialState: {
+  subscribedChannels: ChannelData[];
+  directMessageChannels: ChannelData[];
+} = {
   subscribedChannels: [],
+  directMessageChannels: [],
 };
 
 export const channelSlice = createSlice({
@@ -43,6 +47,10 @@ export const channelSlice = createSlice({
       });
       state.subscribedChannels = channels;
     },
+
+    setDMChannels: (state, action: PayloadAction<Channel[]>) => {
+      state.directMessageChannels = action.payload;
+    },
   },
 });
 
@@ -51,6 +59,7 @@ export const {
   deleteChannel,
   setChannels,
   updateChannelMetadata,
+  setDMChannels,
 } = channelSlice.actions;
 
 export default channelSlice.reducer;
