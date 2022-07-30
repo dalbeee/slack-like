@@ -9,7 +9,7 @@ const DataInitializer = () => {
   const router = useRouter();
   useSocketServiceManager();
   const { fetchWorkspace, fetchJoinedWorkspaces } = useFetchWorkspaces();
-  const { fetchSubscribedChannels } = useFetchChannels();
+  const { fetchSubscribedChannels, fetchCurrentChannel } = useFetchChannels();
 
   useEffect(() => {
     fetchSubscribedChannels();
@@ -20,6 +20,11 @@ const DataInitializer = () => {
     if (!router.query.workspace) return;
     fetchWorkspace(router.query?.workspace as string);
   }, [fetchWorkspace, router.query.workspace]);
+
+  useEffect(() => {
+    if (!router.query.channel) return;
+    fetchCurrentChannel(router.query?.channel as string);
+  }, [fetchCurrentChannel, router.query.channel]);
 
   return <></>;
 };
