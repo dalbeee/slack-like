@@ -4,9 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { UserJwtPayload } from '@src/auth/types';
 import { PrismaService } from '@src/prisma.service';
+import { MessageReactionCreateDto } from './dto/message-reaction-create.dto';
 import { MessageService } from './message.service';
-import { MessageReactionCreateProps } from './types';
 
 @Injectable()
 export class MessageReactionService {
@@ -15,57 +16,33 @@ export class MessageReactionService {
     private readonly messageService: MessageService,
   ) {}
 
-  _findByContent({
-    messageId,
-    userId,
-    content,
-  }: {
-    messageId: string;
-    userId: string;
-    content: string;
-  }) {
-    return this.prisma.messageReaction.findFirst({
-      where: { messageId, userId, content },
-    });
-  }
+  async createItem({ content, messageId, userId }: MessageReactionCreateDto) {
+    if (content.length !== 2) throw new BadRequestException();
 
-  async create({ content, messageId, userId }: MessageReactionCreateProps) {
     const message = await this.messageService.findById(messageId);
     if (!message) throw new NotFoundException('not found message');
 
-    const existReaction = await this._findByContent({
-      content,
-      messageId,
-      userId,
+    return await this.prisma.messageReaction.create({
+      data: {
+        content,
+        message: { connect: { id: messageId } },
+        user: { connect: { id: userId } },
+      },
     });
-    if (existReaction) return existReaction;
-    try {
-      return await this.prisma.messageReaction.create({
-        data: {
-          content,
-          message: { connect: { id: messageId } },
-          user: { connect: { id: userId } },
-        },
-      });
-    } catch (error) {
-      console.log(error);
-      throw new BadRequestException();
-    }
   }
 
-  async delete({ content, messageId, userId }: MessageReactionCreateProps) {
-    const { id } = await this._findByContent({ content, messageId, userId });
-    if (!id) throw new NotFoundException();
+  async deleteItem(user: UserJwtPayload, id: string) {
+    const reaction = await this.prisma.messageReaction.findFirst({
+      where: { id, userId: user.id },
+    });
+    if (!reaction) throw new BadRequestException();
+
     return this.prisma.messageReaction.delete({ where: { id } });
   }
 
-  findByUserAndMessage({
-    messageId,
-    userId,
-  }: Omit<MessageReactionCreateProps, 'content'>) {
+  findManyByMessageId(messageId: string) {
     return this.prisma.messageReaction.findMany({
-      where: { messageId, userId },
-      select: { content: true },
+      where: { messageId },
     });
   }
 }
