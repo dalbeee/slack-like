@@ -9,7 +9,7 @@ const ChannelCreateButton = () => {
   return (
     <MenuItem className="flex items-center" onClick={handleClick}>
       <span className="material-symbols-outlined">add_box</span>
-      <span>채널 추가</span>
+      채널 추가
     </MenuItem>
   );
 };
