@@ -88,6 +88,8 @@ export type Channel = {
   Messages: Message[];
   createdAt: Date;
   updatedAt: Date;
+  password?: string;
+  type: "PUBLIC" | "PRIVATE" | "DIRECT_MESSAGE";
 };
 
 export type UserJwtToken = {
