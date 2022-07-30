@@ -12,7 +12,11 @@ module.exports = {
         content: "95vh",
         top: "5vh",
       },
+      height: {
+        content: "95vh",
+        leftColumnContent: "80vh",
+      },
     },
   },
-  plugins: [],
+  plugins: [require("tailwind-scrollbar")],
 };
