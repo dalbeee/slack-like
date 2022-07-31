@@ -18,7 +18,6 @@ export const useWsMessageInbound = () => {
     () => ({
       messageKey: "message.create",
       callbackFn: (data: Message) => {
-        console.log(data);
         if (data.ancestorId) {
           dispatch(appendComment(data));
           dispatch(
