@@ -25,6 +25,22 @@ export const messageSlice = createSlice({
       );
     },
 
+    updateMessageCommentsCount: (state, action: PayloadAction<Message>) => {
+      const index = state.messages.findIndex(
+        (message) => message.id === action.payload.id
+      );
+      const message = state.messages[index];
+      const updatedMessage: Message = {
+        ...message,
+        commentsCount: action.payload.commentsCount,
+      };
+      state.messages = [
+        ...state.messages.slice(0, index),
+        updatedMessage,
+        ...state.messages.slice(index + 1),
+      ];
+    },
+
     resetMessageAll: (state) => {
       state.messages = initialState.messages;
     },
@@ -71,6 +87,7 @@ export const {
   setMessages,
   appendMessage,
   deleteMessage,
+  updateMessageCommentsCount,
   resetMessageAll,
   appendMessageReaction,
   deleteMessageReaction,

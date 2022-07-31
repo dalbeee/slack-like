@@ -7,7 +7,9 @@ import {
   appendMessageReaction,
   deleteMessage,
   deleteMessageReaction,
+  updateMessageCommentsCount,
 } from "@/common/store/messageSlice";
+import { appendComment, deleteComment } from "@/common/store/threadSlice";
 
 export const useWsMessageInbound = () => {
   const dispatch = useDispatch();
@@ -16,7 +18,12 @@ export const useWsMessageInbound = () => {
     () => ({
       messageKey: "message.create",
       callbackFn: (data: Message) => {
-        dispatch(appendMessage(data));
+        if (data.ancestorId) {
+          dispatch(appendComment(data));
+          dispatch(updateMessageCommentsCount(data));
+        } else {
+          dispatch(appendMessage(data));
+        }
       },
     }),
     [dispatch]
@@ -25,7 +32,14 @@ export const useWsMessageInbound = () => {
   const messageDeleteCallback = useMemo(
     () => ({
       messageKey: "message.delete",
-      callbackFn: (data: Message) => dispatch(deleteMessage(data)),
+      callbackFn: (data: Message) => {
+        if (data.ancestorId) {
+          dispatch(deleteComment(data));
+          dispatch(updateMessageCommentsCount(data));
+        } else {
+          dispatch(deleteMessage(data));
+        }
+      },
     }),
     [dispatch]
   );
