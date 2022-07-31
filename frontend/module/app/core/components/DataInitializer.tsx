@@ -15,7 +15,7 @@ const DataInitializer = () => {
   useSocketServiceManager();
   const { fetchWorkspace, fetchJoinedWorkspaces } = useFetchWorkspaces();
   const { fetchSubscribedChannels, fetchCurrentChannel } = useFetchChannels();
-  const { fetchThread } = useFetchMessages();
+  const { fetchThread, fetchMessages } = useFetchMessages();
 
   useEffect(() => {
     fetchSubscribedChannels();
@@ -30,7 +30,8 @@ const DataInitializer = () => {
   useEffect(() => {
     if (!router.query.channel) return;
     fetchCurrentChannel(router.query?.channel as string);
-  }, [fetchCurrentChannel, router.query.channel]);
+    fetchMessages();
+  }, [fetchCurrentChannel, fetchMessages, router.query.channel]);
 
   useEffect(() => {
     dispatch(setCurrentThreadId((router.query?.thread as string) ?? ""));
