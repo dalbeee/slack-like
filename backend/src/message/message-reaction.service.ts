@@ -29,7 +29,7 @@ export class MessageReactionService {
       data: {
         content,
         message: { connect: { id: messageId } },
-        user: { connect: { id: user.id } },
+        userId: user.id,
       },
     });
   }

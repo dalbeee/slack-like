@@ -19,7 +19,7 @@ export const useFetchMessages = () => {
       .get<any, ChannelData>(
         `/channels?channelId=${router.query?.channel as string}`
       )
-      .then((r) => dispatch(setMessages(r.Messages)));
+      .then((r) => dispatch(setMessages(r.messages)));
   }, [dispatch, router.query?.channel, user]);
 
   const postMessageReaction = useCallback(

@@ -86,8 +86,8 @@ export type Channel = {
   workspaceId: string;
   name: string;
   description?: string;
-  Users: User[];
-  Messages: Message[];
+  users: User[];
+  messages: Message[];
   createdAt: Date;
   updatedAt: Date;
   password?: string;
@@ -101,10 +101,10 @@ export type Message = {
   createdAt: Date;
   updatedAt: Date;
   ancestorId: string;
-  userId: string;
-  workspaceId: string;
-  channelId: string;
   reactions: MessageReaction[];
+  userId: string;
+  channelId: string;
+  workspaceId: string;
 };
 
 // MessageReaction

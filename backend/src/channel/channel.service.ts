@@ -43,7 +43,7 @@ export class ChannelService {
         ...data,
         password: isPrivate ? password : undefined,
         type: isPrivate ? 'PRIVATE' : 'PUBLIC',
-        WorkSpace: { connect: { id: workspaceId } },
+        workSpace: { connect: { id: workspaceId } },
       },
     });
   }
@@ -54,7 +54,7 @@ export class ChannelService {
     const updatedChannel = await this.prisma.channel.update({
       where: { id: channelId },
       data: {
-        Users: { connect: { id: userId } },
+        users: { connect: { id: userId } },
       },
     });
     return updatedChannel;
@@ -66,7 +66,7 @@ export class ChannelService {
     const updatedChannel = await this.prisma.channel.update({
       where: { id: channelId },
       data: {
-        Users: { disconnect: { id: userId } },
+        users: { disconnect: { id: userId } },
       },
     });
     return updatedChannel;
@@ -75,7 +75,7 @@ export class ChannelService {
   async findChannelById(channelId: string) {
     const channel = await this.prisma.channel.findFirst({
       where: { id: channelId },
-      include: { Messages: { include: { reactions: true } }, Users: true },
+      include: { messages: { include: { reactions: true } }, users: true },
     });
     if (!channel) throw new NotFoundException();
     return channel;
@@ -84,7 +84,7 @@ export class ChannelService {
   async findchannelsByWorkspaceId(workspaceId: string) {
     return this.prisma.channel.findMany({
       where: { workspaceId, NOT: { type: 'DIRECT_MESSAGE' } },
-      include: { Users: true },
+      include: { users: true },
     });
   }
 
@@ -118,10 +118,10 @@ export class ChannelService {
         ...data,
         name: `dm-${nanoid(9)}`,
         type: 'DIRECT_MESSAGE',
-        WorkSpace: { connect: { id: workspaceId } },
-        Users: { connect: [{ id: userIds[0] }, { id: userIds[1] }] },
+        workSpace: { connect: { id: workspaceId } },
+        users: { connect: [{ id: userIds[0] }, { id: userIds[1] }] },
       },
-      include: { Users: true, Messages: true },
+      include: { users: true, messages: true },
     });
   }
 
@@ -132,11 +132,11 @@ export class ChannelService {
         workspaceId,
         type: 'DIRECT_MESSAGE',
         AND: [
-          { Users: { some: { id: userIds[0] } } },
-          { Users: { some: { id: userIds[1] } } },
+          { users: { some: { id: userIds[0] } } },
+          { users: { some: { id: userIds[1] } } },
         ],
       },
-      include: { Messages: true, Users: true },
+      include: { messages: true, users: true },
     });
     if (channel) return channel;
     return this._createDirectMessageChannel(dto);
@@ -144,10 +144,10 @@ export class ChannelService {
 
   async findManyDMChannelsByUserId(userId: string) {
     return this.prisma.channel.findMany({
-      where: { type: 'DIRECT_MESSAGE', Users: { some: { id: userId } } },
+      where: { type: 'DIRECT_MESSAGE', users: { some: { id: userId } } },
       include: {
-        Users: true,
-        Messages: { orderBy: { createdAt: 'desc' }, take: 1 },
+        users: true,
+        messages: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
     });
   }

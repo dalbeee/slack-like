@@ -124,7 +124,7 @@ describe('unsubscribeChannel', () => {
     );
 
     const channelAfter = await channelService.findChannelById(channel.id);
-    expect(channelAfter.Users).not.toContain(user);
+    expect(channelAfter.users).not.toContain(user);
   });
 });
 

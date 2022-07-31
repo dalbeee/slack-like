@@ -56,7 +56,7 @@ export class UserRedisService {
   }) {
     const userIds = (
       await this.channelService.findChannelById(dto.channelId)
-    ).Users.map((user) => user.id);
+    ).users.map((user) => user.id);
     userIds.forEach((userId) => {
       this.increaseUnreadMessageCount({
         userId,

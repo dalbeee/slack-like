@@ -52,7 +52,13 @@ describe('createChannel', () => {
       workspaceId: workspace.id,
     });
 
-    expect(result).toEqual(true);
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: expect.any(String),
+        workspaceId: expect.any(String),
+        name: expect.any(String),
+      }),
+    );
   });
 });
 
@@ -70,7 +76,13 @@ describe('subscribeChannel', () => {
       channel.id,
     );
 
-    expect(result).toEqual(true);
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: expect.any(String),
+        workspaceId: expect.any(String),
+        name: expect.any(String),
+      }),
+    );
   });
 });
 
@@ -88,6 +100,12 @@ describe('unsubscribeChannel', () => {
       channel.id,
     );
 
-    expect(result).toEqual(true);
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: expect.any(String),
+        workspaceId: expect.any(String),
+        name: expect.any(String),
+      }),
+    );
   });
 });

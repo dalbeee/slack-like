@@ -23,16 +23,16 @@ export class MessageService {
   }
 
   async createItem(
-    { id }: UserJwtPayload,
+    user: UserJwtPayload,
     { content, channelId, workspaceId }: MessageCreateDto,
   ) {
     try {
       return await this.prisma.message.create({
         data: {
-          content,
-          user: { connect: { id } },
-          workspace: { connect: { id: workspaceId } },
+          workspaceId,
           channel: { connect: { id: channelId } },
+          userId: user.id,
+          content,
         },
       });
     } catch (error) {

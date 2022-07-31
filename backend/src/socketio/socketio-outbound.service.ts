@@ -38,7 +38,7 @@ export class SocketIoOutboundService {
   ) {
     const channelSubscribeUserIds = (
       await this.channelService.findChannelById(channelId)
-    ).Users.map((user) => user.id);
+    ).users.map((user) => user.id);
     const connectedSocketIds = await this.userRedisService.findSocketByUserIds(
       channelSubscribeUserIds,
     );

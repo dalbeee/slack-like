@@ -11,12 +11,15 @@ import { UserRedisService } from '@src/user/user-redis.service';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
 import { createChannel } from '@src/channel/__test__/createChannel';
 import { ChannelService } from '@src/channel/channel.service';
+import { PrismaService } from '@src/prisma.service';
+import { Socket } from 'socket.io-client';
 
 let app: INestApplication;
 let socketIoGateway: SocketIoGateway;
 let socketIoOutboundService: SocketIoOutboundService;
 let userRedisService: UserRedisService;
 let channelService: ChannelService;
+let prismaService: PrismaService;
 let port: number;
 
 beforeAll(async () => {
@@ -29,7 +32,12 @@ beforeAll(async () => {
   socketIoOutboundService = app.get(SocketIoOutboundService);
   userRedisService = app.get(UserRedisService);
   channelService = app.get(ChannelService);
+  prismaService = app.get(PrismaService);
   port = app.getHttpServer().listen().address().port;
+});
+afterEach(async () => {
+  await prismaService.clearDatabase();
+  jest.restoreAllMocks();
 });
 afterAll(async () => {
   await app.close();
@@ -40,8 +48,8 @@ describe('sendToClient', () => {
     jest
       .spyOn(socketIoGateway, 'handleConnection')
       .mockImplementation(() => Promise.resolve(new Server()) as any);
-
     const asyncEvaluationFunction = async () => {
+      const sockets: Socket[] = [];
       const resultArray = [];
       const messageKey = 'messagekey';
       const expectedData = { hello: 'world' };
@@ -50,10 +58,12 @@ describe('sendToClient', () => {
       socketIoClientFactory(port).then((socket1) => {
         socket1
           .on('connect', async () => {
+            sockets.push(socket1);
             await userRedisService.setSocketAt(user1.id, socket1.id);
             socketIoClientFactory(port).then((socket2) => {
               socket2
                 .on('connect', async () => {
+                  sockets.push(socket2);
                   await userRedisService.setSocketAt(user2.id, socket2.id);
 
                   await socketIoOutboundService.sendToClient(
@@ -75,6 +85,7 @@ describe('sendToClient', () => {
         resultArray.push(data);
         if (resultArray.length === 1) {
           expect(resultArray[0]).toEqual(expectedData);
+          sockets.forEach((socket) => socket.close());
           done();
         }
       };
@@ -91,6 +102,7 @@ describe('sendToUser', () => {
       .mockImplementation(() => Promise.resolve(new Server()) as any);
 
     const asyncEvaluationFunction = async () => {
+      const sockets: Socket[] = [];
       const resultArray = [];
       const messageKey = 'messagekey';
       const expectedData = { hello: 'world' };
@@ -98,10 +110,12 @@ describe('sendToUser', () => {
       socketIoClientFactory(port).then((socket1) => {
         socket1
           .on('connect', async () => {
+            sockets.push(socket1);
             await userRedisService.setSocketAt(user.id, socket1.id);
             socketIoClientFactory(port).then((socket2) => {
               socket2
                 .on('connect', async () => {
+                  sockets.push(socket2);
                   await userRedisService.setSocketAt(user.id, socket2.id);
 
                   await socketIoOutboundService.sendToUser(
@@ -123,6 +137,7 @@ describe('sendToUser', () => {
         resultArray.push(data);
         if (resultArray.length === 2) {
           expect(resultArray[0]).toEqual(expectedData);
+          sockets.forEach((socket) => socket.close());
           done();
         }
       };
@@ -139,6 +154,7 @@ describe('sendToChannel', () => {
       .mockImplementation(() => Promise.resolve(new Server()) as any);
 
     const asyncEvaluationFunction = async () => {
+      const sockets: Socket[] = [];
       const resultArray = [];
       const messageKey = 'messagekey';
       const expectedData = { hello: 'world' };
@@ -151,10 +167,12 @@ describe('sendToChannel', () => {
       socketIoClientFactory(port).then((socket1) => {
         socket1
           .on('connect', async () => {
+            sockets.push(socket1);
             await userRedisService.setSocketAt(user1.id, socket1.id);
             socketIoClientFactory(port).then((socket2) => {
               socket2
                 .on('connect', async () => {
+                  sockets.push(socket2);
                   await userRedisService.setSocketAt(user2.id, socket2.id);
 
                   await socketIoOutboundService.sendToChannel(
@@ -176,6 +194,7 @@ describe('sendToChannel', () => {
         resultArray.push(data);
         if (resultArray.length === 2) {
           expect(resultArray[0]).toEqual(expectedData);
+          sockets.forEach((socket) => socket.close());
           done();
         }
       };
@@ -190,6 +209,7 @@ describe('sendToChannel', () => {
       .mockImplementation(() => Promise.resolve(new Server()) as any);
 
     const asyncEvaluationFunction = async () => {
+      const sockets: Socket[] = [];
       const resultArray = [];
       const messageKey = 'messagekey';
       const expectedData = { hello: 'world' };
@@ -201,10 +221,12 @@ describe('sendToChannel', () => {
       socketIoClientFactory(port).then((socket1) => {
         socket1
           .on('connect', async () => {
+            sockets.push(socket1);
             await userRedisService.setSocketAt(user1.id, socket1.id);
             socketIoClientFactory(port).then((socket2) => {
               socket2
                 .on('connect', async () => {
+                  sockets.push(socket2);
                   await userRedisService.setSocketAt(user2.id, socket2.id);
 
                   await socketIoOutboundService.sendToChannel(
@@ -226,6 +248,7 @@ describe('sendToChannel', () => {
         resultArray.push(data);
         if (resultArray.length === 1) {
           expect(resultArray[0]).toEqual(expectedData);
+          sockets.forEach((socket) => socket.close());
           done();
         }
       };

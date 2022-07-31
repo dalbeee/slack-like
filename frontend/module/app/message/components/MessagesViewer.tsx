@@ -115,7 +115,7 @@ const Title = () => {
 
   if (!currentChannel || !currentUser) return null;
 
-  const opponentUser = currentChannel.Users.filter(
+  const opponentUser = currentChannel.users.filter(
     (user) => user.id !== currentUser.id
   )[0];
   const channelName =
