@@ -9,6 +9,7 @@ import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageUpdateDto } from './dto/message-update.dto';
 import { MessageModule } from './message.module';
 import { MessageService } from './message.service';
+import { createComment } from './__test__/createComment';
 import { createMessage } from './__test__/createMessage';
 
 let app: TestingModule;
@@ -30,6 +31,47 @@ afterEach(async () => {
 
 afterAll(async () => {
   await app.close();
+});
+
+describe('__test__/createMessage', () => {
+  it('is valid', async () => {
+    const workspace = await createWorkspace();
+    const channel = await createChannel({ workspaceId: workspace.id });
+    const user = await createUser();
+    const result = await createMessage({
+      content: 'content',
+      workspace,
+      channel,
+      user,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: expect.any(String),
+      }),
+    );
+  });
+});
+
+describe('__test__/createComment', () => {
+  it('is valid', async () => {
+    const workspace = await createWorkspace();
+    const channel = await createChannel({ workspaceId: workspace.id });
+    const user = await createUser();
+    const message = await createMessage({
+      workspace,
+      channel,
+      user,
+    });
+
+    const result = await createComment({ workspace, channel, user, message });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: expect.any(String),
+      }),
+    );
+  });
 });
 
 describe('_validateCorrectUser', () => {
@@ -147,13 +189,13 @@ describe('createItem', () => {
     });
     const user = await createUser();
     const ancestor = await createMessage({ workspace, channel, user });
-    const commentDto: MessageCreateDto = {
-      content: 'comment',
-      channelId: channel.id,
-      workspaceId: workspace.id,
-      ancestorId: ancestor.id,
-    };
-    const comment = await messageService.createItem(user, commentDto);
+    const comment = await createComment({
+      workspace,
+      channel,
+      user,
+      message: ancestor,
+    });
+
     const nestedCommentDto: MessageCreateDto = {
       content: 'nested comment',
       channelId: channel.id,
