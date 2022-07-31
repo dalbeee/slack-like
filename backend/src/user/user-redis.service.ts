@@ -50,6 +50,22 @@ export class UserRedisService {
     });
   }
 
+  async increaseUnreadMessageCountByChannelSubscribers(dto: {
+    workspaceId: string;
+    channelId: string;
+  }) {
+    const userIds = (
+      await this.channelService.findChannelById(dto.channelId)
+    ).users.map((user) => user.id);
+    userIds.forEach((userId) => {
+      this.increaseUnreadMessageCount({
+        userId,
+        workspaceId: dto.workspaceId,
+        channelId: dto.channelId,
+      });
+    });
+  }
+
   async getChannelDataBy({
     userId,
     workspaceId,

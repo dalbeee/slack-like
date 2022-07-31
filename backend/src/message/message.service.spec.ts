@@ -5,10 +5,10 @@ import { createChannel } from '@src/channel/__test__/createChannel';
 import { PrismaService } from '@src/prisma.service';
 import { createUser } from '@src/user/__test__/createUser';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
+import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageUpdateDto } from './dto/message-update.dto';
 import { MessageModule } from './message.module';
 import { MessageService } from './message.service';
-import { MessageCreateProps } from './types';
 import { createMessage } from './__test__/createMessage';
 
 let app: TestingModule;
@@ -29,11 +29,10 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  await prisma.$disconnect();
   await app.close();
 });
 
-describe('_validateCollectUser', () => {
+describe('_validateCorrectUser', () => {
   it('return true if user match', async () => {
     const user = await createUser();
     const workspace = await createWorkspace();
@@ -45,7 +44,7 @@ describe('_validateCollectUser', () => {
       workspaceId: workspace.id,
     });
 
-    const result = await messageService._validateCollectUser({
+    const result = await messageService._validateCorrectUser({
       id: message.id,
       userId: user.id,
     });
@@ -65,7 +64,7 @@ describe('_validateCollectUser', () => {
     });
 
     const result = () =>
-      messageService._validateCollectUser({
+      messageService._validateCorrectUser({
         id: message.id,
         userId: 'abcd',
       });
@@ -74,21 +73,21 @@ describe('_validateCollectUser', () => {
   });
 });
 
-describe('createMessage', () => {
-  it('return message', async () => {
+describe('createItem', () => {
+  it('return Message', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
       name: faker.datatype.string(),
       workspaceId: workspace.id,
     });
     const user = await createUser();
-    const messageDto: MessageCreateProps = {
+    const messageDto: MessageCreateDto = {
       content: '😊',
       channelId: channel.id,
       workspaceId: workspace.id,
     };
 
-    const result = await messageService.createMessage(user, messageDto);
+    const result = await messageService.createItem(user, messageDto);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -103,8 +102,8 @@ describe('createMessage', () => {
   });
 });
 
-describe('updateMessage', () => {
-  it('return message if success', async () => {
+describe('updateItem', () => {
+  it('return Message', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
       name: faker.datatype.string(),
@@ -122,7 +121,7 @@ describe('updateMessage', () => {
       id: message.id,
     };
 
-    const result = await messageService.updateMessage(user, updateDto);
+    const result = await messageService.updateItem(user, updateDto);
 
     expect(result).toBeDefined();
   });
@@ -146,14 +145,14 @@ describe('updateMessage', () => {
       id: message.id,
     };
 
-    const result = () => messageService.updateMessage(invalidUser, updateDto);
+    const result = () => messageService.updateItem(invalidUser, updateDto);
 
     await expect(result).rejects.toThrowError();
   });
 });
 
-describe('deleteMessage', () => {
-  it('return true if success', async () => {
+describe('deleteItem', () => {
+  it('return true', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
       name: faker.datatype.string(),
@@ -167,9 +166,16 @@ describe('deleteMessage', () => {
       workspaceId: workspace.id,
     });
 
-    const result = await messageService.deleteMessage(user, message.id);
+    const result = await messageService.deleteItem(user, message.id);
 
-    expect(result).toEqual(true);
+    expect(result).toEqual(
+      expect.objectContaining({
+        userId: expect.any(String),
+        content: expect.any(String),
+        workspaceId: expect.any(String),
+        channelId: expect.any(String),
+      }),
+    );
   });
 
   it('throw forbidden error if not valid user', async () => {
@@ -187,7 +193,7 @@ describe('deleteMessage', () => {
     });
     const invalidUser = await createUser();
 
-    const result = () => messageService.deleteMessage(invalidUser, message.id);
+    const result = () => messageService.deleteItem(invalidUser, message.id);
 
     await expect(result).rejects.toThrowError();
   });

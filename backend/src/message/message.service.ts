@@ -6,15 +6,15 @@ import {
 
 import { UserJwtPayload } from '@src/auth/types';
 import { PrismaService } from '@src/prisma.service';
+import { MessageCreateDto } from './dto/message-create.dto';
 import { MessageUpdateDto } from './dto/message-update.dto';
 import { MessagesFindDto } from './dto/messages-find.dto';
-import { MessageCreateProps } from './types';
 
 @Injectable()
 export class MessageService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async _validateCollectUser({ id, userId }: { id: string; userId: string }) {
+  async _validateCorrectUser({ id, userId }: { id: string; userId: string }) {
     const message = await this.prisma.message.findUnique({
       where: { id },
     });
@@ -22,44 +22,44 @@ export class MessageService {
     return true;
   }
 
-  async createMessage(
-    { id }: UserJwtPayload,
-    { content, channelId, workspaceId }: MessageCreateProps,
+  async createItem(
+    user: UserJwtPayload,
+    { content, channelId, workspaceId }: MessageCreateDto,
   ) {
     try {
       return await this.prisma.message.create({
         data: {
-          content,
-          user: { connect: { id } },
-          workspace: { connect: { id: workspaceId } },
+          workspaceId,
           channel: { connect: { id: channelId } },
+          userId: user.id,
+          content,
         },
+        include: { reactions: true },
       });
     } catch (error) {
       throw new BadRequestException();
     }
   }
 
-  async updateMessage(
+  async updateItem(
     { id: userId }: UserJwtPayload,
     { id, ...data }: MessageUpdateDto,
   ) {
-    await this._validateCollectUser({ id, userId });
+    await this._validateCorrectUser({ id, userId });
     return this.prisma.message.update({
       where: { id },
       data,
     });
   }
 
-  async deleteMessage({ id: userId }: UserJwtPayload, id: string) {
-    await this._validateCollectUser({ id, userId });
-    await this.prisma.message.delete({ where: { id } });
-    return true;
+  async deleteItem({ id: userId }: UserJwtPayload, id: string) {
+    await this._validateCorrectUser({ id, userId });
+    return await this.prisma.message.delete({ where: { id } });
   }
 
-  findMessages({ channelId, workspaceId }: MessagesFindDto) {
+  findMany(dto: MessagesFindDto) {
     return this.prisma.message.findMany({
-      where: { channelId, workspaceId },
+      where: { ...dto },
     });
   }
 

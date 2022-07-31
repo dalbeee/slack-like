@@ -18,9 +18,9 @@ export const useWsMessageOutbound = () => {
   }, [router.query?.channel, router.query?.workspace]);
 
   const createMessage = useCallback(
-    (message: string) => {
+    (content: string) => {
       if (!socketInfo) return;
-      ws.emit("message.create", { socketInfo, message });
+      ws.emit("message.create", { socketInfo, content });
     },
     [socketInfo, ws]
   );
@@ -33,5 +33,21 @@ export const useWsMessageOutbound = () => {
     [socketInfo, ws]
   );
 
-  return { createMessage, deleteMessage };
+  const createReaction = useCallback(
+    (dto: { content: string; messageId: string }) => {
+      if (!socketInfo) return;
+      ws.emit("message_reaction.create", { socketInfo, ...dto });
+    },
+    [socketInfo, ws]
+  );
+
+  const deleteReaction = useCallback(
+    (dto: { reactionId: string }) => {
+      if (!socketInfo) return;
+      ws.emit("message_reaction.delete", { socketInfo, ...dto });
+    },
+    [socketInfo, ws]
+  );
+
+  return { createMessage, deleteMessage, createReaction, deleteReaction };
 };

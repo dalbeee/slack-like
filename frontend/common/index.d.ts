@@ -1,5 +1,4 @@
 // http
-
 export type ChannelDataResponse = {
   workspaceId: string;
   channels: ChannelData[];
@@ -11,26 +10,6 @@ interface SocketInfo {
   channelId: string;
 }
 
-interface SocketMessageCreate {
-  data: Message;
-  metadata: ChannelMetadata;
-}
-
-interface SocketMessageUpdate {
-  data: Message;
-}
-
-interface SocketMessageDelete {
-  messageId: string;
-}
-
-type SocketMessageResponse =
-  | SocketMessageCreate
-  | SocketMessageUpdate
-  | SocketMessageDelete;
-
-type SocketResponse = SocketMessageResponse;
-
 // AppSlice
 export interface AppState {
   initialize: boolean;
@@ -40,6 +19,9 @@ export interface AppState {
   workspaces: WorkspacesHashMap;
 }
 
+/*
+ * this type used only frontend, not communicate to backend
+ */
 export interface UpdateChannelMetadata {
   socketInfo: SocketInfo;
   metadata: ChannelMetadata;
@@ -66,32 +48,7 @@ export interface ChannelsHashMap {
   byHash: { [channelId: string]: ChannelData };
 }
 
-//
-
-export type Message = {
-  id: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  ancestorId: string;
-  userId: string;
-  workspaceId: string;
-  channelId: string;
-};
-
-export type Channel = {
-  id: string;
-  workspaceId: string;
-  name: string;
-  description?: string;
-  Users: User[];
-  Messages: Message[];
-  createdAt: Date;
-  updatedAt: Date;
-  password?: string;
-  type: "PUBLIC" | "PRIVATE" | "DIRECT_MESSAGE";
-};
-
+// User
 export type UserJwtToken = {
   access_token?: string;
   refresh_token?: string;
@@ -114,10 +71,47 @@ export type UserLoginDto = {
   password: string;
 };
 
+// Workspace
 export type Workspace = {
   id: string;
   name: string;
   description?: string;
   createdAt: Date;
   updatedAt: Date;
+};
+
+// Channel
+export type Channel = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  description?: string;
+  users: User[];
+  messages: Message[];
+  createdAt: Date;
+  updatedAt: Date;
+  password?: string;
+  type: "PUBLIC" | "PRIVATE" | "DIRECT_MESSAGE";
+};
+
+// Message
+export type Message = {
+  id: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  ancestorId: string;
+  reactions: MessageReaction[];
+  userId: string;
+  channelId: string;
+  workspaceId: string;
+};
+
+// MessageReaction
+export type MessageReaction = {
+  id: string;
+  userId: string;
+  messageId: string;
+  content: string;
+  createdAt: Date;
 };
