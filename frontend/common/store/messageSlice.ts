@@ -25,14 +25,23 @@ export const messageSlice = createSlice({
       );
     },
 
-    updateMessageCommentsCount: (state, action: PayloadAction<Message>) => {
+    updateMessageCommentsCount: (
+      state,
+      action: PayloadAction<{
+        ancestorId: string;
+        action: "INCREASE" | "DECEASE";
+      }>
+    ) => {
       const index = state.messages.findIndex(
-        (message) => message.id === action.payload.id
+        (message) => message.id === action.payload.ancestorId
       );
       const message = state.messages[index];
       const updatedMessage: Message = {
         ...message,
-        commentsCount: action.payload.commentsCount,
+        commentsCount:
+          action.payload.action === "INCREASE"
+            ? message.commentsCount + 1
+            : message.commentsCount - 1,
       };
       state.messages = [
         ...state.messages.slice(0, index),

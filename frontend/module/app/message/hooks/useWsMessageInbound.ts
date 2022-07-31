@@ -18,9 +18,15 @@ export const useWsMessageInbound = () => {
     () => ({
       messageKey: "message.create",
       callbackFn: (data: Message) => {
+        console.log(data);
         if (data.ancestorId) {
           dispatch(appendComment(data));
-          dispatch(updateMessageCommentsCount(data));
+          dispatch(
+            updateMessageCommentsCount({
+              ancestorId: data.ancestorId,
+              action: "INCREASE",
+            })
+          );
         } else {
           dispatch(appendMessage(data));
         }
@@ -35,7 +41,12 @@ export const useWsMessageInbound = () => {
       callbackFn: (data: Message) => {
         if (data.ancestorId) {
           dispatch(deleteComment(data));
-          dispatch(updateMessageCommentsCount(data));
+          dispatch(
+            updateMessageCommentsCount({
+              ancestorId: data.ancestorId,
+              action: "DECEASE",
+            })
+          );
         } else {
           dispatch(deleteMessage(data));
         }
