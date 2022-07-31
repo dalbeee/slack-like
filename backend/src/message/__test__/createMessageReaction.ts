@@ -15,10 +15,10 @@ export const createMessageReaction = async () => {
     workspaceId: workspace.id,
   });
   const message = await createMessage({
+    workspace,
+    channel,
+    user,
     content: faker.datatype.string(10),
-    userId: user.id,
-    channelId: channel.id,
-    workspaceId: workspace.id,
   });
   const messageReaction = await prisma.messageReaction.create({
     data: { content: '😊', messageId: message.id, userId: user.id },

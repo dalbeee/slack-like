@@ -211,10 +211,10 @@ describe('socket methods', () => {
       const workspace = await createWorkspace();
       const channel = await createChannel({ workspaceId: workspace.id });
       const message = await createMessage({
-        workspaceId: workspace.id,
-        channelId: channel.id,
+        workspace,
+        channel,
+        user,
         content: 'content',
-        userId: user.id,
       });
       userRedisService.setSocketAt(user.id, id);
 

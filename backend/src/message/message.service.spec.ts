@@ -33,15 +33,15 @@ afterAll(async () => {
 });
 
 describe('_validateCorrectUser', () => {
-  it('return true if user match', async () => {
+  it('return Message if user match', async () => {
     const user = await createUser();
     const workspace = await createWorkspace();
     const channel = await createChannel({ workspaceId: workspace.id });
     const message = await createMessage({
       content: '1',
-      channelId: channel.id,
-      userId: user.id,
-      workspaceId: workspace.id,
+      workspace,
+      channel,
+      user,
     });
 
     const result = await messageService._validateCorrectUser({
@@ -49,18 +49,18 @@ describe('_validateCorrectUser', () => {
       userId: user.id,
     });
 
-    expect(result).toEqual(true);
+    expect(result.id).toBeDefined();
   });
 
-  it('return false if user not match', async () => {
+  it('throw error if user not match', async () => {
     const user = await createUser();
     const workspace = await createWorkspace();
     const channel = await createChannel({ workspaceId: workspace.id });
     const message = await createMessage({
       content: '1',
-      channelId: channel.id,
-      userId: user.id,
-      workspaceId: workspace.id,
+      workspace,
+      channel,
+      user,
     });
 
     const result = () =>
@@ -103,21 +103,13 @@ describe('createItem', () => {
 
   it('return Message when exist ancestor Message', async () => {
     const workspace = await createWorkspace();
-    const channel = await createChannel({
-      name: faker.datatype.string(),
-      workspaceId: workspace.id,
-    });
+    const channel = await createChannel({ workspaceId: workspace.id });
     const user = await createUser();
-    const ancestorDto: MessageCreateDto = {
-      content: 'ancestor',
-      channelId: channel.id,
-      workspaceId: workspace.id,
-    };
-    const ancestor = await messageService.createItem(user, ancestorDto);
+    const ancestor = await createMessage({ workspace, channel, user });
     const commentDto: MessageCreateDto = {
-      content: 'comment',
-      channelId: channel.id,
       workspaceId: workspace.id,
+      channelId: channel.id,
+      content: 'comment',
       ancestorId: ancestor.id,
     };
 
@@ -125,30 +117,36 @@ describe('createItem', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        content: expect.any(String),
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-        userId: expect.any(String),
-        workspaceId: expect.any(String),
-        channelId: expect.any(String),
+        id: expect.any(String),
         ancestorId: expect.any(String),
       }),
     );
   });
 
+  it('has commentsCount when created by comment role', async () => {
+    const workspace = await createWorkspace();
+    const channel = await createChannel({ workspaceId: workspace.id });
+    const user = await createUser();
+    const ancestor = await createMessage({ workspace, channel, user });
+    const commentDto: MessageCreateDto = {
+      workspaceId: workspace.id,
+      channelId: channel.id,
+      content: 'comment',
+      ancestorId: ancestor.id,
+    };
+
+    const result = await messageService.createItem(user, commentDto);
+
+    expect(result.commentsCount).toEqual(1);
+  });
+
   it('throw error if nested comment', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
-      name: faker.datatype.string(),
       workspaceId: workspace.id,
     });
     const user = await createUser();
-    const ancestorDto: MessageCreateDto = {
-      content: 'ancestor',
-      channelId: channel.id,
-      workspaceId: workspace.id,
-    };
-    const ancestor = await messageService.createItem(user, ancestorDto);
+    const ancestor = await createMessage({ workspace, channel, user });
     const commentDto: MessageCreateDto = {
       content: 'comment',
       channelId: channel.id,
@@ -170,45 +168,43 @@ describe('createItem', () => {
 });
 
 describe('updateItem', () => {
-  it('return Message', async () => {
+  it('return Message if update content', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
-      name: faker.datatype.string(),
       workspaceId: workspace.id,
     });
     const user = await createUser();
     const message = await createMessage({
-      channelId: channel.id,
-      content: '1',
-      userId: user.id,
-      workspaceId: workspace.id,
+      workspace,
+      channel,
+      user,
+      content: 'message',
     });
     const updateDto: MessageUpdateDto = {
-      content: '2',
+      content: 'updated',
       id: message.id,
     };
 
     const result = await messageService.updateItem(user, updateDto);
 
-    expect(result).toBeDefined();
+    expect(result.content).toEqual('updated');
   });
 
   it('throw forbidden error if not valid user', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
-      name: faker.datatype.string(),
       workspaceId: workspace.id,
     });
     const validUser = await createUser();
-    const message = await createMessage({
-      channelId: channel.id,
-      content: '1',
-      userId: validUser.id,
-      workspaceId: workspace.id,
-    });
     const invalidUser = await createUser();
+    const message = await createMessage({
+      workspace,
+      channel,
+      user: validUser,
+      content: 'content',
+    });
     const updateDto: MessageUpdateDto = {
-      content: '2',
+      content: 'update',
       id: message.id,
     };
 
@@ -222,43 +218,53 @@ describe('deleteItem', () => {
   it('return true', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
-      name: faker.datatype.string(),
       workspaceId: workspace.id,
     });
     const user = await createUser();
     const message = await createMessage({
-      channelId: channel.id,
+      workspace,
+      channel,
+      user,
       content: '1',
-      userId: user.id,
-      workspaceId: workspace.id,
     });
 
     const result = await messageService.deleteItem(user, message.id);
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        userId: expect.any(String),
-        content: expect.any(String),
-        workspaceId: expect.any(String),
-        channelId: expect.any(String),
-      }),
-    );
+    expect(result.id).toBeDefined();
   });
 
   it('throw forbidden error if not valid user', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
-      name: faker.datatype.string(),
       workspaceId: workspace.id,
     });
     const validUser = await createUser();
+    const invalidUser = await createUser();
     const message = await createMessage({
-      channelId: channel.id,
-      content: '1',
-      userId: validUser.id,
+      workspace,
+      channel,
+      user: validUser,
+      content: 'content',
+    });
+
+    const result = () => messageService.deleteItem(invalidUser, message.id);
+
+    await expect(result).rejects.toThrowError();
+  });
+
+  it('has changed ancestor.commentsCount when comment delete', async () => {
+    const workspace = await createWorkspace();
+    const channel = await createChannel({
       workspaceId: workspace.id,
     });
+    const validUser = await createUser();
     const invalidUser = await createUser();
+    const message = await createMessage({
+      workspace,
+      channel,
+      user: validUser,
+      content: '1',
+    });
 
     const result = () => messageService.deleteItem(invalidUser, message.id);
 

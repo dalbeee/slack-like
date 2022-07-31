@@ -19,19 +19,26 @@ export class MessageService {
       where: { id },
     });
     if (message.userId !== userId) throw new ForbiddenException();
-    return true;
+    return message;
   }
 
   async createItem(
     user: UserJwtPayload,
     { content, channelId, workspaceId, ancestorId }: MessageCreateDto,
   ) {
+    let queryByCommentRole = {};
+
     if (ancestorId) {
-      const message = await this.prisma.message.findFirst({
+      const message = await this.prisma.message.findFirstOrThrow({
         where: { id: ancestorId },
       });
       if (message.ancestorId)
         throw new BadRequestException('comments cannot be nested');
+
+      queryByCommentRole = {
+        ancestor: ancestorId ? { connect: { id: ancestorId } } : {},
+        commentsCount: message.commentsCount + 1,
+      };
     }
 
     try {
@@ -41,7 +48,7 @@ export class MessageService {
           channel: { connect: { id: channelId } },
           userId: user.id,
           content,
-          ancestor: ancestorId ? { connect: { id: ancestorId } } : {},
+          ...queryByCommentRole,
         },
         include: { reactions: true },
       });
@@ -62,7 +69,16 @@ export class MessageService {
   }
 
   async deleteItem({ id: userId }: UserJwtPayload, id: string) {
-    await this._validateCorrectUser({ id, userId });
+    const message = await this._validateCorrectUser({ id, userId });
+    if (message.ancestorId) {
+      await this.prisma.message.update({
+        where: { id: message.id },
+        data: {
+          commentsCount: message.commentsCount - 1,
+        },
+      });
+    }
+
     return await this.prisma.message.delete({ where: { id } });
   }
 
