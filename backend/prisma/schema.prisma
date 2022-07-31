@@ -61,7 +61,7 @@ model Message {
   updatedAt   DateTime          @updatedAt
   ancestorId  String?           @unique
   ancestor    Message?          @relation("thread", fields: [ancestorId], references: [id])
-  children    Message[]         @relation("thread")
+  comments    Message[]         @relation("thread")
   reactions   MessageReaction[]
   userId      String
   channel     Channel           @relation(fields: [channelId], references: [id])

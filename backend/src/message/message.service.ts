@@ -24,8 +24,16 @@ export class MessageService {
 
   async createItem(
     user: UserJwtPayload,
-    { content, channelId, workspaceId }: MessageCreateDto,
+    { content, channelId, workspaceId, ancestorId }: MessageCreateDto,
   ) {
+    if (ancestorId) {
+      const message = await this.prisma.message.findFirst({
+        where: { id: ancestorId },
+      });
+      if (message.ancestorId)
+        throw new BadRequestException('comments cannot be nested');
+    }
+
     try {
       return await this.prisma.message.create({
         data: {
@@ -33,6 +41,7 @@ export class MessageService {
           channel: { connect: { id: channelId } },
           userId: user.id,
           content,
+          ancestor: ancestorId ? { connect: { id: ancestorId } } : {},
         },
         include: { reactions: true },
       });
@@ -66,4 +75,6 @@ export class MessageService {
   findById(messageId: string) {
     return this.prisma.message.findUnique({ where: { id: messageId } });
   }
+
+  // thread mode
 }

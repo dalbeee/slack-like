@@ -100,6 +100,73 @@ describe('createItem', () => {
       }),
     );
   });
+
+  it('return Message when exist ancestor Message', async () => {
+    const workspace = await createWorkspace();
+    const channel = await createChannel({
+      name: faker.datatype.string(),
+      workspaceId: workspace.id,
+    });
+    const user = await createUser();
+    const ancestorDto: MessageCreateDto = {
+      content: 'ancestor',
+      channelId: channel.id,
+      workspaceId: workspace.id,
+    };
+    const ancestor = await messageService.createItem(user, ancestorDto);
+    const commentDto: MessageCreateDto = {
+      content: 'comment',
+      channelId: channel.id,
+      workspaceId: workspace.id,
+      ancestorId: ancestor.id,
+    };
+
+    const result = await messageService.createItem(user, commentDto);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        content: expect.any(String),
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+        userId: expect.any(String),
+        workspaceId: expect.any(String),
+        channelId: expect.any(String),
+        ancestorId: expect.any(String),
+      }),
+    );
+  });
+
+  it('throw error if nested comment', async () => {
+    const workspace = await createWorkspace();
+    const channel = await createChannel({
+      name: faker.datatype.string(),
+      workspaceId: workspace.id,
+    });
+    const user = await createUser();
+    const ancestorDto: MessageCreateDto = {
+      content: 'ancestor',
+      channelId: channel.id,
+      workspaceId: workspace.id,
+    };
+    const ancestor = await messageService.createItem(user, ancestorDto);
+    const commentDto: MessageCreateDto = {
+      content: 'comment',
+      channelId: channel.id,
+      workspaceId: workspace.id,
+      ancestorId: ancestor.id,
+    };
+    const comment = await messageService.createItem(user, commentDto);
+    const nestedCommentDto: MessageCreateDto = {
+      content: 'nested comment',
+      channelId: channel.id,
+      workspaceId: workspace.id,
+      ancestorId: comment.id,
+    };
+
+    const result = () => messageService.createItem(user, nestedCommentDto);
+
+    await expect(result).rejects.toThrowError();
+  });
 });
 
 describe('updateItem', () => {
