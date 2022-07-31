@@ -4,6 +4,7 @@ import { Message, MessageReaction } from "..";
 
 const initialState = {
   thread: {} as Message,
+  curentThreadId: "",
 };
 
 export const threadSlice = createSlice({
@@ -13,6 +14,10 @@ export const threadSlice = createSlice({
     // Message
     setThread: (state, action: PayloadAction<Message>) => {
       state.thread = action.payload;
+    },
+
+    setCurrentThreadId: (state, action: PayloadAction<string>) => {
+      state.curentThreadId = action.payload;
     },
 
     appendComment: (state, action: PayloadAction<Message>) => {
@@ -79,6 +84,8 @@ export const threadSlice = createSlice({
 });
 
 export const {
+  setThread,
+  setCurrentThreadId,
   appendComment,
   appendCommentReaction,
   deleteComment,
