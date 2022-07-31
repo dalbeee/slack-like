@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 
 import { UserJwtPayload } from '@src/auth/types';
 import { MessageReactionCreateDto } from '@src/message/dto/message-reaction-create.dto';
+import { MessageReactionDeleteDto } from '@src/message/dto/message-reaction-delete.dto';
 import { MessageReactionService } from '@src/message/message-reaction.service';
 import { UserRedisService } from '@src/user/user-redis.service';
 import { SocketWrapper } from './dto/socket-wrapper.dto';
@@ -39,7 +40,7 @@ export class SocketIoMessageReactionInboundService {
 
   async deleteItem(
     user: UserJwtPayload,
-    data: SocketWrapper & { reactionId: string },
+    data: SocketWrapper & MessageReactionDeleteDto,
   ) {
     const result = await this.messageReactionService.deleteItem(
       user,

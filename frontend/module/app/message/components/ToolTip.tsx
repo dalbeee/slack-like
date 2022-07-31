@@ -9,6 +9,7 @@ import {
 
 import { Message } from "@/common";
 import ToolTipExpand from "./ToolTipExpand";
+import { useWsMessageOutbound } from "../../message/hooks/useWsMessageOutbound";
 
 const ButtonItem = ({
   handleClick,
@@ -49,6 +50,8 @@ const ToolTip: ForwardRefExoticComponent<
     }: ToolTipProps,
     ref
   ) => {
+    const { createReaction } = useWsMessageOutbound();
+
     const handleToggleExpand = () => {
       setIsHighliterLocked((prev) => !prev);
       setIsOnExpand((prev) => !prev);
@@ -57,9 +60,9 @@ const ToolTip: ForwardRefExoticComponent<
         : setHighlightedRowId(null);
     };
 
-    const handleReaction = (message: Message) => {
-      // TODO createReaction
-      // createReaction(message.id);
+    const handleReaction = (content: string) => {
+      createReaction({ content, messageId: messageData.id });
+      return;
     };
 
     return (
@@ -68,15 +71,16 @@ const ToolTip: ForwardRefExoticComponent<
           className="z-50 flex justify-center items-center border rounded-lg bg-neutral-900 border-neutral-700 p-2"
           {...props}
         >
-          <ButtonItem handleClick={() => handleReaction(messageData)}>
+          <ButtonItem handleClick={() => handleReaction("☑️")}>
             <span className="material-symbols-outlined">check_box</span>
           </ButtonItem>
-          <ButtonItem>
+          <ButtonItem handleClick={() => handleReaction("👀")}>
             <span className="material-symbols-outlined">visibility</span>
           </ButtonItem>
-          <ButtonItem>
+          <ButtonItem handleClick={() => handleReaction("👍")}>
             <span className="material-symbols-outlined">thumb_up</span>
           </ButtonItem>
+          {/* TODO add reactions */}
           <ButtonItem>
             <span className="material-symbols-outlined">add_reaction</span>
           </ButtonItem>

@@ -23,6 +23,9 @@ import { SocketIoMessageInboundService } from './socketio-message-inbound.servic
 import { SocketWrapper } from './dto/socket-wrapper.dto';
 import { MessageDeleteDto } from '@src/message/dto/message-delete.dto';
 import { MessageCreateDto } from '@src/message/dto/message-create.dto';
+import { SocketIoMessageReactionInboundService } from './socketio-message-reaction-inbound.service';
+import { MessageReactionCreateDto } from '@src/message/dto/message-reaction-create.dto';
+import { MessageReactionDeleteDto } from '@src/message/dto/message-reaction-delete.dto';
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -38,6 +41,8 @@ export class SocketIoGateway implements OnGatewayConnection {
     private readonly socketIoChannelInboundService: SocketIoChannelInboundService,
     @Inject(forwardRef(() => SocketIoMessageInboundService))
     private readonly socketIoMessageInboundService: SocketIoMessageInboundService,
+    @Inject(forwardRef(() => SocketIoMessageReactionInboundService))
+    private readonly socketIoMessageReactionInboundService: SocketIoMessageReactionInboundService,
     private readonly userRedisService: UserRedisService,
   ) {}
 
@@ -106,19 +111,19 @@ export class SocketIoGateway implements OnGatewayConnection {
   @UseGuards(WsGuard)
   @SubscribeMessage('message_reaction.create')
   createMessageReaction(
-    @MessageBody() body: SocketWrapper & MessageCreateDto,
+    @MessageBody() body: SocketWrapper & MessageReactionCreateDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
-    return this.socketIoMessageInboundService.createItem(user, body);
+    return this.socketIoMessageReactionInboundService.createItem(user, body);
   }
 
   @UseGuards(WsGuard)
   @SubscribeMessage('message_reaction.delete')
   deleteMessageReaction(
-    @MessageBody() body: SocketWrapper & MessageDeleteDto,
+    @MessageBody() body: SocketWrapper & MessageReactionDeleteDto,
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
-    return this.socketIoMessageInboundService.deleteItem(user, body);
+    return this.socketIoMessageReactionInboundService.deleteItem(user, body);
   }
 
   // Channel

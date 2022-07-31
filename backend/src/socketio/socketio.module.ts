@@ -8,6 +8,7 @@ import { SocketIoOutboundService } from './socketio-outbound.service';
 import { ChannelModule } from '@src/channel/channel.module';
 import { SocketIoChannelInboundService } from './socketio-channel-inbound.service';
 import { SocketIoMessageInboundService } from './socketio-message-inbound.service';
+import { SocketIoMessageReactionInboundService } from './socketio-message-reaction-inbound.service';
 
 @Module({
   imports: [UserModule, MessageModule, ChannelModule],
@@ -17,6 +18,7 @@ import { SocketIoMessageInboundService } from './socketio-message-inbound.servic
     SocketIoOutboundService,
     SocketIoChannelInboundService,
     SocketIoMessageInboundService,
+    SocketIoMessageReactionInboundService,
   ],
   exports: [SocketIoOutboundService],
 })

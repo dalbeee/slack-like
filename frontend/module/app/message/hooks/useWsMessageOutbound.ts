@@ -36,7 +36,7 @@ export const useWsMessageOutbound = () => {
   const createReaction = useCallback(
     (dto: { content: string; messageId: string }) => {
       if (!socketInfo) return;
-      ws.emit("message.reaction.create", { socketInfo, dto });
+      ws.emit("message_reaction.create", { socketInfo, ...dto });
     },
     [socketInfo, ws]
   );
@@ -44,7 +44,7 @@ export const useWsMessageOutbound = () => {
   const deleteReaction = useCallback(
     (dto: { reactionId: string }) => {
       if (!socketInfo) return;
-      ws.emit("message.reaction.create", { socketInfo, dto });
+      ws.emit("message_reaction.delete", { socketInfo, ...dto });
     },
     [socketInfo, ws]
   );

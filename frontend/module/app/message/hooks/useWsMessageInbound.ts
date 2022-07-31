@@ -1,8 +1,13 @@
 import { useMemo } from "react";
 import { useDispatch } from "react-redux";
 
-import { Message } from "@/common";
-import { appendMessage, deleteMessage } from "@/common/store/messageSlice";
+import { Message, MessageReaction } from "@/common";
+import {
+  appendMessage,
+  appendMessageReaction,
+  deleteMessage,
+  deleteMessageReaction,
+} from "@/common/store/messageSlice";
 
 export const useWsMessageInbound = () => {
   const dispatch = useDispatch();
@@ -25,7 +30,33 @@ export const useWsMessageInbound = () => {
     [dispatch]
   );
 
-  const messageInboundFns = [messageCreateCallback, messageDeleteCallback];
+  const messageReactionCreateCallback = useMemo(
+    () => ({
+      messageKey: "message_reaction.create",
+      callbackFn: (data: MessageReaction) => {
+        dispatch(appendMessageReaction(data));
+      },
+    }),
+    [dispatch]
+  );
 
-  return { messageCreateCallback, messageDeleteCallback, messageInboundFns };
+  const messageReactionDeleteCallback = useMemo(
+    () => ({
+      messageKey: "message_reaction.delete",
+      callbackFn: (data: MessageReaction) =>
+        dispatch(deleteMessageReaction(data)),
+    }),
+    [dispatch]
+  );
+
+  const messageInboundFns = [
+    messageCreateCallback,
+    messageDeleteCallback,
+    messageReactionCreateCallback,
+    messageReactionDeleteCallback,
+  ];
+
+  return {
+    messageInboundFns,
+  };
 };
