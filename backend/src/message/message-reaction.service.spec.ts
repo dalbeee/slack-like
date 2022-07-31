@@ -1,14 +1,14 @@
-import { faker } from '@faker-js/faker';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { createChannel } from '@src/channel/__test__/createChannel';
 import { PrismaService } from '@src/prisma.service';
 import { createUser } from '@src/user/__test__/createUser';
 import { createWorkspace } from '@src/workspace/__test__/createWorkspace';
+import { MessageReactionCreateDto } from './dto/message-reaction-create.dto';
 import { MessageReactionService } from './message-reaction.service';
 import { MessageModule } from './message.module';
-import { MessageReactionCreateProps } from './types';
 import { createMessage } from './__test__/createMessage';
+import { createMessageReaction } from './__test__/createMessageReaction';
 
 let app: TestingModule;
 let messageReactionService: MessageReactionService;
@@ -28,18 +28,14 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  await prisma.$disconnect();
   await app.close();
 });
 
-describe('createMessage', () => {
-  it('return message', async () => {
+describe('createItem', () => {
+  it('return MessageReaction', async () => {
     const user = await createUser();
-    const workspace = await createWorkspace({
-      name: faker.datatype.string(10),
-    });
+    const workspace = await createWorkspace();
     const channel = await createChannel({
-      name: faker.datatype.string(10),
       workspaceId: workspace.id,
     });
     const message = await createMessage({
@@ -48,31 +44,28 @@ describe('createMessage', () => {
       channelId: channel.id,
       workspaceId: workspace.id,
     });
-    const messageDto: MessageReactionCreateProps = {
+    const dto: MessageReactionCreateDto = {
       content: '😊',
-      userId: user.id,
       messageId: message.id,
     };
 
-    const result = await messageReactionService.create(messageDto);
+    const result = await messageReactionService.createItem(user, dto);
 
-    expect(result).toEqual(
-      expect.objectContaining({
+    expect(result).toEqual({
+      action: expect.any(String),
+      reaction: expect.objectContaining({
         userId: expect.any(String),
         messageId: expect.any(String),
         content: expect.any(String),
         createdAt: expect.any(Date),
       }),
-    );
+    });
   });
 
-  it('return array.length=2 if create two reactions', async () => {
+  it('throw error if content length not 1', async () => {
     const user = await createUser();
-    const workspace = await createWorkspace({
-      name: faker.datatype.string(10),
-    });
+    const workspace = await createWorkspace();
     const channel = await createChannel({
-      name: faker.datatype.string(10),
       workspaceId: workspace.id,
     });
     const message = await createMessage({
@@ -81,55 +74,24 @@ describe('createMessage', () => {
       channelId: channel.id,
       workspaceId: workspace.id,
     });
-    const messageDto: MessageReactionCreateProps = {
-      content: '😊',
+    const dto: MessageReactionCreateDto = {
+      content: '😊😊',
       messageId: message.id,
-      userId: user.id,
     };
-    await messageReactionService.create(messageDto);
-    await messageReactionService.create({
-      ...messageDto,
-      content: '😍',
-    });
 
-    const result = await messageReactionService.findByUserAndMessage({
-      messageId: message.id,
-      userId: user.id,
-    });
+    const result = messageReactionService.createItem(user, dto);
 
-    expect(result.length).toEqual(2);
+    await expect(result).rejects.toThrowError();
   });
 });
 
-describe('delete', () => {
-  it('return array.length=0 if delete reaction', async () => {
-    const user = await createUser();
-    const workspace = await createWorkspace({
-      name: faker.datatype.string(10),
-    });
-    const channel = await createChannel({
-      name: faker.datatype.string(10),
-      workspaceId: workspace.id,
-    });
-    const message = await createMessage({
-      content: 'hello',
-      userId: user.id,
-      channelId: channel.id,
-      workspaceId: workspace.id,
-    });
-    const messageDto: MessageReactionCreateProps = {
-      content: '😊',
-      messageId: message.id,
-      userId: user.id,
-    };
-    await messageReactionService.create(messageDto);
-    await messageReactionService.delete(messageDto);
+describe('findManyByMessageId', () => {
+  it('return MessageReaction', async () => {
+    const { messageReaction, message } = await createMessageReaction();
 
-    const result = await messageReactionService.findByUserAndMessage({
-      messageId: message.id,
-      userId: user.id,
-    });
+    const result = await messageReactionService.findManyByMessageId(message.id);
 
-    expect(result.length).toEqual(0);
+    expect(messageReaction).toBeDefined();
+    expect(result.length).toEqual(1);
   });
 });

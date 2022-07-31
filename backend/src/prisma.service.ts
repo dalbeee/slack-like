@@ -26,19 +26,23 @@ export class PrismaService
   }
 
   async clearDatabase() {
-    const models = Reflect.ownKeys(this).filter((key) => key[0] !== '_');
+    const tablenames = await this.$queryRaw<
+      Array<{ tablename: string }>
+    >`SELECT tablename FROM pg_tables WHERE schemaname='public'`
+      .then((r) => r.filter((r) => r.tablename !== '_prisma_migrations'))
+      .then((r) => r.map((r) => r.tablename));
 
-    return Promise.all(
-      models.map((modelKey) =>
-        this.$executeRawUnsafe(
-          `TRUNCATE TABLE "${modelKey
-            .toString()
-            .charAt(0)
-            .toUpperCase()}${modelKey
-            .toString()
-            .slice(1)}" RESTART IDENTITY CASCADE;`,
-        ),
-      ),
-    );
+    // method1
+    for (const tablename of tablenames) {
+      await this.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" CASCADE;`);
+    }
+    return;
+
+    // method2
+    // return await Promise.all(
+    //   tablenames.map((tablename) =>
+    //     this.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" CASCADE;`),
+    //   ),
+    // );
   }
 }

@@ -64,9 +64,9 @@ const ChannelItem = ({ channel }: { channel: Channel }) => {
 
   useEffect(() => {
     if (!user) return;
-    const subscribed = channel?.Users.map((user) => user.id).includes(user.id);
+    const subscribed = channel?.users.map((user) => user.id).includes(user.id);
     setSubscribed(subscribed);
-  }, [channel?.Users, user]);
+  }, [channel?.users, user]);
 
   if (!user) return null;
 
@@ -108,7 +108,7 @@ const ChannelItem = ({ channel }: { channel: Channel }) => {
               )}
             </span>
             <span className="px-1">{`${
-              channel?.Users && `· ${channel.Users.length}명의 맴버`
+              channel?.users && `· ${channel.users.length}명의 맴버`
             }`}</span>
             <span className="px-1">{channel?.description}</span>
           </div>

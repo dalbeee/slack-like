@@ -8,6 +8,30 @@ import { useFetchMessages } from "../hooks/useFetchMessages";
 import ContentComponent from "../../core/components/ContentComponent";
 import { RootState } from "@/common/store/store";
 import SendCommander from "./SendCommander";
+import { MessageReaction } from "@/common";
+
+const ReactionViewer = ({ reactions }: { reactions: MessageReaction[] }) => {
+  if (!reactions || !reactions.length) return null;
+  const result = reactions.reduce((acc, cur) => {
+    acc[cur.content] = (acc[cur.content] || 0) + 1;
+    return acc;
+  }, {} as { [key: string]: number });
+
+  return (
+    <div className="flex pl-20">
+      {Object.keys(result).map((key) => {
+        return (
+          <div
+            key={key}
+            className="mt-2 bg-emerald-800 bg-opacity-80  rounded-2xl px-2 mr-2"
+          >
+            {key} {result[key]}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const Content = () => {
   const { fetchMessages, messages } = useFetchMessages();
@@ -44,32 +68,36 @@ const Content = () => {
 
   return (
     <div className="" onClick={handleClickBackground}>
-      {messages.map((m) => (
+      {messages.map((message) => (
         <div
           className={`relative group bg-opacity-50 justify-between py-2 flex ${
-            highlightedRowId === m.id ? "bg-neutral-700" : ""
+            highlightedRowId === message?.id ? "bg-neutral-700" : ""
           }`}
-          key={m.id}
-          onMouseOver={() => handleHighlight(m.id)}
+          key={message.id}
+          onMouseOver={() => handleHighlight(message.id)}
           onMouseLeave={() => handleHighlight(null)}
         >
           <div className="">
             <span
               className={`inline-block text-neutral-400 w-20 text-center text-sm ${
-                highlightedRowId === m.id ? "visible" : "invisible"
+                highlightedRowId === message?.id ? "visible" : "invisible"
               }`}
             >
-              {dayjs(m.createdAt).format("HH:mm")}
+              {dayjs(message.createdAt).format("HH:mm")}
             </span>
-            <span className="text-neutral-400 text-lg">{m.content}</span>
+            <span className="text-neutral-400 text-lg">{message.content}</span>
+            {/* reaction viewer */}
+
+            <ReactionViewer reactions={message.reactions} />
           </div>
+          {/*  */}
           <div
             className={`z-10 inline-block absolute -right-0 -top-4  ${
-              highlightedRowId === m.id ? "visible" : "invisible"
+              highlightedRowId === message.id ? "visible" : "invisible"
             }`}
           >
             <ToolTip
-              messageData={m}
+              messageData={message}
               hightlightedRowId={highlightedRowId}
               setHighlightedRowId={setHighlightedRowId}
               setIsHighliterLocked={setIsHighliterLocked}
@@ -90,7 +118,7 @@ const Title = () => {
 
   if (!currentChannel || !currentUser) return null;
 
-  const opponentUser = currentChannel.Users.filter(
+  const opponentUser = currentChannel.users.filter(
     (user) => user.id !== currentUser.id
   )[0];
   const channelName =

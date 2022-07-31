@@ -19,13 +19,13 @@ const DirectMessageContentItem = ({
     (state: RootState) => state.workspaces
   );
 
-  const date = dayjs(channelData.Messages[0].createdAt)
+  const date = dayjs(channelData.messages[0].createdAt)
     .locale("ko")
     .format("MM월 DD일 dddd");
-  const time = dayjs(channelData.Messages[0].createdAt)
+  const time = dayjs(channelData.messages[0].createdAt)
     .locale("ko")
     .format("a HH:mm");
-  const opponentUser = channelData.Users.filter(
+  const opponentUser = channelData.users.filter(
     (user) => user.id !== currentUser?.id
   )[0];
 
@@ -50,7 +50,7 @@ const DirectMessageContentItem = ({
           />
           <div className="">
             <div className="text-light font-semibold">{opponentUser.name}</div>
-            <span>{channelData.Messages[0].content}</span>
+            <span>{channelData.messages[0].content}</span>
           </div>
         </div>
         <div className="w-28">{time}</div>

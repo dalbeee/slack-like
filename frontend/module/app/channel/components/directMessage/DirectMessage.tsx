@@ -38,7 +38,7 @@ const DirectMessageMenu = () => {
         <button onClick={handlePushAllDms}>+</button>
       </MenuItem>
       {directMessageChannels.map((channel) => {
-        const dmFallower = channel.Users.filter(
+        const dmFallower = channel.users.filter(
           (user) => user.id !== currentUser.id
         )[0];
 
