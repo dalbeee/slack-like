@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { createChannel } from '@src/channel/__test__/createChannel';
@@ -161,11 +162,12 @@ describe('createItem', () => {
       expect.objectContaining({
         id: expect.any(String),
         ancestorId: expect.any(String),
+        commentsCount: 0,
       }),
     );
   });
 
-  it('has commentsCount when created by comment role', async () => {
+  it('ancestorMessage has increase commentsCount when comment created', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({ workspaceId: workspace.id });
     const user = await createUser();
@@ -176,8 +178,9 @@ describe('createItem', () => {
       content: 'comment',
       ancestorId: ancestor.id,
     };
+    await messageService.createItem(user, commentDto);
 
-    const result = await messageService.createItem(user, commentDto);
+    const result = await messageService.findById(ancestor.id);
 
     expect(result.commentsCount).toEqual(1);
   });
@@ -205,7 +208,30 @@ describe('createItem', () => {
 
     const result = () => messageService.createItem(user, nestedCommentDto);
 
-    await expect(result).rejects.toThrowError();
+    await expect(result).rejects.toThrowError(
+      new BadRequestException('comments cannot be nested'),
+    );
+  });
+
+  it('throw error if ancestor not exist when create comment', async () => {
+    const workspace = await createWorkspace();
+    const channel = await createChannel({
+      workspaceId: workspace.id,
+    });
+    const user = await createUser();
+    const fakeAncestorId = 'fake';
+    const nestedCommentDto: MessageCreateDto = {
+      content: 'nested comment',
+      channelId: channel.id,
+      workspaceId: workspace.id,
+      ancestorId: fakeAncestorId,
+    };
+
+    const result = () => messageService.createItem(user, nestedCommentDto);
+
+    await expect(result).rejects.toThrowError(
+      new BadRequestException('Ancestor message not found'),
+    );
   });
 });
 
@@ -252,7 +278,7 @@ describe('updateItem', () => {
 
     const result = () => messageService.updateItem(invalidUser, updateDto);
 
-    await expect(result).rejects.toThrowError();
+    await expect(result).rejects.toThrowError(ForbiddenException);
   });
 });
 
@@ -291,10 +317,10 @@ describe('deleteItem', () => {
 
     const result = () => messageService.deleteItem(invalidUser, message.id);
 
-    await expect(result).rejects.toThrowError();
+    await expect(result).rejects.toThrowError(ForbiddenException);
   });
 
-  it('has changed ancestor.commentsCount when comment delete', async () => {
+  it('throw error when invalid user', async () => {
     const workspace = await createWorkspace();
     const channel = await createChannel({
       workspaceId: workspace.id,
@@ -310,6 +336,26 @@ describe('deleteItem', () => {
 
     const result = () => messageService.deleteItem(invalidUser, message.id);
 
-    await expect(result).rejects.toThrowError();
+    await expect(result).rejects.toThrowError(ForbiddenException);
+  });
+
+  it('has changed ancestor.commentsCount when comment delete', async () => {
+    const workspace = await createWorkspace();
+    const channel = await createChannel({
+      workspaceId: workspace.id,
+    });
+    const user = await createUser();
+    const message = await createMessage({
+      workspace,
+      channel,
+      user,
+      content: '1',
+    });
+    const comment = await createComment({ workspace, channel, user, message });
+    await messageService.deleteItem(user, comment.id);
+
+    const result = await messageService.findById(message.id);
+
+    expect(result.commentsCount).toEqual(0);
   });
 });

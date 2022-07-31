@@ -29,32 +29,33 @@ export class MessageService {
     let queryByCommentRole = {};
 
     if (ancestorId) {
-      const message = await this.prisma.message.findFirstOrThrow({
+      const ancestorMessage = await this.prisma.message.findFirst({
         where: { id: ancestorId },
       });
-      if (message.ancestorId)
+      if (!ancestorMessage)
+        throw new BadRequestException('Ancestor message not found');
+      if (ancestorMessage.ancestorId)
         throw new BadRequestException('comments cannot be nested');
 
       queryByCommentRole = {
         ancestor: ancestorId ? { connect: { id: ancestorId } } : {},
-        commentsCount: message.commentsCount + 1,
       };
+      await this.prisma.message.update({
+        where: { id: ancestorId },
+        data: { commentsCount: { increment: 1 } },
+      });
     }
 
-    try {
-      return await this.prisma.message.create({
-        data: {
-          workspaceId,
-          channel: { connect: { id: channelId } },
-          userId: user.id,
-          content,
-          ...queryByCommentRole,
-        },
-        include: { reactions: true },
-      });
-    } catch (error) {
-      throw new BadRequestException();
-    }
+    return await this.prisma.message.create({
+      data: {
+        workspaceId,
+        channel: { connect: { id: channelId } },
+        userId: user.id,
+        content,
+        ...queryByCommentRole,
+      },
+      include: { reactions: true },
+    });
   }
 
   async updateItem(
@@ -72,9 +73,9 @@ export class MessageService {
     const message = await this._validateCorrectUser({ id, userId });
     if (message.ancestorId) {
       await this.prisma.message.update({
-        where: { id: message.id },
+        where: { id: message.ancestorId },
         data: {
-          commentsCount: message.commentsCount - 1,
+          commentsCount: { decrement: 1 },
         },
       });
     }
@@ -94,6 +95,4 @@ export class MessageService {
       include: { comments: role === 'thread' ? true : false },
     });
   }
-
-  // thread mode
 }

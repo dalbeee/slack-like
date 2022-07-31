@@ -47,7 +47,7 @@ export class MessageController {
 
   @Delete('/messages/:messageId')
   deleteMessage(
-    @Body() dto: MessageDeleteDto,
+    @Param() dto: MessageDeleteDto,
     @CurrentUser() user: UserJwtPayload,
   ) {
     return this.messageService.deleteItem(user, dto.messageId);
