@@ -37,6 +37,14 @@ export class MessageController {
     return this.messageService.findMany(dto);
   }
 
+  @Get('/messages/:messageId')
+  findMessageByMessageId(
+    @Param('messageId') messageId: string,
+    @Query('role') role: 'message' | 'thread',
+  ) {
+    return this.messageService.findById(messageId, role);
+  }
+
   @Delete('/messages/:messageId')
   deleteMessage(
     @Body() dto: MessageDeleteDto,

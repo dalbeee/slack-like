@@ -88,8 +88,11 @@ export class MessageService {
     });
   }
 
-  findById(messageId: string) {
-    return this.prisma.message.findUnique({ where: { id: messageId } });
+  findById(messageId: string, role: 'message' | 'thread' = 'message') {
+    return this.prisma.message.findFirst({
+      where: { id: messageId },
+      include: { comments: role === 'thread' ? true : false },
+    });
   }
 
   // thread mode
