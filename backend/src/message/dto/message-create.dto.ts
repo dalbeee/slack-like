@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class MessageCreateDto {
   @IsString()
@@ -9,4 +9,8 @@ export class MessageCreateDto {
 
   @IsString()
   channelId!: string;
+
+  @IsOptional()
+  @IsString()
+  ancestorId?: string;
 }

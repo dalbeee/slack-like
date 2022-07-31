@@ -39,10 +39,10 @@ describe('createItem', () => {
       workspaceId: workspace.id,
     });
     const message = await createMessage({
+      workspace,
+      channel,
+      user,
       content: 'hello',
-      userId: user.id,
-      channelId: channel.id,
-      workspaceId: workspace.id,
     });
     const dto: MessageReactionCreateDto = {
       content: '😊',
@@ -69,10 +69,10 @@ describe('createItem', () => {
       workspaceId: workspace.id,
     });
     const message = await createMessage({
+      workspace,
+      channel,
+      user,
       content: 'hello',
-      userId: user.id,
-      channelId: channel.id,
-      workspaceId: workspace.id,
     });
     const dto: MessageReactionCreateDto = {
       content: '😊😊',

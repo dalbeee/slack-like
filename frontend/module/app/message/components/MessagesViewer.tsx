@@ -4,11 +4,11 @@ import { useSelector } from "react-redux";
 
 import ToolTip from "./ToolTip";
 import { useWsChannelOutbound } from "../../channel/hooks/useWsChannelOutbound";
-import { useFetchMessages } from "../hooks/useFetchMessages";
 import ContentComponent from "../../core/components/ContentComponent";
 import { RootState } from "@/common/store/store";
 import SendCommander from "./SendCommander";
-import { MessageReaction } from "@/common";
+import { Message, MessageReaction } from "@/common";
+
 type ReactionViewerResult = {
   [content: string]: { count: number; createdByMe: boolean };
 };
@@ -47,17 +47,16 @@ const ReactionViewer = ({ reactions }: { reactions: MessageReaction[] }) => {
   );
 };
 
-const Content = () => {
-  const { fetchMessages, messages } = useFetchMessages();
+export const Content = ({
+  channelOrThreadData: messages,
+}: {
+  channelOrThreadData: Message[];
+}) => {
   const { setZeroUnreadMessageCount } = useWsChannelOutbound();
   const [isHighliterLocked, setIsHighliterLocked] = useState(false);
   const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
   const [isOnExpand, setIsOnExpand] = useState(false);
   const toolTipExpandRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    fetchMessages();
-  }, [fetchMessages]);
 
   useEffect(() => {
     setZeroUnreadMessageCount();
@@ -100,11 +99,8 @@ const Content = () => {
               {dayjs(message.createdAt).format("HH:mm")}
             </span>
             <span className="text-neutral-400 text-lg">{message.content}</span>
-            {/* reaction viewer */}
-
             <ReactionViewer reactions={message.reactions} />
           </div>
-          {/*  */}
           <div
             className={`z-10 inline-block absolute -right-0 -top-4  ${
               highlightedRowId === message.id ? "visible" : "invisible"
@@ -150,14 +146,16 @@ const Title = () => {
 
 const Bottom = () => {
   const { currentChannel } = useSelector((state: RootState) => state.channels);
-  return <>{currentChannel && <SendCommander />}</>;
+  return <>{currentChannel && <SendCommander target="CHANNEL" />}</>;
 };
 
 const MessagesViewer = () => {
+  const { messages } = useSelector((state: RootState) => state.messages);
+
   return (
     <ContentComponent
       title={<Title />}
-      content={<Content />}
+      content={<Content channelOrThreadData={messages} />}
       bottom={<Bottom />}
     />
   );
