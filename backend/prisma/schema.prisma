@@ -11,15 +11,15 @@ datasource db {
 }
 
 model User {
-  id         String            @id @default(uuid())
+  id         String      @id @default(uuid())
   email      String
   password   String
   name       String
   timezone   String?
   status     String?
   pictureSrc String?
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
   workspaces Workspace[]
   channels   Channel[]
 }
@@ -41,33 +41,33 @@ enum ChannelType {
 }
 
 model Channel {
-  id          String    @id @default(uuid())
+  id          String      @id @default(uuid())
   type        ChannelType @default(PUBLIC)
   password    String?
   workspaceId String
-  workSpace   Workspace @relation(fields: [workspaceId], references: [id])
+  workSpace   Workspace   @relation(fields: [workspaceId], references: [id])
   name        String
   description String?
   users       User[]
   messages    Message[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model Message {
-  id          String            @id @default(uuid())
-  content     String
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  ancestorId  String?           @unique
-  ancestor    Message?          @relation("thread", fields: [ancestorId], references: [id])
-  comments    Message[]         @relation("thread")
-  commentsCount Int              @default(0)
-  reactions   MessageReaction[]
-  userId      String
-  channel     Channel           @relation(fields: [channelId], references: [id])
-  channelId   String
-  workspaceId String
+  id            String            @id @default(uuid())
+  content       String
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  ancestorId    String?
+  ancestor      Message?          @relation("thread", fields: [ancestorId], references: [id])
+  comments      Message[]         @relation("thread")
+  commentsCount Int               @default(0)
+  reactions     MessageReaction[]
+  userId        String
+  channel       Channel           @relation(fields: [channelId], references: [id])
+  channelId     String
+  workspaceId   String
 
   @@index([id, createdAt])
 }
