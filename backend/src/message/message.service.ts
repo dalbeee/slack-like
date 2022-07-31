@@ -19,26 +19,43 @@ export class MessageService {
       where: { id },
     });
     if (message.userId !== userId) throw new ForbiddenException();
-    return true;
+    return message;
   }
 
   async createItem(
     user: UserJwtPayload,
-    { content, channelId, workspaceId }: MessageCreateDto,
+    { content, channelId, workspaceId, ancestorId }: MessageCreateDto,
   ) {
-    try {
-      return await this.prisma.message.create({
-        data: {
-          workspaceId,
-          channel: { connect: { id: channelId } },
-          userId: user.id,
-          content,
-        },
-        include: { reactions: true },
+    let queryByCommentRole = {};
+
+    if (ancestorId) {
+      const ancestorMessage = await this.prisma.message.findFirst({
+        where: { id: ancestorId },
       });
-    } catch (error) {
-      throw new BadRequestException();
+      if (!ancestorMessage)
+        throw new BadRequestException('Ancestor message not found');
+      if (ancestorMessage.ancestorId)
+        throw new BadRequestException('comments cannot be nested');
+
+      queryByCommentRole = {
+        ancestor: ancestorId ? { connect: { id: ancestorId } } : {},
+      };
+      await this.prisma.message.update({
+        where: { id: ancestorId },
+        data: { commentsCount: { increment: 1 } },
+      });
     }
+
+    return await this.prisma.message.create({
+      data: {
+        workspaceId,
+        channel: { connect: { id: channelId } },
+        userId: user.id,
+        content,
+        ...queryByCommentRole,
+      },
+      include: { reactions: true },
+    });
   }
 
   async updateItem(
@@ -53,7 +70,16 @@ export class MessageService {
   }
 
   async deleteItem({ id: userId }: UserJwtPayload, id: string) {
-    await this._validateCorrectUser({ id, userId });
+    const message = await this._validateCorrectUser({ id, userId });
+    if (message.ancestorId) {
+      await this.prisma.message.update({
+        where: { id: message.ancestorId },
+        data: {
+          commentsCount: { decrement: 1 },
+        },
+      });
+    }
+
     return await this.prisma.message.delete({ where: { id } });
   }
 
@@ -63,7 +89,10 @@ export class MessageService {
     });
   }
 
-  findById(messageId: string) {
-    return this.prisma.message.findUnique({ where: { id: messageId } });
+  findById(messageId: string, role: 'message' | 'thread' = 'message') {
+    return this.prisma.message.findFirst({
+      where: { id: messageId },
+      include: { comments: role === 'thread' ? true : false },
+    });
   }
 }

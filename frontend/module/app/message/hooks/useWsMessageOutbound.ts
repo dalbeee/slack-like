@@ -1,12 +1,15 @@
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 import { socketFactory } from "@/common/wsClient";
-import { SocketInfo } from "@/common";
+import { MessageCreateTarget, SocketInfo } from "@/common";
+import { RootState } from "@/common/store/store";
 
 export const useWsMessageOutbound = () => {
   const ws = socketFactory();
   const router = useRouter();
+  const { thread } = useSelector((state: RootState) => state.thread);
 
   const [socketInfo, setSocketInfo] = useState<null | SocketInfo>(null);
 
@@ -17,20 +20,43 @@ export const useWsMessageOutbound = () => {
     });
   }, [router.query?.channel, router.query?.workspace]);
 
-  const createMessage = useCallback(
-    (content: string) => {
-      if (!socketInfo) return;
-      ws.emit("message.create", { socketInfo, content });
+  const querySelector = useCallback(
+    (target: MessageCreateTarget) => {
+      return target === "THREAD" ? { ancestorId: thread.id } : {};
     },
-    [socketInfo, ws]
+    [thread.id]
+  );
+
+  const createMessage = useCallback(
+    ({ content, target }: { content: string; target: MessageCreateTarget }) => {
+      if (!socketInfo) return;
+
+      ws.emit("message.create", {
+        socketInfo,
+        content,
+        ...querySelector(target),
+      });
+    },
+    [querySelector, socketInfo, ws]
   );
 
   const deleteMessage = useCallback(
-    (messageId: string) => {
+    ({
+      messageId,
+      target,
+    }: {
+      messageId: string;
+      target: MessageCreateTarget;
+    }) => {
       if (!socketInfo) return;
-      ws.emit("message.delete", { socketInfo, messageId });
+
+      ws.emit("message.delete", {
+        socketInfo,
+        messageId,
+        ...querySelector(target),
+      });
     },
-    [socketInfo, ws]
+    [querySelector, socketInfo, ws]
   );
 
   const createReaction = useCallback(

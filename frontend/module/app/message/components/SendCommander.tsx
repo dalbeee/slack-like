@@ -3,8 +3,9 @@ import { useSelector } from "react-redux";
 
 import { RootState } from "@/common/store/store";
 import { useWsMessageOutbound } from "../../message/hooks/useWsMessageOutbound";
+import { MessageCreateTarget } from "@/common";
 
-const SendCommander = () => {
+const SendCommander = ({ target }: { target: MessageCreateTarget }) => {
   const { createMessage } = useWsMessageOutbound();
   const { currentChannel } = useSelector((state: RootState) => state.channels);
   const [message, setMessage] = useState("");
@@ -24,7 +25,8 @@ const SendCommander = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message) return;
-    createMessage(message);
+
+    createMessage({ content: message, target });
     setMessage("");
   };
 

@@ -1,5 +1,7 @@
+import ThreadViewer from "@/module/app/message/components/ThreadViewer";
+
 const RightColumnLayout = () => {
-  return <div className="w-4/12">RightColumn</div>;
+  return <ThreadViewer />;
 };
 
 export default RightColumnLayout;

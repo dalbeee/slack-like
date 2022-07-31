@@ -9,7 +9,7 @@ const AppLayout = () => {
     <div className="h-screen scrollbar-thumb-neutral-600">
       <DataInitializer />
       <TopSearchBarLayout />
-      <div className="flex bg-neutral-900 h-content overflow-hidden">
+      <div className="flex bg-neutral-900/95 h-content overflow-hidden">
         <LeftColumnLayout />
         <ContentColumnLayout />
         <RightColumnLayout />
