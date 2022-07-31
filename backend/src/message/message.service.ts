@@ -34,6 +34,7 @@ export class MessageService {
           userId: user.id,
           content,
         },
+        include: { reactions: true },
       });
     } catch (error) {
       throw new BadRequestException();

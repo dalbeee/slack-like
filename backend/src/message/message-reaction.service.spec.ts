@@ -51,14 +51,15 @@ describe('createItem', () => {
 
     const result = await messageReactionService.createItem(user, dto);
 
-    expect(result).toEqual(
-      expect.objectContaining({
+    expect(result).toEqual({
+      action: expect.any(String),
+      reaction: expect.objectContaining({
         userId: expect.any(String),
         messageId: expect.any(String),
         content: expect.any(String),
         createdAt: expect.any(Date),
       }),
-    );
+    });
   });
 
   it('throw error if content length not 1', async () => {
@@ -79,61 +80,6 @@ describe('createItem', () => {
     };
 
     const result = messageReactionService.createItem(user, dto);
-
-    await expect(result).rejects.toThrowError();
-  });
-});
-
-describe('deleteItem', () => {
-  it('return MessageReaction', async () => {
-    const user = await createUser();
-    const workspace = await createWorkspace();
-    const channel = await createChannel({
-      workspaceId: workspace.id,
-    });
-    const message = await createMessage({
-      content: 'hello',
-      userId: user.id,
-      channelId: channel.id,
-      workspaceId: workspace.id,
-    });
-    const createDto: MessageReactionCreateDto = {
-      content: '😊',
-      messageId: message.id,
-    };
-    const reaction = await messageReactionService.createItem(user, createDto);
-
-    const result = await messageReactionService.deleteItem(user, reaction.id);
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        id: expect.any(String),
-        userId: expect.any(String),
-      }),
-    );
-  });
-
-  it('throw error if invalid author', async () => {
-    const user = await createUser();
-    const invalid_user = await createUser();
-    const workspace = await createWorkspace();
-    const channel = await createChannel({
-      workspaceId: workspace.id,
-    });
-    const message = await createMessage({
-      content: 'hello',
-      userId: user.id,
-      channelId: channel.id,
-      workspaceId: workspace.id,
-    });
-    const createDto: MessageReactionCreateDto = {
-      content: '😊',
-      messageId: message.id,
-    };
-    const reaction = await messageReactionService.createItem(user, createDto);
-
-    const result = () =>
-      messageReactionService.deleteItem(invalid_user, reaction.id);
 
     await expect(result).rejects.toThrowError();
   });

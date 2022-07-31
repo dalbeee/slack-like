@@ -25,7 +25,6 @@ import { MessageDeleteDto } from '@src/message/dto/message-delete.dto';
 import { MessageCreateDto } from '@src/message/dto/message-create.dto';
 import { SocketIoMessageReactionInboundService } from './socketio-message-reaction-inbound.service';
 import { MessageReactionCreateDto } from '@src/message/dto/message-reaction-create.dto';
-import { MessageReactionDeleteDto } from '@src/message/dto/message-reaction-delete.dto';
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -115,15 +114,6 @@ export class SocketIoGateway implements OnGatewayConnection {
     @WebsocketCurrentUser() user: UserJwtPayload,
   ) {
     return this.socketIoMessageReactionInboundService.createItem(user, body);
-  }
-
-  @UseGuards(WsGuard)
-  @SubscribeMessage('message_reaction.delete')
-  deleteMessageReaction(
-    @MessageBody() body: SocketWrapper & MessageReactionDeleteDto,
-    @WebsocketCurrentUser() user: UserJwtPayload,
-  ) {
-    return this.socketIoMessageReactionInboundService.deleteItem(user, body);
   }
 
   // Channel

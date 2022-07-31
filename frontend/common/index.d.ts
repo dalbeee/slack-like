@@ -114,6 +114,4 @@ export type MessageReaction = {
   messageId: string;
   content: string;
   createdAt: Date;
-  users: User[];
-  messages: Message[];
 };

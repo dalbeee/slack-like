@@ -2,7 +2,6 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 
 import { UserJwtPayload } from '@src/auth/types';
 import { MessageReactionCreateDto } from '@src/message/dto/message-reaction-create.dto';
-import { MessageReactionDeleteDto } from '@src/message/dto/message-reaction-delete.dto';
 import { MessageReactionService } from '@src/message/message-reaction.service';
 import { UserRedisService } from '@src/user/user-redis.service';
 import { SocketWrapper } from './dto/socket-wrapper.dto';
@@ -30,29 +29,13 @@ export class SocketIoMessageReactionInboundService {
 
     this.socketOutboundService.sendToChannel(
       {
+        messageKey:
+          result.action === 'create'
+            ? 'message_reaction.create'
+            : 'message_reaction.delete',
         channelId: data.socketInfo.channelId,
-        messageKey: 'message_reaction.create',
       },
-      result,
-    );
-    return result;
-  }
-
-  async deleteItem(
-    user: UserJwtPayload,
-    data: SocketWrapper & MessageReactionDeleteDto,
-  ) {
-    const result = await this.messageReactionService.deleteItem(
-      user,
-      data.reactionId,
-    );
-
-    this.socketOutboundService.sendToChannel(
-      {
-        channelId: data.socketInfo.channelId,
-        messageKey: 'message_reaction.delete',
-      },
-      result,
+      result.reaction,
     );
     return result;
   }

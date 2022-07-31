@@ -25,13 +25,25 @@ export class MessageReactionService {
     const message = await this.messageService.findById(messageId);
     if (!message) throw new NotFoundException('not found message');
 
-    return await this.prisma.messageReaction.create({
+    const reaction = await this.prisma.messageReaction.findFirst({
+      where: { messageId, userId: user.id, content },
+    });
+    if (reaction) {
+      await this.deleteItem(user, reaction.id);
+      return {
+        action: 'delete',
+        reaction,
+      };
+    }
+
+    const result = await this.prisma.messageReaction.create({
       data: {
         content,
         message: { connect: { id: messageId } },
         userId: user.id,
       },
     });
+    return { action: 'create', reaction: result };
   }
 
   async deleteItem(user: UserJwtPayload, id: string) {
