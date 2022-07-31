@@ -102,9 +102,18 @@ export type Message = {
   updatedAt: Date;
   ancestorId: string;
   reactions: MessageReaction[];
+  comments: Message[];
+  commentsCount: number;
   userId: string;
   channelId: string;
   workspaceId: string;
+};
+
+type MessageCreateDto = {
+  content: string;
+  workspaceId: string;
+  channelId: string;
+  ancestorId?: string;
 };
 
 // MessageReaction
@@ -115,3 +124,5 @@ export type MessageReaction = {
   content: string;
   createdAt: Date;
 };
+
+type MessageCreateTarget = "CHANNEL" | "THREAD";
