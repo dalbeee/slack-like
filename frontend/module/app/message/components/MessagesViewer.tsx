@@ -21,7 +21,10 @@ const ReactionViewer = ({ reactions }: { reactions: MessageReaction[] }) => {
     <div className="flex pl-20">
       {Object.keys(result).map((key) => {
         return (
-          <div key={key} className="mt-2 bg-indigo-800 rounded-2xl px-2 py-1">
+          <div
+            key={key}
+            className="mt-2 bg-emerald-800 bg-opacity-80  rounded-2xl px-2 mr-2"
+          >
             {key} {result[key]}
           </div>
         );
