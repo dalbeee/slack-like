@@ -150,7 +150,7 @@ const Title = () => {
 
 const Bottom = () => {
   const { currentChannel } = useSelector((state: RootState) => state.channels);
-  return <>{currentChannel && <SendCommander />}</>;
+  return <>{currentChannel && <SendCommander target="CHANNEL" />}</>;
 };
 
 const MessagesViewer = () => {

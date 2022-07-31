@@ -6,10 +6,13 @@ import {
   RefAttributes,
   SetStateAction,
 } from "react";
+import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
 
 import { Message } from "@/common";
 import ToolTipExpand from "./ToolTipExpand";
 import { useWsMessageOutbound } from "../../message/hooks/useWsMessageOutbound";
+import { RootState } from "@/common/store/store";
 
 const ButtonItem = ({
   handleClick,
@@ -19,7 +22,7 @@ const ButtonItem = ({
   handleClick?: (arg: unknown) => unknown;
 }) => {
   return (
-    <button className="px-1" onClick={handleClick}>
+    <button className="px-2" onClick={handleClick}>
       {children}
     </button>
   );
@@ -51,6 +54,13 @@ const ToolTip: ForwardRefExoticComponent<
     ref
   ) => {
     const { createReaction } = useWsMessageOutbound();
+    const router = useRouter();
+    const { currentWorkspaceId } = useSelector(
+      (state: RootState) => state.workspaces
+    );
+    const { currentChannel } = useSelector(
+      (state: RootState) => state.channels
+    );
 
     const handleToggleExpand = () => {
       setIsHighliterLocked((prev) => !prev);
@@ -64,6 +74,17 @@ const ToolTip: ForwardRefExoticComponent<
       createReaction({ content, messageId: messageData.id });
       return;
     };
+
+    const handleOpenThread = () => {
+      if (!currentChannel) return;
+      router.push(
+        `/client/${currentWorkspaceId}/${currentChannel.id}/thread/${messageData.id}`,
+        undefined,
+        { shallow: true }
+      );
+    };
+
+    if (!currentChannel) return null;
 
     return (
       <>
@@ -83,6 +104,9 @@ const ToolTip: ForwardRefExoticComponent<
           {/* TODO add reactions */}
           <ButtonItem>
             <span className="material-symbols-outlined">add_reaction</span>
+          </ButtonItem>
+          <ButtonItem handleClick={handleOpenThread}>
+            <span className="material-symbols-outlined">comment</span>
           </ButtonItem>
           <ButtonItem>
             <span className="material-symbols-outlined">forward</span>
