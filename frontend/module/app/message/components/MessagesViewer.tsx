@@ -9,23 +9,37 @@ import ContentComponent from "../../core/components/ContentComponent";
 import { RootState } from "@/common/store/store";
 import SendCommander from "./SendCommander";
 import { MessageReaction } from "@/common";
+type ReactionViewerResult = {
+  [content: string]: { count: number; createdByMe: boolean };
+};
 
 const ReactionViewer = ({ reactions }: { reactions: MessageReaction[] }) => {
-  if (!reactions || !reactions.length) return null;
-  const result = reactions.reduce((acc, cur) => {
-    acc[cur.content] = (acc[cur.content] || 0) + 1;
+  const { user } = useSelector((state: RootState) => state.user);
+
+  if (!reactions || !reactions.length || !user) return null;
+
+  const result: ReactionViewerResult = reactions.reduce((acc, cur) => {
+    acc[cur.content] = {
+      count: (acc[cur.content]?.count ?? 0) + 1,
+      createdByMe:
+        acc[cur.content]?.createdByMe || cur.userId === user.id ? true : false,
+    };
     return acc;
-  }, {} as { [key: string]: number });
+  }, {} as ReactionViewerResult);
 
   return (
     <div className="flex pl-20">
-      {Object.keys(result).map((key) => {
+      {Object.keys(result).map((content) => {
         return (
           <div
-            key={key}
-            className="mt-2 bg-emerald-800 bg-opacity-80  rounded-2xl px-2 mr-2"
+            key={content}
+            className={`mt-2  rounded-2xl px-2 mr-2
+            ${
+              result[content].createdByMe ? "bg-emerald-800 bg-opacity-80" : ""
+            }}
+            `}
           >
-            {key} {result[key]}
+            {content} {result[content].count}
           </div>
         );
       })}
