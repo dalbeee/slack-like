@@ -25,6 +25,7 @@ export class SocketIoMessageInboundService {
       channelId: data.socketInfo.channelId,
       workspaceId: data.socketInfo.workspaceId,
       content: data.content,
+      ancestorId: data?.ancestorId,
     });
 
     this.userRedisService.increaseUnreadMessageCountByChannelSubscribers({
