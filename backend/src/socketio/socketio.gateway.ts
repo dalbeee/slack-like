@@ -58,7 +58,7 @@ export class SocketIoGateway implements OnGatewayConnection {
       await this._saveSocketId(data);
       return;
     } catch (ex) {
-      throw new WsException('token required');
+      socket._error(new WsException('token required'));
     }
   }
 

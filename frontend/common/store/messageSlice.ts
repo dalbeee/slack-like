@@ -40,9 +40,9 @@ export const messageSlice = createSlice({
         reactions: [...message.reactions, action.payload],
       };
       state.messages = [
-        ...state.messages.splice(0, index),
+        ...state.messages.slice(0, index),
         updatedMessage,
-        ...state.messages.splice(index),
+        ...state.messages.slice(index + 1),
       ];
     },
 
@@ -59,9 +59,9 @@ export const messageSlice = createSlice({
         ],
       };
       state.messages = [
-        ...state.messages.splice(0, index),
+        ...state.messages.slice(0, index),
         updatedMessage,
-        ...state.messages.splice(index),
+        ...state.messages.slice(index + 1),
       ];
     },
   },
