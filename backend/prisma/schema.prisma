@@ -62,6 +62,7 @@ model Message {
   ancestorId  String?           @unique
   ancestor    Message?          @relation("thread", fields: [ancestorId], references: [id])
   comments    Message[]         @relation("thread")
+  commentsCount Int              @default(0)
   reactions   MessageReaction[]
   userId      String
   channel     Channel           @relation(fields: [channelId], references: [id])
