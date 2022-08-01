@@ -3,9 +3,13 @@ import { useSelector } from "react-redux";
 
 import { RootState } from "@/common/store/store";
 import { useWsMessageOutbound } from "../../message/hooks/useWsMessageOutbound";
-import { MessageCreateTarget } from "@/common";
+import { EventOutboundTarget } from "@/common";
 
-const SendCommander = ({ target }: { target: MessageCreateTarget }) => {
+const SendCommander = ({
+  eventOutboundTarget,
+}: {
+  eventOutboundTarget: EventOutboundTarget;
+}) => {
   const { createMessage } = useWsMessageOutbound();
   const { currentChannel } = useSelector((state: RootState) => state.channels);
   const [message, setMessage] = useState("");
@@ -26,7 +30,7 @@ const SendCommander = ({ target }: { target: MessageCreateTarget }) => {
     e.preventDefault();
     if (!message) return;
 
-    createMessage({ content: message, target });
+    createMessage({ content: message, eventOutboundTarget });
     setMessage("");
   };
 

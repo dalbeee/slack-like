@@ -90,9 +90,18 @@ export class MessageService {
   }
 
   findById(messageId: string, role: 'message' | 'thread' = 'message') {
+    const includeQuery =
+      role === 'thread'
+        ? ({
+            include: { comments: { include: { reactions: true } } },
+          } as any)
+        : ({
+            include: { reactions: true },
+          } as any);
+
     return this.prisma.message.findFirst({
       where: { id: messageId },
-      include: { comments: role === 'thread' ? true : false },
+      ...includeQuery,
     });
   }
 }

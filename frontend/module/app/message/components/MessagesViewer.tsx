@@ -7,7 +7,7 @@ import { useWsChannelOutbound } from "../../channel/hooks/useWsChannelOutbound";
 import ContentComponent from "../../core/components/ContentComponent";
 import { RootState } from "@/common/store/store";
 import SendCommander from "./SendCommander";
-import { Message, MessageReaction } from "@/common";
+import { Message, EventOutboundTarget, MessageReaction } from "@/common";
 
 type ReactionViewerResult = {
   [content: string]: { count: number; createdByMe: boolean };
@@ -49,7 +49,9 @@ const ReactionViewer = ({ reactions }: { reactions: MessageReaction[] }) => {
 
 export const Content = ({
   channelOrThreadData: messages,
+  eventOutboundTarget,
 }: {
+  eventOutboundTarget: EventOutboundTarget;
   channelOrThreadData: Message[];
 }) => {
   const { setZeroUnreadMessageCount } = useWsChannelOutbound();
@@ -113,6 +115,7 @@ export const Content = ({
               setIsHighliterLocked={setIsHighliterLocked}
               isOnExpand={isOnExpand}
               setIsOnExpand={setIsOnExpand}
+              eventOutboundTarget={eventOutboundTarget}
               ref={toolTipExpandRef}
             />
           </div>
@@ -146,7 +149,10 @@ const Title = () => {
 
 const Bottom = () => {
   const { currentChannel } = useSelector((state: RootState) => state.channels);
-  return <>{currentChannel && <SendCommander target="CHANNEL" />}</>;
+
+  if (!currentChannel) return null;
+
+  return <SendCommander eventOutboundTarget="CHANNEL" />;
 };
 
 const MessagesViewer = () => {
@@ -155,7 +161,12 @@ const MessagesViewer = () => {
   return (
     <ContentComponent
       title={<Title />}
-      content={<Content channelOrThreadData={messages} />}
+      content={
+        <Content
+          channelOrThreadData={messages}
+          eventOutboundTarget={"CHANNEL"}
+        />
+      }
       bottom={<Bottom />}
     />
   );

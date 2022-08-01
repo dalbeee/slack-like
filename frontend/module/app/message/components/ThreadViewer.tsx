@@ -9,7 +9,12 @@ import { Content as MessageViewer } from "@/module/app/message/components/Messag
 
 const Content = () => {
   const { thread } = useSelector((state: RootState) => state.thread);
-  return <MessageViewer channelOrThreadData={thread.comments} />;
+  return (
+    <MessageViewer
+      channelOrThreadData={thread.comments}
+      eventOutboundTarget={"THREAD"}
+    />
+  );
 };
 
 const Title = () => {
@@ -43,7 +48,10 @@ const Title = () => {
 
 const Bottom = () => {
   const { currentChannel } = useSelector((state: RootState) => state.channels);
-  return <>{currentChannel && <SendCommander target="THREAD" />}</>;
+
+  if (!currentChannel) return null;
+
+  return <SendCommander eventOutboundTarget="THREAD" />;
 };
 
 const ThreadViewer = () => {

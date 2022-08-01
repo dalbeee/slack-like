@@ -27,6 +27,7 @@ export class MessageReactionService {
 
     const reaction = await this.prisma.messageReaction.findFirst({
       where: { messageId, userId: user.id, content },
+      include: { message: true },
     });
     if (reaction) {
       await this.deleteItem(user, reaction.id);
@@ -42,6 +43,7 @@ export class MessageReactionService {
         message: { connect: { id: messageId } },
         userId: user.id,
       },
+      include: { message: true },
     });
     return { action: 'create', reaction: result };
   }
