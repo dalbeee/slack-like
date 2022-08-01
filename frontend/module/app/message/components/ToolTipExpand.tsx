@@ -23,7 +23,7 @@ const ToolTipExpand: ForwardRefExoticComponent<
       const handleDelete = () => {
         deleteMessage({
           messageId: messageData.id,
-          target: eventOutboundTarget,
+          eventOutboundTarget: eventOutboundTarget,
         });
       };
       return (
