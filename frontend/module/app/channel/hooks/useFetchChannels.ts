@@ -50,7 +50,7 @@ export const useFetchChannels = () => {
   const fetchSubscribedChannels = useCallback(() => {
     if (!user || !currentWorkspaceId) return;
     httpClient
-      .get<any, ChannelDataResponse>(`/users/subscribed-channels`, {
+      .get<any, ChannelDataResponse>(`/channels/subscribed-channels`, {
         params: { workspaceId: currentWorkspaceId },
       })
       .then(async (r) => dispatch(setChannels(r)));

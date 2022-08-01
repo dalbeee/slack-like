@@ -39,7 +39,7 @@ export const useFetchWorkspaces = () => {
   const fetchJoinedWorkspaces = useCallback(async () => {
     if (!user) return;
     httpClient
-      .get<any, Workspace[]>(`/users/joined-workspaces`)
+      .get<any, Workspace[]>(`/workspaces/joined-workspaces`)
       .then((r) => dispatch(setWorkspaces(r)));
   }, [dispatch, user]);
 
