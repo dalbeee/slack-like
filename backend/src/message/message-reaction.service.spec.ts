@@ -62,6 +62,28 @@ describe('createItem', () => {
     });
   });
 
+  it('return MessageReaction include Message', async () => {
+    const user = await createUser();
+    const workspace = await createWorkspace();
+    const channel = await createChannel({
+      workspaceId: workspace.id,
+    });
+    const message = await createMessage({
+      workspace,
+      channel,
+      user,
+      content: 'hello',
+    });
+    const dto: MessageReactionCreateDto = {
+      content: '😊',
+      messageId: message.id,
+    };
+
+    const result = await messageReactionService.createItem(user, dto);
+
+    expect(result.reaction.message).toBeDefined();
+  });
+
   it('throw error if content length not 1', async () => {
     const user = await createUser();
     const workspace = await createWorkspace();
@@ -93,5 +115,27 @@ describe('findManyByMessageId', () => {
 
     expect(messageReaction).toBeDefined();
     expect(result.length).toEqual(1);
+  });
+
+  it('return MessageReaction include Message', async () => {
+    const user = await createUser();
+    const workspace = await createWorkspace();
+    const channel = await createChannel({
+      workspaceId: workspace.id,
+    });
+    const message = await createMessage({
+      workspace,
+      channel,
+      user,
+      content: 'hello',
+    });
+    const dto: MessageReactionCreateDto = {
+      content: '😊',
+      messageId: message.id,
+    };
+
+    const result = await messageReactionService.createItem(user, dto);
+
+    expect(result.reaction.message).toBeDefined();
   });
 });

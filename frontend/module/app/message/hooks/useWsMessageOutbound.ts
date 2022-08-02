@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 import { socketFactory } from "@/common/wsClient";
-import { MessageCreateTarget, SocketInfo } from "@/common";
+import { EventOutboundTarget, SocketInfo } from "@/common";
 import { RootState } from "@/common/store/store";
 
 export const useWsMessageOutbound = () => {
@@ -21,20 +21,26 @@ export const useWsMessageOutbound = () => {
   }, [router.query?.channel, router.query?.workspace]);
 
   const querySelector = useCallback(
-    (target: MessageCreateTarget) => {
-      return target === "THREAD" ? { ancestorId: thread.id } : {};
+    (eventOutboundTarget: EventOutboundTarget) => {
+      return eventOutboundTarget === "THREAD" ? { ancestorId: thread.id } : {};
     },
     [thread.id]
   );
 
   const createMessage = useCallback(
-    ({ content, target }: { content: string; target: MessageCreateTarget }) => {
+    ({
+      content,
+      eventOutboundTarget,
+    }: {
+      content: string;
+      eventOutboundTarget: EventOutboundTarget;
+    }) => {
       if (!socketInfo) return;
 
       ws.emit("message.create", {
         socketInfo,
         content,
-        ...querySelector(target),
+        ...querySelector(eventOutboundTarget),
       });
     },
     [querySelector, socketInfo, ws]
@@ -43,17 +49,17 @@ export const useWsMessageOutbound = () => {
   const deleteMessage = useCallback(
     ({
       messageId,
-      target,
+      eventOutboundTarget,
     }: {
       messageId: string;
-      target: MessageCreateTarget;
+      eventOutboundTarget: EventOutboundTarget;
     }) => {
       if (!socketInfo) return;
 
       ws.emit("message.delete", {
         socketInfo,
         messageId,
-        ...querySelector(target),
+        ...querySelector(eventOutboundTarget),
       });
     },
     [querySelector, socketInfo, ws]

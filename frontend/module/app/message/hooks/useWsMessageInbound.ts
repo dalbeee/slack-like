@@ -9,7 +9,12 @@ import {
   deleteMessageReaction,
   updateMessageCommentsCount,
 } from "@/common/store/messageSlice";
-import { appendComment, deleteComment } from "@/common/store/threadSlice";
+import {
+  appendComment,
+  appendCommentReaction,
+  deleteComment,
+  deleteCommentReaction,
+} from "@/common/store/threadSlice";
 
 export const useWsMessageInbound = () => {
   const dispatch = useDispatch();
@@ -58,7 +63,17 @@ export const useWsMessageInbound = () => {
     () => ({
       messageKey: "message_reaction.create",
       callbackFn: (data: MessageReaction) => {
-        dispatch(appendMessageReaction(data));
+        if (data.message.ancestorId) {
+          dispatch(appendCommentReaction(data));
+          dispatch(
+            updateMessageCommentsCount({
+              ancestorId: data.message.ancestorId,
+              action: "INCREASE",
+            })
+          );
+        } else {
+          dispatch(appendMessageReaction(data));
+        }
       },
     }),
     [dispatch]
@@ -67,8 +82,19 @@ export const useWsMessageInbound = () => {
   const messageReactionDeleteCallback = useMemo(
     () => ({
       messageKey: "message_reaction.delete",
-      callbackFn: (data: MessageReaction) =>
-        dispatch(deleteMessageReaction(data)),
+      callbackFn: (data: MessageReaction) => {
+        if (data.message.ancestorId) {
+          dispatch(deleteCommentReaction(data));
+          dispatch(
+            updateMessageCommentsCount({
+              ancestorId: data.message.ancestorId,
+              action: "DECEASE",
+            })
+          );
+        } else {
+          dispatch(deleteMessageReaction(data));
+        }
+      },
     }),
     [dispatch]
   );

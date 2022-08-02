@@ -9,7 +9,7 @@ import {
 import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
 
-import { Message } from "@/common";
+import { EventOutboundTarget, Message } from "@/common";
 import ToolTipExpand from "./ToolTipExpand";
 import { useWsMessageOutbound } from "../../message/hooks/useWsMessageOutbound";
 import { RootState } from "@/common/store/store";
@@ -35,6 +35,7 @@ type ToolTipProps = {
   setIsHighliterLocked: Dispatch<SetStateAction<boolean>>;
   isOnExpand: boolean;
   setIsOnExpand: Dispatch<SetStateAction<boolean>>;
+  eventOutboundTarget: EventOutboundTarget;
 };
 
 const ToolTip: ForwardRefExoticComponent<
@@ -49,6 +50,7 @@ const ToolTip: ForwardRefExoticComponent<
       setIsHighliterLocked,
       isOnExpand,
       setIsOnExpand,
+      eventOutboundTarget,
       ...props
     }: ToolTipProps,
     ref
@@ -119,7 +121,11 @@ const ToolTip: ForwardRefExoticComponent<
           </ButtonItem>
         </div>
         {isOnExpand && hightlightedRowId === messageData.id && (
-          <ToolTipExpand messageData={messageData} ref={ref} />
+          <ToolTipExpand
+            messageData={messageData}
+            eventOutboundTarget={eventOutboundTarget}
+            ref={ref}
+          />
         )}
       </>
     );

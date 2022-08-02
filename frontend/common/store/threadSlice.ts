@@ -44,11 +44,7 @@ export const threadSlice = createSlice({
       const comment = state.thread.comments[commentIndex];
       const updatedComment: Message = {
         ...comment,
-        reactions: [
-          ...comment.reactions.slice(0, commentIndex),
-          action.payload,
-          ...comment.reactions.slice(commentIndex + 1),
-        ],
+        reactions: [...comment.reactions, action.payload],
       };
       state.thread = {
         ...state.thread,
@@ -60,7 +56,7 @@ export const threadSlice = createSlice({
       };
     },
 
-    deleteMessageReaction: (state, action: PayloadAction<MessageReaction>) => {
+    deleteCommentReaction: (state, action: PayloadAction<MessageReaction>) => {
       const commentIndex = state.thread.comments.findIndex(
         (comment) => comment.id === action.payload.messageId
       );
@@ -89,7 +85,7 @@ export const {
   appendComment,
   appendCommentReaction,
   deleteComment,
-  deleteMessageReaction,
+  deleteCommentReaction,
 } = threadSlice.actions;
 
 export default threadSlice.reducer;
