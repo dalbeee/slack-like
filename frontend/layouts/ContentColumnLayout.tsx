@@ -1,10 +1,8 @@
-import ContentRouter from "@/module/app/core/components/ContentRouter";
+import { ReactNode } from "react";
 
-const ContentColumnLayout = () => {
+const ContentColumnLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <div className="w-full flex flex-col border border-t-0">
-      <ContentRouter />
-    </div>
+    <div className="w-full flex flex-col border border-t-0">{children}</div>
   );
 };
 
