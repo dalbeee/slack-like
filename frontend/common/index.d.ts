@@ -121,8 +121,9 @@ export type MessageReaction = {
   id: string;
   userId: string;
   messageId: string;
+  message: Message;
   content: string;
   createdAt: Date;
 };
 
-type MessageCreateTarget = "CHANNEL" | "THREAD";
+type EventOutboundTarget = "CHANNEL" | "THREAD";
