@@ -1,11 +1,14 @@
 import AppLayout from "@/layouts/AppLayout";
+import MessagesViewer from "@/module/app/message/components/MessagesViewer";
+import ThreadViewer from "@/module/app/message/components/ThreadViewer";
 
-const thread = () => {
+const Page = () => {
   return (
     <>
-      <AppLayout />
+      <AppLayout content={<MessagesViewer />} sideBar={<ThreadViewer />} />
     </>
   );
 };
 
-export default thread;
+Page.Auth = true;
+export default Page;
