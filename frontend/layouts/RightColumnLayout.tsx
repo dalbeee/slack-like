@@ -1,7 +1,7 @@
-import ThreadViewer from "@/module/app/message/components/ThreadViewer";
+import { ReactNode } from "react";
 
-const RightColumnLayout = () => {
-  return <ThreadViewer />;
+const RightColumnLayout = ({ children }: { children: ReactNode }) => {
+  return <>{children}</>;
 };
 
 export default RightColumnLayout;

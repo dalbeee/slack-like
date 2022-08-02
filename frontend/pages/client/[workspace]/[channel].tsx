@@ -1,9 +1,10 @@
 import AppLayout from "@/layouts/AppLayout";
+import MessagesViewer from "@/module/app/message/components/MessagesViewer";
 
 const Page = () => {
   return (
     <>
-      <AppLayout />
+      <AppLayout content={<MessagesViewer />} />
     </>
   );
 };
